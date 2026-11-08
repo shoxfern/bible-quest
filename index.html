@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>聖經闖關王 — 66卷經文精讀與進度總覽系統</title>
+  <title>聖經闖關王統</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -228,7 +228,7 @@
 
       <div class="bg-white p-4 rounded-2xl border-2 border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2">
-          <span class="text-xs font-black text-slate-600">👑 依導師／小家(D欄)篩選：</span>
+          <span class="text-xs font-black text-slate-600">👑 領袖篩選：</span>
           <select id="pub-leader-filter" onchange="renderPublicProgressBoard()" class="px-3 py-2 rounded-xl border-2 border-slate-200 text-xs font-black text-slate-700 bg-slate-50 outline-none focus:border-emerald-500">
             <option value="ALL">全部學員</option>
           </select>
@@ -248,7 +248,7 @@
               <tr class="bg-slate-100 text-slate-600 font-black border-b-2 border-slate-200">
                 <th class="py-3 px-4">排名</th>
                 <th class="py-3 px-4">學員姓名 (帳號)</th>
-                <th class="py-3 px-4">所屬導師(D欄)</th>
+                <th class="py-3 px-4">領袖帳號</th>
                 <th class="py-3 px-4">目前研讀書卷</th>
                 <th class="py-3 px-4 text-center">累計通關章數</th>
                 <th class="py-3 px-4">各卷完成章節明細</th>
@@ -315,8 +315,8 @@
         </div>
 
         <div id="auth-nickname-wrapper" class="hidden">
-          <label class="text-xs font-extrabold text-slate-600 block mb-1">顯示姓名 <span class="text-rose-500">*首次註冊必填（之後登入免填）</span></label>
-          <input id="auth-nickname" type="text" placeholder="請輸入真實姓名，例如：陳韋翰"
+          <label class="text-xs font-extrabold text-slate-600 block mb-1">顯示姓名 <span class="text-rose-500">*首次註冊必填</span></label>
+          <input id="auth-nickname" type="text" placeholder="請輸入真實姓名"
                  class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-800 bg-slate-50 focus:bg-white transition" />
         </div>
 
@@ -389,7 +389,7 @@
 
         <!-- 導師專屬按鈕 -->
         <button onclick="switchTab('flock')" id="nav-btn-flock" class="hidden nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 border-2 border-indigo-200 transition cursor-pointer">
-          <div class="flex items-center gap-3"><span class="text-xl">🏠</span><span>小家進度 (導師專屬)</span></div>
+          <div class="flex items-center gap-3"><span class="text-xl">🏠</span><span>小家進度 (領袖帳號專屬)</span></div>
           <span id="sidebar-flock-badge" class="bg-indigo-600 text-white text-[11px] px-2 py-0.5 rounded-full">0</span>
         </button>
 
@@ -618,7 +618,7 @@
                     <th class="py-3 px-3">登入帳號</th>
                     <th class="py-3 px-3">顯示姓名</th>
                     <th class="py-3 px-3">密碼備查</th>
-                    <th class="py-3 px-3">D欄：所屬導師帳號</th>
+                    <th class="py-3 px-3">領袖帳號</th>
                     <th class="py-3 px-3 text-center">查詢看板權限</th>
                     <th class="py-3 px-3 text-center">通關章數</th>
                     <th class="py-3 px-3 text-right">總 XP</th>
@@ -1012,7 +1012,7 @@
       document.getElementById('tab-mode-login').className = mode === 'login' ? "py-2.5 rounded-xl bg-white text-emerald-600 shadow-sm transition" : "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition";
       document.getElementById('tab-mode-register').className = mode === 'register' ? "py-2.5 rounded-xl bg-white text-emerald-600 shadow-sm transition" : "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition";
       document.getElementById('auth-submit-btn').innerText = mode === 'login' ? "🚀 確認登入並載入進度" : "✨ 完成註冊並開始闖關";
-      document.getElementById('auth-subtitle-text').innerText = mode === 'login' ? "老玩家請直接輸入帳號密碼登入（免填姓名）" : "新玩家請填寫您的專屬帳號、密碼與顯示姓名！";
+      document.getElementById('auth-subtitle-text').innerText = mode === 'login' ? "輸入帳號密碼登入" : "新玩家請填寫您的專屬帳號、密碼與顯示姓名！";
       
       if (mode === 'register') {
           document.getElementById('auth-nickname-wrapper').classList.remove('hidden');
@@ -1060,7 +1060,7 @@
               errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
           if (existing.password && String(existing.password) !== pwd) {
-            errEl.innerText = '❌ 密碼不正確！忘記密碼請聯繫導師。';
+            errEl.innerText = '❌ 密碼不正確！忘記密碼請聯繫負責人。';
             errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
           userId = accKey; userAccountRaw = rawAcc; userPasswordRaw = pwd;
@@ -1579,7 +1579,7 @@
             </div>
         `;
         document.getElementById('lesson-bottom-inner').innerHTML = `
-            <div class="text-xs font-bold text-slate-500 text-center mb-2">進度已自動同步至 Firebase 雲端總表</div>
+            <div class="text-xs font-bold text-slate-500 text-center mb-2">進度已自動同步雲端</div>
             <button onclick="closeLessonOverlay()" class="w-full quest-btn-green px-10 py-4 rounded-2xl font-black text-lg cursor-pointer">
                 領取獎勵並返回
             </button>
@@ -1881,7 +1881,7 @@
 
     function exportAdminCSV() {
         const list = allCloudUsersCache;
-        let csv = "\uFEFF登入帳號,顯示姓名,密碼備查,D欄(導師),總經驗值,目前書卷,通關章數,查詢權限\n";
+        let csv = "\uFEFF登入帳號,顯示姓名,密碼備查,領袖帳號,總經驗值,目前書卷,通關章數,查詢權限\n";
         list.forEach(u => {
             csv += `"${u.account||''}","${u.name||''}","${u.password||''}","${u.role||''}","${u.total_xp||0}","${u.current_book||''}","${u.cleared_count||0}","${u.portal_auth?'是':'否'}"\n`;
         });
