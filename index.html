@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>聖經闖關王統</title>
+  <title>聖經闖關王 — 66卷經文精讀與進度總覽系統</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -228,7 +228,7 @@
 
       <div class="bg-white p-4 rounded-2xl border-2 border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2">
-          <span class="text-xs font-black text-slate-600">👑 領袖篩選：</span>
+          <span class="text-xs font-black text-slate-600">👑 領袖：</span>
           <select id="pub-leader-filter" onchange="renderPublicProgressBoard()" class="px-3 py-2 rounded-xl border-2 border-slate-200 text-xs font-black text-slate-700 bg-slate-50 outline-none focus:border-emerald-500">
             <option value="ALL">全部學員</option>
           </select>
@@ -315,7 +315,7 @@
         </div>
 
         <div id="auth-nickname-wrapper" class="hidden">
-          <label class="text-xs font-extrabold text-slate-600 block mb-1">顯示姓名 <span class="text-rose-500">*首次註冊必填</span></label>
+          <label class="text-xs font-extrabold text-slate-600 block mb-1">顯示姓名 <span class="text-rose-500">*首次註冊必填（之後登入免填）</span></label>
           <input id="auth-nickname" type="text" placeholder="請輸入真實姓名"
                  class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-800 bg-slate-50 focus:bg-white transition" />
         </div>
@@ -377,7 +377,7 @@
           <span class="text-xl">⚡</span><span>每日挑戰＆閃電戰</span>
         </button>
         <button onclick="switchTab('pk')" id="nav-btn-pk" class="nav-tab-btn flex items-center gap-3 px-4 py-3.5 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-100 border-2 border-transparent transition cursor-pointer">
-          <span class="text-xl">⚔️</span><span>好友 1v1 擂台</span>
+          <span class="text-xl">⚔️</span><span>好友多人 PK 擂台</span>
         </button>
         <button onclick="switchTab('review')" id="nav-btn-review" class="nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-100 border-2 border-transparent transition cursor-pointer">
           <div class="flex items-center gap-3"><span class="text-xl">📕</span><span>錯題特訓營</span></div>
@@ -387,9 +387,9 @@
           <span class="text-xl">🏅</span><span>榮譽徽章＆心得筆記</span>
         </button>
 
-        <!-- 導師專屬按鈕 -->
+        <!-- 領袖專屬按鈕 -->
         <button onclick="switchTab('flock')" id="nav-btn-flock" class="hidden nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 border-2 border-indigo-200 transition cursor-pointer">
-          <div class="flex items-center gap-3"><span class="text-xl">🏠</span><span>小家進度 (領袖帳號專屬)</span></div>
+          <div class="flex items-center gap-3"><span class="text-xl">🏠</span><span>小家進度 (領袖專屬)</span></div>
           <span id="sidebar-flock-badge" class="bg-indigo-600 text-white text-[11px] px-2 py-0.5 rounded-full">0</span>
         </button>
 
@@ -401,7 +401,7 @@
 
         <div class="mt-4 bg-white p-4 rounded-2xl border-2 border-slate-200 space-y-2">
           <div class="flex items-center justify-between">
-            <h3 class="text-xs font-black text-slate-700">📣 全服即時里程碑</h3>
+            <h3 class="text-xs font-black text-slate-700">📣 里程碑</h3>
             <span class="text-[10px] text-emerald-600 font-bold">LIVE</span>
           </div>
           <div id="live-milestone-feed" class="space-y-2 max-h-48 overflow-y-auto text-xs text-slate-600">
@@ -467,37 +467,174 @@
                 🔥 開始 60 秒閃電戰
               </button>
             </div>
+
+            <!-- 閃電戰進行中面板 -->
+            <div id="blitz-play-area" class="hidden bg-white text-slate-800 rounded-2xl p-5 space-y-4 shadow-lg">
+              <div class="flex items-center justify-between text-sm font-black">
+                <span class="text-rose-600">⏱️ 剩餘時間：<span id="blitz-timer-text">60</span>s</span>
+                <span id="blitz-combo-badge" class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full">Combo x1</span>
+                <span class="text-emerald-600">得分：<span id="blitz-score-text">0</span></span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div id="blitz-timer-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 100%;"></div>
+              </div>
+              <h4 id="blitz-question-text" class="text-base font-black text-slate-800 py-2">題目載入中...</h4>
+              <div id="blitz-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+            </div>
           </div>
         </section>
 
-        <!-- ================= TAB 3: 好友 1v1 PK 對戰擂台 ================= -->
+        <!-- ================= TAB 3: 好友多人連線 PK 對戰擂台 (支援 2～4 人同時對戰) ================= -->
         <section id="tab-pk" class="hidden space-y-5">
-          <div class="bg-white rounded-3xl border-2 border-slate-200 p-6 space-y-5">
-            <div>
-              <h2 class="text-xl font-black text-slate-800">⚔️ 聖經 1v1 雙人即時 PK 擂台</h2>
-              <p class="text-xs text-slate-500 mt-1">建立 4 位數房號邀請同伴連線對決，或隨時與 AI 聖經導師切磋！</p>
-            </div>
-            <div id="pk-lobby-panel" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="p-5 rounded-2xl bg-slate-50 border-2 border-slate-200 space-y-3">
-                <h3 class="font-black text-slate-800">🌐 好友房號連線對戰</h3>
-                <div class="flex gap-2">
-                  <input id="pk-room-input" type="text" maxlength="4" placeholder="輸入4位數房號"
-                         class="flex-1 px-3 py-2.5 rounded-xl border-2 border-slate-200 font-black text-center tracking-widest" />
-                  <button onclick="joinPkRoom()" class="quest-btn-blue px-4 py-2.5 rounded-xl font-black text-xs cursor-pointer">加入房間</button>
+          <div class="bg-white rounded-3xl border-2 border-slate-200 p-6 space-y-6">
+            <!-- 標題區 -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="bg-indigo-100 text-indigo-700 text-xs font-black px-3 py-1 rounded-full">🌐 即時多人連線對戰</span>
+                  <span class="bg-emerald-100 text-emerald-700 text-xs font-black px-3 py-1 rounded-full">支援 2～4 人同時搶答</span>
                 </div>
-                <button onclick="createPkRoom()" class="w-full quest-btn-green py-3 rounded-xl font-black text-sm cursor-pointer">
-                  ➕ 建立新 PK 房間
+                <h2 class="text-xl md:text-2xl font-black text-slate-800 mt-2">⚔️ 聖經多人即時 PK 擂台</h2>
+                <p class="text-xs text-slate-500 mt-0.5">建立 4 位數房號，邀請最多 4 位同伴進入同一房間同步搶答對決！</p>
+              </div>
+              <div class="bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-2xl text-center shrink-0">
+                <div class="text-[11px] font-bold text-amber-700">我的勝場數</div>
+                <div class="text-xl font-black text-amber-600"><span id="pk-win-count-badge">0</span> 勝</div>
+              </div>
+            </div>
+
+            <!-- 📖 畫面操作教學說明（怎麼進行對戰） -->
+            <div id="pk-instructions-box" class="bg-indigo-50/70 border-2 border-indigo-100 rounded-2xl p-4 md:p-5 space-y-3">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">💡</span>
+                <h3 class="font-black text-indigo-950 text-sm md:text-base">如何進行多人連線對戰？（支援 2～4 人同時對決）</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                <div class="bg-white p-3.5 rounded-xl border border-indigo-100 space-y-1 shadow-2xs">
+                  <div class="font-black text-indigo-600">步驟 1：建立房間</div>
+                  <p class="text-slate-600 font-medium leading-relaxed">由 1 位玩家點擊下方<strong>「➕ 建立新 PK 房間」</strong>，系統會產生一組專屬的 <strong>4 位數房號</strong>。</p>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl border border-indigo-100 space-y-1 shadow-2xs">
+                  <div class="font-black text-indigo-600">步驟 2：輸入房號加入</div>
+                  <p class="text-slate-600 font-medium leading-relaxed">把 4 位數房號告訴朋友（最多可 <strong>4 人同時進房</strong>），朋友輸入房號點<strong>「加入房間」</strong>。</p>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl border border-indigo-100 space-y-1 shadow-2xs">
+                  <div class="font-black text-indigo-600">步驟 3：房主開始對戰</div>
+                  <p class="text-slate-600 font-medium leading-relaxed">等候室會即時顯示已加入的 1～4 位玩家名單，人齊後（至少 2 人）由<strong>房主點擊「開始對戰」</strong>。</p>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl border border-indigo-100 space-y-1 shadow-2xs">
+                  <div class="font-black text-indigo-600">步驟 4：7 題同步搶答</div>
+                  <p class="text-slate-600 font-medium leading-relaxed">所有人畫面同步出題（每題限時 12 秒），<strong>越快答對分數越高</strong>，7 題結束即時公布名次！</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 階段 1：PK 大廳（建立或加入房間，已移除 AI 導師） -->
+            <div id="pk-lobby-panel" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- 建立新房間 -->
+              <div class="p-6 rounded-2xl bg-emerald-50/60 border-2 border-emerald-200 flex flex-col justify-between space-y-4">
+                <div class="space-y-1.5">
+                  <span class="bg-emerald-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">我是房主 (Host)</span>
+                  <h3 class="text-lg font-black text-slate-800">➕ 建立新多人 PK 房間</h3>
+                  <p class="text-xs text-slate-600 font-medium">點擊下方按鈕立即開啟新房間，取得 4 位數房號後分享給 1～3 位好友即可開戰！</p>
+                </div>
+                <button onclick="createPkRoom()" class="w-full quest-btn-green py-3.5 rounded-2xl font-black text-sm md:text-base cursor-pointer">
+                  ➕ 建立新 PK 房間 (產生4位數房號)
                 </button>
               </div>
-              <div class="p-5 rounded-2xl bg-amber-50/70 border-2 border-amber-200 space-y-3">
-                <h3 class="font-black text-amber-900">🤖 單人挑戰 AI 聖經導師</h3>
-                <p class="text-xs text-amber-700">免等待配對，立即與不同強度的 AI 角色進行 7 題搶答對決！</p>
-                <div class="grid grid-cols-2 gap-2">
-                  <button onclick="startAiPk('大衛牧童 AI', 0.72)" class="quest-btn-amber py-3 rounded-xl font-black text-xs cursor-pointer">🪨 挑戰大衛 AI</button>
-                  <button onclick="startAiPk('使徒保羅 AI', 0.88)" class="quest-btn-rose py-3 rounded-xl font-black text-xs cursor-pointer">⚡ 挑戰保羅 AI</button>
+
+              <!-- 輸入房號加入 -->
+              <div class="p-6 rounded-2xl bg-sky-50/60 border-2 border-sky-200 flex flex-col justify-between space-y-4">
+                <div class="space-y-1.5">
+                  <span class="bg-sky-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">我是參賽者 (Player 2~4)</span>
+                  <h3 class="text-lg font-black text-slate-800">🔑 輸入好友的 4 位數房號</h3>
+                  <p class="text-xs text-slate-600 font-medium">請輸入房主提供給您的 4 位數字房號，點擊「加入房間」進入等候室集合！</p>
+                </div>
+                <div class="flex gap-2">
+                  <input id="pk-room-input" type="text" maxlength="4" placeholder="輸入4位數房號 (如 8812)"
+                         class="flex-1 px-4 py-3 rounded-2xl border-2 border-sky-300 bg-white font-black text-center text-base tracking-widest outline-none focus:border-sky-600" />
+                  <button onclick="joinPkRoom()" class="quest-btn-blue px-6 py-3 rounded-2xl font-black text-sm shrink-0 cursor-pointer">
+                    加入房間
+                  </button>
                 </div>
               </div>
             </div>
+
+            <!-- 階段 2：4 人即時等候室 (#pk-waiting-panel) -->
+            <div id="pk-waiting-panel" class="hidden bg-slate-50 rounded-3xl border-2 border-slate-200 p-6 text-center space-y-6">
+              <div class="space-y-2">
+                <span class="bg-sky-100 text-sky-700 text-xs font-black px-3 py-1 rounded-full">⏳ 房間等候室（最多可 4 人同時參戰）</span>
+                <p class="text-xs font-bold text-slate-500">請將下方 4 位數房號告訴您的同伴，請他們輸入房號加入：</p>
+                <div class="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-2xl border-2 border-indigo-200 shadow-xs">
+                  <span id="pk-wait-room-code" class="text-4xl font-black tracking-widest text-indigo-600">0000</span>
+                  <button onclick="copyPkRoomCode()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer">
+                    📋 複製房號
+                  </button>
+                </div>
+              </div>
+
+              <!-- 4 個玩家座位席次 -->
+              <div id="pk-waiting-slots" class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto"></div>
+
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto pt-2">
+                <button onclick="leavePkRoom()" class="w-full sm:w-auto quest-btn-gray px-6 py-3.5 rounded-2xl font-black text-xs sm:text-sm cursor-pointer">
+                  🚪 離開房間
+                </button>
+                <button id="pk-host-start-btn" onclick="hostStartPkMatch()" class="w-full sm:flex-1 quest-btn-green px-8 py-3.5 rounded-2xl font-black text-sm sm:text-base cursor-pointer">
+                  🚀 房主開始對戰！
+                </button>
+              </div>
+              <p id="pk-wait-hint-text" class="text-xs font-bold text-slate-400">至少 2 人進房即可開始對戰（上限 4 人）</p>
+            </div>
+
+            <!-- 階段 3：多人即時搶答擂台 (#pk-arena-panel) -->
+            <div id="pk-arena-panel" class="hidden space-y-5">
+              <!-- 頂部回合與倒數計時 -->
+              <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span id="pk-arena-room-badge" class="bg-white/15 text-[11px] font-black px-2.5 py-1 rounded-lg">房號 #0000</span>
+                  <span id="pk-round-badge" class="bg-amber-400 text-slate-950 text-xs font-black px-3 py-1 rounded-lg">第 1 / 7 題</span>
+                </div>
+                <div class="flex items-center gap-2 text-amber-400 font-black text-lg">
+                  <span>⏱️ 搶答倒數：</span>
+                  <span id="pk-timer-text" class="text-2xl">12s</span>
+                </div>
+              </div>
+
+              <!-- 4 人即時分數與作答狀態看板 -->
+              <div id="pk-players-scoreboard" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+
+              <!-- 題目與選項區 -->
+              <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 space-y-4">
+                <div class="flex items-center justify-between text-xs font-black">
+                  <span id="pk-q-diff-tag" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">聖經搶答題 (基礎 100 分)</span>
+                  <span id="pk-q-speed-bonus" class="text-emerald-600">⚡ 越快答對加成越高！</span>
+                </div>
+                <h4 id="pk-question-text" class="text-base md:text-lg font-black text-slate-800 leading-snug py-1">題目載入中...</h4>
+                <div id="pk-options-list" class="grid grid-cols-1 gap-2.5"></div>
+                <p id="pk-round-status-msg" class="text-xs font-bold text-center text-slate-500 pt-1"></p>
+              </div>
+            </div>
+
+            <!-- 階段 4：多人對戰最終排行榜結算 (#pk-result-panel) -->
+            <div id="pk-result-panel" class="hidden bg-slate-50 rounded-3xl border-2 border-slate-200 p-6 text-center space-y-5">
+              <div class="w-20 h-20 rounded-full bg-amber-400 text-slate-950 text-4xl flex items-center justify-center mx-auto shadow-lg animate-bounce">
+                🏆
+              </div>
+              <div>
+                <span class="bg-amber-100 text-amber-800 text-xs font-black px-3 py-1 rounded-full">對戰圓滿結束</span>
+                <h3 id="pk-result-title" class="text-2xl font-black text-slate-800 mt-2">多人 PK 最終名次揭曉！</h3>
+              </div>
+
+              <div id="pk-result-rankings" class="space-y-2.5 max-w-lg mx-auto text-left"></div>
+
+              <div class="pt-2">
+                <button onclick="leavePkRoom()" class="quest-btn-green px-8 py-3.5 rounded-2xl font-black text-sm cursor-pointer">
+                  🎉 領取對戰獎勵並返回 PK 大廳
+                </button>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -546,12 +683,12 @@
           </div>
         </section>
 
-        <!-- ================= TAB 6: 導師專屬「🏠 小家進度」監看面板 ================= -->
+        <!-- ================= TAB 6: 領袖專屬「🏠 小家進度」監看面板 ================= -->
         <section id="tab-flock" class="hidden space-y-5">
           <div class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white p-6 rounded-3xl shadow-lg space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="bg-white/20 text-xs font-black px-3 py-1 rounded-full">👑 導師／小家長專屬視角</span>
-              <span class="text-xs font-bold text-indigo-100">導師帳號：<strong id="flock-leader-account-tag" class="text-white">-</strong></span>
+              <span class="bg-white/20 text-xs font-black px-3 py-1 rounded-full">👑 領袖專屬視角</span>
+              <span class="text-xs font-bold text-indigo-100">領袖帳號：<strong id="flock-leader-account-tag" class="text-white">-</strong></span>
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -599,7 +736,7 @@
                 </button>
               </div>
             </div>
-            <h2 class="text-2xl font-black">⚙️ 聖經闖關王 — 唯一最高主控台 (帳號：admin)</h2>
+            <h2 class="text-2xl font-black">⚙️ 聖經闖關王 — 最高主控台 (帳號：admin)</h2>
           </div>
           <div class="bg-white rounded-3xl border-2 border-slate-200 p-5 space-y-5">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
@@ -608,7 +745,7 @@
                 <button onclick="switchAdminSubTab('notes')" id="adm-sub-notes" class="px-4 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">✍️ 2. 書卷筆記總覽</button>
                 <button onclick="switchAdminSubTab('qbank')" id="adm-sub-qbank" class="px-4 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">🤖 3. 雲端題庫上傳</button>
               </div>
-              <input id="admin-user-search" type="text" oninput="renderAdminConsole()" placeholder="🔍 搜尋帳號、姓名或導師..."
+              <input id="admin-user-search" type="text" oninput="renderAdminConsole()" placeholder="🔍 搜尋帳號、姓名或領袖..."
                      class="px-3.5 py-1.5 rounded-xl border-2 border-slate-200 text-xs font-bold outline-none focus:border-amber-500" />
             </div>
             <div id="admin-panel-users" class="overflow-x-auto">
@@ -661,11 +798,11 @@
     <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
       <div class="p-4 md:p-5 border-b border-slate-200 flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-black text-slate-800">📚 選擇聖經書卷</h3>
+          <h3 class="text-lg font-black text-slate-800">📚 選擇聖經書卷 (全66卷)</h3>
         </div>
         <button onclick="closeBookSelectorModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-black px-2 cursor-pointer">✕</button>
       </div>
-      <div class="p-4 overflow-y-auto space-y-5" id="books-catalog-body"></div>
+      <div class="p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="books-catalog-body"></div>
     </div>
   </div>
 
@@ -742,7 +879,7 @@
 
   <script>
     /**************************************************************
-     * 1. 音效引擎
+     * 1. 音效引擎與浮動特效
      **************************************************************/
     let soundEnabled = true;
     let audioCtx = null;
@@ -836,41 +973,92 @@
     }
 
     /**************************************************************
-     * 2. 資料庫與設定 (66卷書)
+     * 2. 資料庫與設定 (全本聖經 66 卷書完整目錄)
      **************************************************************/
     const BIBLE_BOOKS = [
-        { id: "創世記", num: 1, eng: "Genesis", testament: "OT", cat: "摩西五經", chapters: 50, icon: "🌍", color: "#059669", border: "#047857", desc: "天地萬物的創造、人類的墮落與列祖之約。" },
-        { id: "出埃及記", num: 2, eng: "Exodus", testament: "OT", cat: "摩西五經", chapters: 40, icon: "🌊", color: "#2563eb", border: "#1d4ed8", desc: "過紅海、十誡頒布與會幕建造。" },
-        { id: "利未記", num: 3, eng: "Leviticus", testament: "OT", cat: "摩西五經", chapters: 27, icon: "🔥", color: "#d97706", border: "#b45309", desc: "五祭條例、節期與祭司聖潔事奉。" },
-        { id: "民數記", num: 4, eng: "Numbers", testament: "OT", cat: "摩西五經", chapters: 36, icon: "⛺", color: "#8b5cf6", border: "#6d28d9", desc: "曠野漂流四十年與雲柱火柱引領。" },
-        { id: "申命記", num: 5, eng: "Deuteronomy", testament: "OT", cat: "摩西五經", chapters: 34, icon: "📜", color: "#059669", border: "#047857", desc: "摩西在摩押平原重申律法與愛神誡命。" },
-        { id: "約書亞記", num: 6, eng: "Joshua", testament: "OT", cat: "歷史書", chapters: 24, icon: "🎺", color: "#e11d48", border: "#be123c", desc: "剛強壯膽渡過約旦河與進佔應許之地。" },
-        { id: "士師記", num: 7, eng: "Judges", testament: "OT", cat: "歷史書", chapters: 21, icon: "🛡️", color: "#d97706", border: "#b45309", desc: "底波拉、基甸、參孫等士師的拯救循環。" },
-        { id: "路得記", num: 8, eng: "Ruth", testament: "OT", cat: "歷史書", chapters: 4, icon: "🌾", color: "#d97706", border: "#b45309", desc: "摩押女子路得的忠誠與波阿斯至親救贖。" },
-        { id: "撒母耳記上", num: 9, eng: "1 Samuel", testament: "OT", cat: "歷史書", chapters: 31, icon: "👑", color: "#2563eb", border: "#1d4ed8", desc: "撒母耳膏立掃羅與大衛擊敗歌利亞。" },
-        { id: "撒母耳記下", num: 10, eng: "2 Samuel", testament: "OT", cat: "歷史書", chapters: 24, icon: "🏰", color: "#8b5cf6", border: "#6d28d9", desc: "大衛定都耶路撒冷與永恆的大衛之約。" },
-        { id: "馬太福音", num: 40, eng: "Matthew", testament: "NT", cat: "四福音書", chapters: 28, icon: "👑", color: "#059669", border: "#047857", desc: "天國君王耶穌、登山寶訓與大使命。" },
-        { id: "馬可福音", num: 41, eng: "Mark", testament: "NT", cat: "四福音書", chapters: 16, icon: "🦁", color: "#e11d48", border: "#be123c", desc: "人子來乃是要服事人，並且要捨命作多人的贖價。" },
-        { id: "路加福音", num: 42, eng: "Luke", testament: "NT", cat: "四福音書", chapters: 24, icon: "🩺", color: "#2563eb", border: "#1d4ed8", desc: "人子來為要尋找、拯救失喪的人。" },
-        { id: "約翰福音", num: 43, eng: "John", testament: "NT", cat: "四福音書", chapters: 21, icon: "🦅", color: "#8b5cf6", border: "#6d28d9", desc: "太初有道、七個神蹟與七個「我是」的永生見證。" },
-        { id: "使徒行傳", num: 44, eng: "Acts", testament: "NT", cat: "使徒歷史", chapters: 28, icon: "🔥", color: "#d97706", border: "#b45309", desc: "五旬節聖靈降臨與福音從耶路撒冷傳到地極。" },
-        { id: "羅馬書", num: 45, eng: "Romans", testament: "NT", cat: "保羅書信", chapters: 16, icon: "⚖️", color: "#059669", border: "#047857", desc: "福音本是神的大能、因信稱義與活祭人生。" },
-        { id: "啟示錄", num: 66, eng: "Revelation", testament: "NT", cat: "啟示錄", chapters: 22, icon: "🌈", color: "#d97706", border: "#b45309", desc: "得勝的羔羊、七教會書信與新天新地新耶路撒冷。" }
+      // 舊約 39 卷
+      { id: "創世記", num: 1, eng: "Genesis", testament: "OT", cat: "摩西五經", chapters: 50, icon: "🌍", color: "#059669", border: "#047857", desc: "天地萬物的創造、人類的墮落與列祖之約。" },
+      { id: "出埃及記", num: 2, eng: "Exodus", testament: "OT", cat: "摩西五經", chapters: 40, icon: "🌊", color: "#2563eb", border: "#1d4ed8", desc: "過紅海、十誡頒布與會幕建造。" },
+      { id: "利未記", num: 3, eng: "Leviticus", testament: "OT", cat: "摩西五經", chapters: 27, icon: "🔥", color: "#d97706", border: "#b45309", desc: "五祭條例、節期與祭司聖潔事奉。" },
+      { id: "民數記", num: 4, eng: "Numbers", testament: "OT", cat: "摩西五經", chapters: 36, icon: "⛺", color: "#8b5cf6", border: "#6d28d9", desc: "曠野漂流四十年與雲柱火柱引領。" },
+      { id: "申命記", num: 5, eng: "Deuteronomy", testament: "OT", cat: "摩西五經", chapters: 34, icon: "📜", color: "#059669", border: "#047857", desc: "摩西在摩押平原重申律法與愛神誡命。" },
+      { id: "約書亞記", num: 6, eng: "Joshua", testament: "OT", cat: "歷史書", chapters: 24, icon: "🎺", color: "#e11d48", border: "#be123c", desc: "剛強壯膽渡過約旦河與進佔應許之地。" },
+      { id: "士師記", num: 7, eng: "Judges", testament: "OT", cat: "歷史書", chapters: 21, icon: "🛡️", color: "#d97706", border: "#b45309", desc: "底波拉、基甸、參孫等士師的拯救循環。" },
+      { id: "路得記", num: 8, eng: "Ruth", testament: "OT", cat: "歷史書", chapters: 4, icon: "🌾", color: "#d97706", border: "#b45309", desc: "摩押女子路得的忠誠與波阿斯至親救贖。" },
+      { id: "撒母耳記上", num: 9, eng: "1 Samuel", testament: "OT", cat: "歷史書", chapters: 31, icon: "👑", color: "#2563eb", border: "#1d4ed8", desc: "撒母耳膏立掃羅與大衛擊敗歌利亞。" },
+      { id: "撒母耳記下", num: 10, eng: "2 Samuel", testament: "OT", cat: "歷史書", chapters: 24, icon: "🏰", color: "#8b5cf6", border: "#6d28d9", desc: "大衛定都耶路撒冷與永恆的大衛之約。" },
+      { id: "列王紀上", num: 11, eng: "1 Kings", testament: "OT", cat: "歷史書", chapters: 22, icon: "🏛️", color: "#d97706", border: "#b45309", desc: "所羅門建造聖殿與以利亞先知。" },
+      { id: "列王紀下", num: 12, eng: "2 Kings", testament: "OT", cat: "歷史書", chapters: 25, icon: "🐎", color: "#e11d48", border: "#be123c", desc: "以利沙神蹟與南北國歷史鑑戒。" },
+      { id: "歷代志上", num: 13, eng: "1 Chronicles", testament: "OT", cat: "歷史書", chapters: 29, icon: "📖", color: "#059669", border: "#047857", desc: "大衛家譜與聖殿敬拜制度。" },
+      { id: "歷代志下", num: 14, eng: "2 Chronicles", testament: "OT", cat: "歷史書", chapters: 36, icon: "🕯️", color: "#2563eb", border: "#1d4ed8", desc: "猶大諸王興衰與信仰復興運動。" },
+      { id: "以斯拉記", num: 15, eng: "Ezra", testament: "OT", cat: "歷史書", chapters: 10, icon: "🔨", color: "#d97706", border: "#b45309", desc: "歸回重建聖殿與宣讀律法。" },
+      { id: "尼希米記", num: 16, eng: "Nehemiah", testament: "OT", cat: "歷史書", chapters: 13, icon: "🧱", color: "#059669", border: "#047857", desc: "五十二天重建耶路撒冷城牆。" },
+      { id: "以斯帖記", num: 17, eng: "Esther", testament: "OT", cat: "歷史書", chapters: 10, icon: "👸", color: "#8b5cf6", border: "#6d28d9", desc: "焉知你得了王后的位分不是為現今的機會嗎？" },
+      { id: "約伯記", num: 18, eng: "Job", testament: "OT", cat: "詩歌智慧書", chapters: 42, icon: "🌪️", color: "#2563eb", border: "#1d4ed8", desc: "從前風聞有你，現在親眼見你。" },
+      { id: "詩篇", num: 19, eng: "Psalms", testament: "OT", cat: "詩歌智慧書", chapters: 150, icon: "🎵", color: "#059669", border: "#047857", desc: "150篇讚美、禱告與信靠詩歌。" },
+      { id: "箴言", num: 20, eng: "Proverbs", testament: "OT", cat: "詩歌智慧書", chapters: 31, icon: "💡", color: "#d97706", border: "#b45309", desc: "敬畏耶和華是智慧的開端。" },
+      { id: "傳道書", num: 21, eng: "Ecclesiastes", testament: "OT", cat: "詩歌智慧書", chapters: 12, icon: "⏳", color: "#d97706", border: "#b45309", desc: "你趁著年幼，當記念造你的主。" },
+      { id: "雅歌", num: 22, eng: "Song of Songs", testament: "OT", cat: "詩歌智慧書", chapters: 8, icon: "🌹", color: "#e11d48", border: "#be123c", desc: "愛情如死之堅強，眾水不能熄滅。" },
+      { id: "以賽亞書", num: 23, eng: "Isaiah", testament: "OT", cat: "大先知書", chapters: 66, icon: "🦅", color: "#2563eb", border: "#1d4ed8", desc: "以馬內利預言、受苦僕人與如鷹展翅上騰。" },
+      { id: "耶利米書", num: 24, eng: "Jeremiah", testament: "OT", cat: "大先知書", chapters: 52, icon: "💧", color: "#8b5cf6", border: "#6d28d9", desc: "流淚先知的呼喚與寫在心版上的新約。" },
+      { id: "耶利米哀歌", num: 25, eng: "Lamentations", testament: "OT", cat: "大先知書", chapters: 5, icon: "🌅", color: "#d97706", border: "#b45309", desc: "耶和華的慈愛永不斷絕，每早晨這都是新的。" },
+      { id: "以西結書", num: 26, eng: "Ezekiel", testament: "OT", cat: "大先知書", chapters: 48, icon: "🦴", color: "#059669", border: "#047857", desc: "枯骨復生異象、除石心賜肉心。" },
+      { id: "但以理書", num: 27, eng: "Daniel", testament: "OT", cat: "大先知書", chapters: 12, icon: "🦁", color: "#d97706", border: "#b45309", desc: "火窯與獅子坑中的忠心與國度異象。" },
+      { id: "何西阿書", num: 28, eng: "Hosea", testament: "OT", cat: "小先知書", chapters: 14, icon: "❤️", color: "#e11d48", border: "#be123c", desc: "神不離不棄的慈愛與務要認識耶和華。" },
+      { id: "約珥書", num: 29, eng: "Joel", testament: "OT", cat: "小先知書", chapters: 3, icon: "🌾", color: "#d97706", border: "#b45309", desc: "我要將我的靈澆灌凡有血氣的。" },
+      { id: "阿摩司書", num: 30, eng: "Amos", testament: "OT", cat: "小先知書", chapters: 9, icon: "⚖️", color: "#2563eb", border: "#1d4ed8", desc: "惟願公平如大水滾滾，使公義如江河滔滔。" },
+      { id: "俄巴底亞書", num: 31, eng: "Obadiah", testament: "OT", cat: "小先知書", chapters: 1, icon: "⛰️", color: "#8b5cf6", border: "#6d28d9", desc: "國度必歸耶和華。" },
+      { id: "約拿書", num: 32, eng: "Jonah", testament: "OT", cat: "小先知書", chapters: 4, icon: "🐳", color: "#2563eb", border: "#1d4ed8", desc: "大魚腹中的禱告與神對尼尼微的憐憫。" },
+      { id: "彌迦書", num: 33, eng: "Micah", testament: "OT", cat: "小先知書", chapters: 7, icon: "🌟", color: "#059669", border: "#047857", desc: "行公義，好憐憫，存謙卑的心與你的神同行。" },
+      { id: "那鴻書", num: 34, eng: "Nahum", testament: "OT", cat: "小先知書", chapters: 3, icon: "🌩️", color: "#e11d48", border: "#be123c", desc: "耶和華本為善，在患難的日子為人的保障。" },
+      { id: "哈巴谷書", num: 35, eng: "Habakkuk", testament: "OT", cat: "小先知書", chapters: 3, icon: "🦌", color: "#d97706", border: "#b45309", desc: "義人必因信得生，仍要因耶和華歡欣。" },
+      { id: "西番雅書", num: 36, eng: "Zephaniah", testament: "OT", cat: "小先知書", chapters: 3, icon: "🎶", color: "#8b5cf6", border: "#6d28d9", desc: "耶和華你的神是施行拯救、大有能力的主。" },
+      { id: "哈該書", num: 37, eng: "Haggai", testament: "OT", cat: "小先知書", chapters: 2, icon: "🏛️", color: "#d97706", border: "#b45309", desc: "你們要省察自己的行為，剛強作工建造聖殿。" },
+      { id: "撒迦利亞書", num: 38, eng: "Zechariah", testament: "OT", cat: "小先知書", chapters: 14, icon: "🫒", color: "#059669", border: "#047857", desc: "不是倚靠勢力，不是倚靠才能，乃是倚靠我的靈。" },
+      { id: "瑪拉基書", num: 39, eng: "Malachi", testament: "OT", cat: "小先知書", chapters: 4, icon: "☀️", color: "#d97706", border: "#b45309", desc: "萬軍之耶和華說：你們要將當納的十分之一全然送入倉庫。" },
+      // 新約 27 卷
+      { id: "馬太福音", num: 40, eng: "Matthew", testament: "NT", cat: "四福音書", chapters: 28, icon: "👑", color: "#059669", border: "#047857", desc: "天國君王耶穌、登山寶訓與大使命。" },
+      { id: "馬可福音", num: 41, eng: "Mark", testament: "NT", cat: "四福音書", chapters: 16, icon: "🦁", color: "#e11d48", border: "#be123c", desc: "人子來乃是要服事人，並且要捨命作多人的贖價。" },
+      { id: "路加福音", num: 42, eng: "Luke", testament: "NT", cat: "四福音書", chapters: 24, icon: "🩺", color: "#2563eb", border: "#1d4ed8", desc: "人子來為要尋找、拯救失喪的人。" },
+      { id: "約翰福音", num: 43, eng: "John", testament: "NT", cat: "四福音書", chapters: 21, icon: "🦅", color: "#8b5cf6", border: "#6d28d9", desc: "太初有道、七個神蹟與七個「我是」的永生見證。" },
+      { id: "使徒行傳", num: 44, eng: "Acts", testament: "NT", cat: "使徒歷史", chapters: 28, icon: "🔥", color: "#d97706", border: "#b45309", desc: "五旬節聖靈降臨與福音從耶路撒冷傳到地極。" },
+      { id: "羅馬書", num: 45, eng: "Romans", testament: "NT", cat: "保羅書信", chapters: 16, icon: "⚖️", color: "#059669", border: "#047857", desc: "福音本是神的大能、因信稱義與活祭人生。" },
+      { id: "哥林多前書", num: 46, eng: "1 Corinthians", testament: "NT", cat: "保羅書信", chapters: 16, icon: "💖", color: "#2563eb", border: "#1d4ed8", desc: "教會合一、屬靈恩賜、愛的真諦與死裡復活。" },
+      { id: "哥林多後書", num: 47, eng: "2 Corinthians", testament: "NT", cat: "保羅書信", chapters: 13, icon: "🏺", color: "#8b5cf6", border: "#6d28d9", desc: "寶貝放在瓦器裡，我的恩典夠你用的。" },
+      { id: "加拉太書", num: 48, eng: "Galatians", testament: "NT", cat: "保羅書信", chapters: 6, icon: "🍇", color: "#d97706", border: "#b45309", desc: "在基督裡的自由與聖靈所結的九樣果子。" },
+      { id: "以弗所書", num: 49, eng: "Ephesians", testament: "NT", cat: "保羅書信", chapters: 6, icon: "🛡️", color: "#059669", border: "#047857", desc: "教會是基督的身體與穿戴神所賜的全副軍裝。" },
+      { id: "腓立比書", num: 50, eng: "Philippians", testament: "NT", cat: "保羅書信", chapters: 4, icon: "😊", color: "#d97706", border: "#b45309", desc: "靠主常常喜樂，我靠著那加給我力量的凡事都能做。" },
+      { id: "歌羅西書", num: 51, eng: "Colossians", testament: "NT", cat: "保羅書信", chapters: 4, icon: "🌌", color: "#2563eb", border: "#1d4ed8", desc: "基督在萬有上居首位，要思念上面的事。" },
+      { id: "帖撒羅尼迦前書", num: 52, eng: "1 Thessalonians", testament: "NT", cat: "保羅書信", chapters: 5, icon: "🎺", color: "#8b5cf6", border: "#6d28d9", desc: "常常喜樂，不住地禱告，凡事謝恩。" },
+      { id: "帖撒羅尼迦後書", num: 53, eng: "2 Thessalonians", testament: "NT", cat: "保羅書信", chapters: 3, icon: "⚓", color: "#059669", border: "#047857", desc: "在真道上站立得穩，行善不可喪志。" },
+      { id: "提摩太前書", num: 54, eng: "1 Timothy", testament: "NT", cat: "保羅書信", chapters: 6, icon: "🌱", color: "#d97706", border: "#b45309", desc: "不可叫人小看你年輕，總要在言語行為上作信徒的榜樣。" },
+      { id: "提摩太後書", num: 55, eng: "2 Timothy", testament: "NT", cat: "保羅書信", chapters: 4, icon: "🏁", color: "#e11d48", border: "#be123c", desc: "聖經都是神所默示的；那美好的仗我已經打過了。" },
+      { id: "提多書", num: 56, eng: "Titus", testament: "NT", cat: "保羅書信", chapters: 3, icon: "🏝️", color: "#2563eb", border: "#1d4ed8", desc: "重生的洗和聖靈的更新，熱心為善。" },
+      { id: "腓利門書", num: 57, eng: "Philemon", testament: "NT", cat: "保羅書信", chapters: 1, icon: "🤝", color: "#d97706", border: "#b45309", desc: "在主裡接納阿尼西母，活出饒恕與弟兄之愛。" },
+      { id: "希伯來書", num: 58, eng: "Hebrews", testament: "NT", cat: "普通書信", chapters: 13, icon: "⚓", color: "#8b5cf6", border: "#6d28d9", desc: "超越的大祭司耶穌與第11章信心偉人見證。" },
+      { id: "雅各書", num: 59, eng: "James", testament: "NT", cat: "普通書信", chapters: 5, icon: "🏃", color: "#059669", border: "#047857", desc: "聽道也要行道，信心沒有行為就是死的。" },
+      { id: "彼得前書", num: 60, eng: "1 Peter", testament: "NT", cat: "普通書信", chapters: 5, icon: "🪨", color: "#2563eb", border: "#1d4ed8", desc: "被揀選的族類、君尊的祭司，將一切憂慮卸給神。" },
+      { id: "彼得後書", num: 61, eng: "2 Peter", testament: "NT", cat: "普通書信", chapters: 3, icon: "🪜", color: "#d97706", border: "#b45309", desc: "在恩典和知識上長進，有了信心還要加上德行與愛心。" },
+      { id: "約翰一書", num: 62, eng: "1 John", testament: "NT", cat: "普通書信", chapters: 5, icon: "💡", color: "#e11d48", border: "#be123c", desc: "神就是光、神就是愛；我們愛，因為神先愛我們。" },
+      { id: "約翰二書", num: 63, eng: "2 John", testament: "NT", cat: "普通書信", chapters: 1, icon: "✉️", color: "#8b5cf6", border: "#6d28d9", desc: "在真理和愛心裡彼此相愛。" },
+      { id: "約翰三書", num: 64, eng: "3 John", testament: "NT", cat: "普通書信", chapters: 1, icon: "🏡", color: "#059669", border: "#047857", desc: "願你凡事興盛，身體健壯，正如你的靈魂興盛一樣。" },
+      { id: "猶大書", num: 65, eng: "Jude", testament: "NT", cat: "普通書信", chapters: 1, icon: "🔥", color: "#d97706", border: "#b45309", desc: "為從前一次交付聖徒的真道竭力爭辯。" },
+      { id: "啟示錄", num: 66, eng: "Revelation", testament: "NT", cat: "啟示錄", chapters: 22, icon: "🌈", color: "#d97706", border: "#b45309", desc: "得勝的羔羊、七教會書信與新天新地新耶路撒冷。" }
     ];
 
     const BADGES_CATALOG = [
-        { id: "b1", icon: "🕯️", title: "起初之光", desc: "完成任意 1 章聖經閱讀與測驗", check: () => Object.keys(completedChapters).length >= 1 },
-        { id: "b2", icon: "📜", title: "真理行者", desc: "累積通關達 5 個聖經章節", check: () => Object.keys(completedChapters).length >= 5 },
-        { id: "b3", icon: "⚡", title: "百XP門徒", desc: "總經驗值累積達 100 XP", check: () => userXP >= 100 },
-        { id: "b4", icon: "🌩️", title: "閃電神學家", desc: "在 60秒閃電戰單場破 150 分", check: () => blitzBestScore >= 150 },
-        { id: "b5", icon: "🔥", title: "連擊狂熱者", desc: "在測驗達成 5 連擊 Combo", check: () => maxComboEver >= 5 },
-        { id: "b6", icon: "👑", title: "PK 擂台常勝軍", desc: "在 1v1 PK 對戰贏得至少 1 勝", check: () => userPKWins >= 1 },
-        { id: "b7", icon: "🛡️", title: "錯題終結者", desc: "在錯題特訓營累計消滅 3 道錯題", check: () => masteredWrongCount >= 3 },
-        { id: "b8", icon: "🌅", title: "火焰守望者", desc: "連續靈修打卡達 3 天以上", check: () => userStreak >= 3 },
-        { id: "b9", icon: "✍️", title: "屬靈筆記本", desc: "寫下至少 1 篇書卷收穫筆記", check: () => Object.keys(bookNotes).length >= 1 },
-        { id: "b10", icon: "🕊️", title: "新約福音使者", desc: "通關任意一章新約聖經書卷", check: () => Object.keys(completedChapters).some(k => { const b = BIBLE_BOOKS.find(x => x.id === k.split('_')[0]); return b && b.testament === 'NT'; }) },
-        { id: "b11", icon: "🏛️", title: "千分神學先鋒", desc: "總經驗值累積突破 1,000 XP", check: () => userXP >= 1000 },
-        { id: "b12", icon: "🌈", title: "聖經大滿貫王", desc: "累積解鎖 8 枚以上榮譽徽章", check: () => countUnlockedBadgesRaw() >= 8 }
+      { id: "b1", icon: "🕯️", title: "起初之光", desc: "完成任意 1 章聖經閱讀與測驗", check: () => Object.keys(completedChapters).length >= 1 },
+      { id: "b2", icon: "📜", title: "真理行者", desc: "累積通關達 5 個聖經章節", check: () => Object.keys(completedChapters).length >= 5 },
+      { id: "b3", icon: "⚡", title: "百XP門徒", desc: "總經驗值累積達 100 XP", check: () => userXP >= 100 },
+      { id: "b4", icon: "🌩️", title: "閃電神學家", desc: "在 60秒閃電戰單場破 150 分", check: () => blitzBestScore >= 150 },
+      { id: "b5", icon: "🔥", title: "連擊狂熱者", desc: "在測驗達成 5 連擊 Combo", check: () => maxComboEver >= 5 },
+      { id: "b6", icon: "👑", title: "PK 擂台常勝軍", desc: "在多人 PK 對戰贏得至少 1 勝", check: () => userPKWins >= 1 },
+      { id: "b7", icon: "🛡️", title: "錯題終結者", desc: "在錯題特訓營累計消滅 3 道錯題", check: () => masteredWrongCount >= 3 },
+      { id: "b8", icon: "🌅", title: "火焰守望者", desc: "連續靈修打卡達 3 天以上", check: () => userStreak >= 3 },
+      { id: "b9", icon: "✍️", title: "屬靈筆記本", desc: "寫下至少 1 篇書卷收穫筆記", check: () => Object.keys(bookNotes).length >= 1 },
+      { id: "b10", icon: "🕊️", title: "新約福音使者", desc: "通關任意一章新約聖經書卷", check: () => Object.keys(completedChapters).some(k => { const b = BIBLE_BOOKS.find(x => x.id === k.split('_')[0]); return b && b.testament === 'NT'; }) },
+      { id: "b11", icon: "🏛️", title: "千分神學先鋒", desc: "總經驗值累積突破 1,000 XP", check: () => userXP >= 1000 },
+      { id: "b12", icon: "🌈", title: "聖經大滿貫王", desc: "累積解鎖 8 枚以上榮譽徽章", check: () => countUnlockedBadgesRaw() >= 8 }
     ];
 
     function countUnlockedBadgesRaw() { return BADGES_CATALOG.filter(b => b.id !== 'b12' && b.check()).length; }
@@ -902,8 +1090,264 @@
     let wrongQuestions = JSON.parse(localStorage.getItem('bq_wrong_questions')) || [];
     let bookNotes = JSON.parse(localStorage.getItem('bq_book_notes')) || {};
     let allCloudUsersCache = [];
-    
-    let BUILTIN_FULL_VERSES = {}; 
+
+    // =========================================================================
+    // 內建和合本一字不漏完整經文庫（離線秒開）＋ 自動快取已讀章節
+    // =========================================================================
+    let BUILTIN_FULL_VERSES = JSON.parse(localStorage.getItem('bq_verses_cache')) || {};
+    Object.assign(BUILTIN_FULL_VERSES, {
+      "創世記_1": [
+        "1. 起初，神創造天地。",
+        "2. 地是空虛混沌，淵面黑暗；神的靈運行在水面上。",
+        "3. 神說：「要有光」，就有了光。",
+        "4. 神看光是好的，就把光暗分開了。",
+        "5. 神稱光為「晝」，稱暗為「夜」。有晚上，有早晨，這是頭一日。",
+        "6. 神說：「諸水之間要有空氣，將水分為上下。」",
+        "7. 神就造出空氣，將空氣以下的水、空氣以上的水分開了。事就這樣成了。",
+        "8. 神稱空氣為「天」。有晚上，有早晨，是第二日。",
+        "9. 神說：「天下的水要聚在一處，使旱地露出來。」事就這樣成了。",
+        "10. 神稱旱地為「地」，稱水的聚處為「海」。神看著是好的。",
+        "11. 神說：「地要發生青草和結種子的菜蔬，並結果子的樹木，各從其類，果子都包著核。」事就這樣成了。",
+        "12. 於是地發生了青草和結種子的菜蔬，各從其類；並結果子的樹木，各從其類；果子都包著核。神看著是好的。",
+        "13. 有晚上，有早晨，是第三日。",
+        "14. 神說：「天上要有光體，可以分晝夜，作記號，定節令、日子、年歲，",
+        "15. 並要發光在天空，普照在地上。」事就這樣成了。",
+        "16. 於是神造了兩個大光，大的管晝，小的管夜，又造眾星，",
+        "17. 就把這些光擺列在天空，普照在地上，",
+        "18. 管理晝夜，分別明暗。神看著是好的。",
+        "19. 有晚上，有早晨，是第四日。",
+        "20. 神說：「水要多多滋生有生命的物；要有雀鳥飛在地面以上，天空之中。」",
+        "21. 神就造出大魚和水中所滋生各樣有生命的動物，各從其類；又造出各樣飛鳥，各從其類。神看著是好的。",
+        "22. 神就賜福給這一切，說：「滋生繁多，充滿海中的水；雀鳥也要多生在地上。」",
+        "23. 有晚上，有早晨，是第五日。",
+        "24. 神說：「地要生出活物來，各從其類；牲畜、昆蟲、野獸，各從其類。」事就這樣成了。",
+        "25. 於是神造出野獸，各從其類；牲畜，各從其類；地上一切昆蟲，各從其類。神看著是好的。",
+        "26. 神說：「我們要照著我們的形像、按著我們的樣式造人，使他們管理海裡的魚、空中的鳥、地上的牲畜，和全地，並地上所爬的一切昆蟲。」",
+        "27. 神就照著自己的形像造人，乃是照著他的形像造男造女。",
+        "28. 神就賜福給他們，又對他們說：「要生養眾多，遍滿地面，治理這地，也要管理海裡的魚、空中的鳥，和地上各樣行動的活物。」",
+        "29. 神說：「看哪，我將遍地上一切結種子的菜蔬和一切樹上所結有核的果子全賜給你們作食物。",
+        "30. 至於地上的走獸和空中的飛鳥，並各樣爬在地上有生命的物，我將青草賜給牠們作食物。」事就這樣成了。",
+        "31. 神看著一切所造的都甚好。有晚上，有早晨，是第六日。"
+      ],
+      "創世記_2": [
+        "1. 天地萬物都造齊了。",
+        "2. 到第七日，神造物的工已經完畢，就在第七日歇了他一切的工，安息了。",
+        "3. 神賜福給第七日，定為聖日；因為在這日，神歇了他一切創造的工，就安息了。",
+        "4. 創造天地的來歷，在耶和華神造天地的日子，乃是這樣：",
+        "5. 野地還沒有草木，田間的菜蔬還沒有長起來；因為耶和華神還沒有降雨在地上，也沒有人耕地，",
+        "6. 但有霧氣從地上騰，滋潤遍地。",
+        "7. 耶和華神用地上的塵土造人，將生氣吹在他鼻孔裡，他就成了有靈的活人，名叫亞當。",
+        "8. 耶和華神在東方的伊甸立了一個園子，把所造的人安置在那裡。",
+        "9. 耶和華神使各樣的樹從地裡長出來，可以悅人的眼目，其上的果子好作食物。園子當中又有生命樹和分別善惡的樹。",
+        "10. 有河從伊甸流出來，滋潤那園子，從那裡分為四道：",
+        "11. 第一道名叫比遜，就是環繞哈腓拉全地的。在那裡有金子，",
+        "12. 並且那地的金子是好的；在那裡又有珍珠和紅瑪瑙。",
+        "13. 第二道河名叫基訓，就是環繞古實全地的。",
+        "14. 第三道河名叫希底結，流在亞述的東邊。第四道河就是伯拉河。",
+        "15. 耶和華神將那人安置在伊甸園，使他修理，看守。",
+        "16. 耶和華神吩咐他說：「園中各樣樹上的果子，你可以隨意吃，",
+        "17. 只是分別善惡樹上的果子，你不可吃，因為你吃的日子必定死！」",
+        "18. 耶和華神說：「那人獨居不好，我要為他造一個配偶幫助他。」",
+        "19. 耶和華神用土所造成的野地各樣走獸和空中各樣飛鳥都帶到那人面前，看他叫什麼。那人怎樣叫各樣的活物，那就是牠的名字。",
+        "20. 那人便給一切牲畜和空中飛鳥、野地走獸都起了名；只是那人沒有遇見配偶幫助他。",
+        "21. 耶和華神使他沉睡，他就睡了；於是取下他的一條肋骨，又把肉合起來。",
+        "22. 耶和華神就用那人身上所取的肋骨造成一個女人，領她到那人跟前。",
+        "23. 那人說：「這是我骨中的骨，肉中的肉，可以稱她為『女人』，因為她是從『男人』身上取出來的。」",
+        "24. 因此，人要離開父母，與妻子連合，二人成為一體。",
+        "25. 當時夫妻二人赤身露體，並不羞恥。"
+      ],
+      "創世記_3": [
+        "1. 耶和華神所造的，惟有蛇比田野一切的活物更狡猾。蛇對女人說：「神豈是真說不許你們吃園中所有樹上的果子嗎？」",
+        "2. 女人對蛇說：「園中樹上的果子，我們可以吃，",
+        "3. 惟有園當中那棵樹上的果子，神曾說：『你們不可吃，也不可摸，免得你們死。』」",
+        "4. 蛇對女人說：「你們不一定死；",
+        "5. 因為神知道，你們吃的日子眼睛就明亮了，你們便如神能知道善惡。」",
+        "6. 於是女人見那棵樹的果子好作食物，也悅人的眼目，且是可喜愛的，能使人有智慧，就摘下果子來吃了，又給她丈夫，她丈夫也吃了。",
+        "7. 他們二人的眼睛就明亮了，才知道自己是赤身露體，便拿無花果樹的葉子為自己編作裙子。",
+        "8. 天起了涼風，耶和華神在園中行走。那人和他妻子聽見神的聲音，就藏在園裡的樹木中，躲避耶和華神的面。",
+        "9. 耶和華神呼喚那人，對他說：「你在哪裡？」",
+        "10. 他說：「我在園中聽見你的聲音，我就害怕；因為我赤身露體，我便藏了。」",
+        "11. 耶和華說：「誰告訴你赤身露體呢？莫非你吃了我吩咐你不可吃的那樹上的果子嗎？」",
+        "12. 那人說：「你所賜給我、與我同居的女人，她把那樹上的果子給我，我就吃了。」",
+        "13. 耶和華神對女人說：「你做的是什麼事呢？」女人說：「那蛇引誘我，我就吃了。」",
+        "14. 耶和華神對蛇說：「你既做了這事，就必受咒詛，比一切的牲畜野獸更甚；你必用肚子行走，終身吃土。",
+        "15. 我又要叫你和女人彼此為仇；你的後裔和女人的後裔也彼此為仇。女人的後裔要傷你的頭，你要傷他的腳跟。」",
+        "16. 又對女人說：「我必多多加增你懷胎的苦楚；你生產兒女必多受苦楚。你必戀慕你丈夫，你丈夫必管轄你。」",
+        "17. 又對亞當說：「你既聽從妻子的話，吃了我所吩咐你不可吃的那樹上的果子，地必為你的緣故受咒詛；你必終身勞苦才能從地裡得吃的。",
+        "18. 地必給你長出荊棘和蒺藜來；你也要吃田間的菜蔬。",
+        "19. 你必汗流滿面才得糊口，直到你歸了土，因為你是從土而出的。你本是塵土，仍要歸於塵土。」",
+        "20. 亞當給他妻子起名叫夏娃，因為她是眾生之母。",
+        "21. 耶和華神為亞當和他妻子用皮子作衣服給他們穿。",
+        "22. 耶和華神說：「那人已經與我們相似，能知道善惡。現在恐怕他伸手又摘生命樹的果子吃，就永遠活著。」",
+        "23. 耶和華神便打發他出伊甸園去，耕種他所自出之土。",
+        "24. 於是把他趕出去了；又在伊甸園的東邊安設基路伯和四面轉動發火焰的劍，要把守生命樹的道路。"
+      ],
+      "創世記_4": [
+        "1. 有一日，那人和他妻子夏娃同房，夏娃就懷孕，生了該隱，便說：「耶和華使我得了一個男子。」",
+        "2. 又生了該隱的兄弟亞伯。亞伯是牧羊的，該隱是種地的。",
+        "3. 有一日，該隱拿地裡的出產為供物獻給耶和華；",
+        "4. 亞伯也將他羊群中頭生的和羊的脂油獻上。耶和華看中了亞伯和他的供物，",
+        "5. 只是看不中該隱和他的供物。該隱就大大地發怒，變了臉色。",
+        "6. 耶和華對該隱說：「你為什麼發怒呢？你為什麼變了臉色呢？",
+        "7. 你若行得好，豈不蒙悅納？你若行得不好，罪就伏在門前。它必戀慕你，你卻要制伏它。」",
+        "8. 該隱與他兄弟亞伯說話；二人正在田間的時候，該隱起來打他兄弟亞伯，把他殺了。",
+        "9. 耶和華對該隱說：「你兄弟亞伯在哪裡？」他說：「我不知道！我豈是我兄弟的看守者嗎？」",
+        "10. 耶和華說：「你做了什麼事呢？你兄弟的血有聲音從地裡向我哀告。",
+        "11. 地開了口，從你手裡接受你兄弟的血，現在你必從這地受咒詛。",
+        "12. 你種地，地不再給你效力；你必流離飄蕩在地上。」",
+        "13. 該隱對耶和華說：「我的刑罰太重，過於我所能當的。",
+        "14. 你今日趕逐我離開這地，以致不見你面；我必流離飄蕩在地上，凡遇見我的必殺我。」",
+        "15. 耶和華對他說：「凡殺該隱的，必遭報七倍。」耶和華就給該隱立一個記號，免得人遇見他就殺他。",
+        "16. 於是該隱離開耶和華的面，去住在伊甸東邊挪得之地。",
+        "17. 該隱與妻子同房，他妻子就懷孕，生了以諾。該隱建造了一座城，就按著他兒子的名將那城叫做以諾。",
+        "18. 以諾生以拿；以拿生米戶雅利；米戶雅利生瑪土撒利；瑪土撒利生拉麥。",
+        "19. 拉麥娶了兩個妻：一個名叫亞大，一個名叫洗拉。",
+        "20. 亞大生雅八；雅八就是住帳棚、牧養牲畜之人的祖師。",
+        "21. 雅八的兄弟名叫猶八；他是一切彈琴吹簫之人的祖師。",
+        "22. 洗拉又生了土八該隱；他是打造各樣銅鐵利器的。土八該隱的妹子是拿瑪。",
+        "23. 拉麥對他兩個妻子說：「亞大、洗拉，聽我的聲音；拉麥的妻子，細聽我的話語：壯年人傷我，我把他殺了；少年人損我，我把他害了。",
+        "24. 若殺該隱，遭報七倍，殺拉麥，必遭報七十七倍。」",
+        "25. 亞當又與妻子同房，她就生了一個兒子，起名叫塞特，意思說：「神另給我立了一個兒子代替亞伯，因為該隱殺了他。」",
+        "26. 塞特也生了一個兒子，起名叫以挪士。那時候，人才求告耶和華的名。"
+      ],
+      "詩篇_23": [
+        "1. （大衛的詩。）耶和華是我的牧者，我必不致缺乏。",
+        "2. 他使我躺臥在青草地上，領我在可安歇的水邊。",
+        "3. 他使我的靈魂甦醒，為自己的名引導我走義路。",
+        "4. 我雖然行過死蔭的幽谷，也不怕遭害，因為你與我同在；你的杖，你的竿，都安慰我。",
+        "5. 在我敵人面前，你為我擺設筵席；你用油膏了我的頭，使我的福杯滿溢。",
+        "6. 我一生一世必有恩惠慈愛隨著我；我且要住在耶和華的殿中，直到永遠。"
+      ],
+      "馬太福音_1": [
+        "1. 亞伯拉罕的後裔，大衛的子孫，耶穌基督的家譜：",
+        "2. 亞伯拉罕生以撒；以撒生雅各；雅各生猶大和他的弟兄；",
+        "3. 猶大從他瑪氏生法勒斯和謝拉；法勒斯生希斯崙；希斯崙生亞蘭；",
+        "4. 亞蘭生亞米拿達；亞米拿達生拿順；拿順生撒門；",
+        "5. 撒門從喇合氏生波阿斯；波阿斯從路得氏生俄備得；俄備得生耶西；",
+        "6. 耶西生大衛王。大衛從烏利亞的妻子生所羅門；",
+        "7. 所羅門生羅波安；羅波安生亞比雅；亞比雅生亞撒；",
+        "8. 亞撒生約沙法；約沙法生約蘭；約蘭生烏西亞；",
+        "9. 烏西亞生約坦；約坦生亞哈斯；亞哈斯生希西家；",
+        "10. 希西家生瑪拿西；瑪拿西生亞們；亞們生約西亞；",
+        "11. 百姓被遷到巴比倫的時候，約西亞生耶哥尼雅和他的弟兄。",
+        "12. 遷到巴比倫之後，耶哥尼雅生撒拉鐵；撒拉鐵生所羅巴伯；",
+        "13. 所羅巴伯生亞比玉；亞比玉生以利亞敬；以利亞敬生亞所；",
+        "14. 亞所生撒督；撒督生亞金；亞金生以律；",
+        "15. 以律生以利亞撒；以利亞撒生馬但；馬但生雅各；",
+        "16. 雅各生約瑟，就是馬利亞的丈夫。那稱為基督的耶穌是從馬利亞生的。",
+        "17. 這樣，從亞伯拉罕到大衛共有十四代；從大衛到遷至巴比倫的時候也有十四代；從遷至巴比倫的時候到基督又有十四代。",
+        "18. 耶穌基督降生的事記在下面：他母親馬利亞已經許配了約瑟，還沒有迎娶，馬利亞就從聖靈懷了孕。",
+        "19. 她丈夫約瑟是個義人，不願意明明地羞辱她，想要暗暗地把她休了。",
+        "20. 正思念這事的時候，有主的使者向他夢中顯現，說：「大衛的子孫約瑟，不要怕！只管娶過你的妻子馬利亞來，因她所懷的孕是從聖靈來的。",
+        "21. 她將要生一個兒子，你要給他起名叫耶穌，因他要將自己的百姓從罪惡裡救出來。」",
+        "22. 這一切的事成就，是要應驗主藉先知所說的話，",
+        "23. 說：「必有童女懷孕生子；人要稱他的名為以馬內利。」（「以馬內利」翻出來就是「神與我們同在」。）",
+        "24. 約瑟醒了，起來，就遵著主使者的吩咐把妻子娶過來；",
+        "25. 只是沒有和她同房，等她生了兒子，就給他起名叫耶穌。"
+      ],
+      "約翰福音_1": [
+        "1. 太初有道，道與神同在，道就是神。",
+        "2. 這道太初與神同在。",
+        "3. 萬物是藉著他造的；凡被造的，沒有一樣不是藉著他造的。",
+        "4. 生命在他裡頭，這生命就是人的光。",
+        "5. 光照在黑暗裡，黑暗卻不接受光。",
+        "6. 有一個人，是從神那裡差來的，名叫約翰。",
+        "7. 這人來，為要作見證，就是為光作見證，叫眾人因他可以信。",
+        "8. 他不是那光，乃是要為光作見證。",
+        "9. 那光是真光，照亮一切生在世上的人。",
+        "10. 他在世界，世界也是藉著他造的，世界卻不認識他。",
+        "11. 他到自己的地方來，自己的人倒不接待他。",
+        "12. 凡接待他的，就是信他名的人，他就賜他們權柄，作神的兒女。",
+        "13. 這等人不是從血氣生的，不是從情慾生的，也不是從人意生的，乃是從神生的。",
+        "14. 道成了肉身，住在我們中間，充充足足地有恩典有真理。我們也見過他的榮光，正是父獨生子的榮光。",
+        "15. 約翰為他作見證，喊著說：「這就是我曾說：『那在我以後來的，反成了在我以前的，因他本來在我以前。』」",
+        "16. 從他豐滿的恩典裡，我們都領受了，而且恩上加恩。",
+        "17. 律法本是藉著摩西傳的；恩典和真理都是由耶穌基督來的。",
+        "18. 從來沒有人看見神，只有在父懷裡的獨生子將他表明出來。",
+        "19. 約翰所作的見證記在下面：猶太人從耶路撒冷差祭司和利未人到約翰那裡，問他說：「你是誰？」",
+        "20. 他就明說，並不隱瞞，明說：「我不是基督。」",
+        "21. 他們又問他說：「這樣，你是誰呢？是以利亞嗎？」他說：「我不是。」「是那先知嗎？」他回答說：「不是。」",
+        "22. 於是他們說：「你到底是誰，叫我們好回覆差我們來的人。你自己說，你是誰？」",
+        "23. 他說：「我就是那在曠野有人聲喊著說：『修直主的道路』，正如先知以賽亞所說的。」",
+        "24. 那些人是法利賽人差來的。",
+        "25. 他們就問他說：「你既不是基督，不是以利亞，也不是那先知，為什麼施洗呢？」",
+        "26. 約翰回答說：「我是用水施洗，但有一位站在你們中間，是你們不認識的，",
+        "27. 就是那在我以後來的，我給他解鞋帶也不配。」",
+        "28. 這是在約旦河外伯大尼，約翰施洗的地方作的見證。",
+        "29. 次日，約翰看見耶穌來到他那裡，就說：「看哪，神的羔羊，除去世人罪孽的！",
+        "30. 這就是我曾說：『有一位在我以後來的，反成了在我以前的，因他本來在我以前。』",
+        "31. 我先前不認識他，如今我來用水施洗，為要叫他顯明給以色列人。」",
+        "32. 約翰又作見證說：「我曾看見聖靈，彷彿鴿子從天降下，住在他的身上。",
+        "33. 我先前不認識他，只是那差我來用水施洗的、對我說：『你看見聖靈降下來，住在誰的身上，誰就是用聖靈施洗的。』",
+        "34. 我看見了，就證明這是神的兒子。」",
+        "35. 再次日，約翰同兩個門徒站在那裡。",
+        "36. 他見耶穌行走，就看著他說：「看哪，這是神的羔羊！」",
+        "37. 兩個門徒聽見他的話，就跟從了耶穌。",
+        "38. 耶穌轉過身來，看見他們跟著，就問他們說：「你們要什麼？」他們說：「拉比，在哪裡住？」（「拉比」翻出來就是「夫子」。）",
+        "39. 耶穌說：「你們來看。」他們就去看他在哪裡住，這一天便與他同住；那時約有申正了。",
+        "40. 聽見約翰的話跟從耶穌的那兩個人，一個是西門彼得的兄弟安得烈。",
+        "41. 他先找著自己的哥哥西門，對他說：「我們遇見彌賽亞了。」（「彌賽亞」翻出來就是「基督」。）",
+        "42. 於是領他到耶穌那裡。耶穌看著他，說：「你是約翰的兒子西門，你要稱為磯法。」（「磯法」翻出來就是「彼得」。）",
+        "43. 又次日，耶穌想要往加利利去，遇見腓力，就對他說：「來跟從我吧。」",
+        "44. 這腓力是伯賽大人，和安得烈、彼得同城。",
+        "45. 腓力找著拿但業，對他說：「摩西在律法上所寫的和眾先知所記的那一位，我們遇見了，就是約瑟的兒子拿撒勒人耶穌。」",
+        "46. 拿但業對他說：「拿撒勒還能出什麼好的嗎？」腓力說：「你來看！」",
+        "47. 耶穌看見拿但業來，就指著他說：「看哪，這是個真以色列人，他心裡是沒有詭詐的。」",
+        "48. 拿但業對耶穌說：「你從哪裡知道我呢？」耶穌回答說：「腓力還沒有招呼你，你在無花果樹底下，我就看見你了。」",
+        "49. 拿但業說：「拉比，你是神的兒子，你是以色列的王！」",
+        "50. 耶穌對他說：「因為我說『在無花果樹底下看見你』，你就信嗎？你將要看見比這更大的事」；",
+        "51. 又說：「我實實在在地告訴你們，你們將要看見天開了，神的使者上去下來在人子身上。」"
+      ]
+    });
+
+    // 內建雙軌精選題庫 (每章 10 題：5 題簡單 + 5 題困難)
+    window.CURATED_CHAPTER_DATA = window.CURATED_CHAPTER_DATA || {
+      "創世記_1": {
+        title: "創世記 第 1 章：天地萬物的創造與人類受造",
+        questions: [
+          { type: "簡單", xp: 10, q: "在創世記第 1 章第 1 節中，「起初」神創造了什麼？", options: ["天地", "太陽與月亮", "伊甸園", "天使與基路伯"], answer: 0, exp: "創世記 1:1：「起初，神創造天地。」這是全本聖經的開篇宣告。" },
+          { type: "簡單", xp: 10, q: "神在創造的第一日說：「要有光」，就有了光。接著神把光和暗怎麼處理？", options: ["把暗完全消滅", "把光暗分開，稱光為晝、稱暗為夜", "把光藏在雲彩裡", "交給太陽管理"], answer: 1, exp: "創世記 1:4-5：神看光是好的，就把光暗分開了，稱光為「晝」，稱暗為「夜」。" },
+          { type: "簡單", xp: 10, q: "神是在第幾日創造了陸上活物與人類（造男造女）？", options: ["第三日", "第五日", "第六日", "第七日"], answer: 2, exp: "創世記 1:24-31：第六日神造地上活物，並照著自己的形像造男造女。" },
+          { type: "簡單", xp: 10, q: "神在創造的第四日造了什麼來分晝夜，並作記號定節令、日子和年歲？", options: ["飛鳥和走獸", "青草和菜蔬", "空氣和海洋", "兩個大光（日月）和眾星"], answer: 3, exp: "創世記 1:14-19：第四日神造了兩個大光和眾星管理晝夜。" },
+          { type: "簡單", xp: 10, q: "在創世記第 1 章中，神將地上的結種子的菜蔬和結果子的樹賜給誰作食物？", options: ["給人類、走獸和飛鳥作食物", "只給天使享用", "只給海裡的魚", "留著不可食用"], answer: 0, exp: "創世記 1:29-30：神把各樣結種子的菜蔬和結果子的樹賜給人，並將青草賜給走獸和飛鳥作食物。" },
+          { type: "困難", xp: 25, q: "【細節考察】根據創世記第 1 章的創造次序，「植物（青草、菜蔬、果樹）」與「太陽、月亮、星辰」哪一個先被造出來？", options: ["太陽月亮先造，植物才有光合作用", "植物在第三日先被造，日月星辰在第四日才造", "兩者在第三日同時被造", "兩者在第四日同時被造"], answer: 1, exp: "創世記 1:11-19：第三日先造植物，第四日才造光體，顯明萬物生長的根源在於神的話語。" },
+          { type: "困難", xp: 25, q: "【神學反思】神在前五日都說「神看著是好的」，唯獨在第六日造完人類並觀看一切所造的之後，經文怎麼形容？", options: ["神看著是完美的", "神看著是聖潔的", "神看著一切所造的都甚好", "神看著是永遠的"], answer: 2, exp: "創世記 1:31：「神看著一切所造的都甚好（very good）。」代表神創造之工達到和諧與完整的高峰。" },
+          { type: "困難", xp: 25, q: "【形像涵義】經文記載神說「我們要照著我們的形像、按著我們的樣式造人」，在屬靈意涵上強調人類具有什麼獨特身分？", options: ["具有與神同等的無限神性", "不需要倚靠創造主而獨立存在", "只具備肉體的本能反應", "具有道德、靈性、理智，並代表神治理全地的管家職分"], answer: 3, exp: "創世記 1:26-28 賦予人治理全地的管家職分，並能反映神公義與慈愛的屬性。" },
+          { type: "困難", xp: 25, q: "【創造宣告】在創世記第 1 章中，神創造萬物最主要的獨特方式是什麼？", options: ["出於神口中的話語（「神說...就有了...」）", "藉由天使代工建造", "從現存物質中慢慢雕刻", "經由神話爭戰"], answer: 0, exp: "創世記 1 章全程以「神說...事就這樣成了」彰顯神話語全能的創造力。" },
+          { type: "困難", xp: 25, q: "【宇宙觀點】古代近東神話常將日月星辰視為掌管命運的神明，但創世記第 1 章如何定位日月星辰？", options: ["它們是掌管人類吉凶的天體神祇", "它們只是神在第四日所造的「光體與記號」，受造為人類服務而非神明", "它們是永恆不滅的創造源頭", "它們是天使的化身"], answer: 1, exp: "創世記只稱其為「兩個大光」，破除當時的星象與日月崇拜。" }
+        ]
+      },
+      "創世記_2": {
+        title: "創世記 第 2 章：安息聖日、伊甸園與婚姻設立",
+        questions: [
+          { type: "簡單", xp: 10, q: "到第幾日神造物的工已經完畢，就歇了他一切的工，並賜福定為聖日？", options: ["第七日", "第六日", "第一日", "第八日"], answer: 0, exp: "創世記 2:2-3：神在第七日歇了他一切創造的工，賜福給第七日，定為聖日。" },
+          { type: "簡單", xp: 10, q: "耶和華神是用什麼材料造亞當的身體，並將生氣吹在他鼻孔裡？", options: ["海裡的水", "地上的塵土", "天上的雲彩", "伊甸園的樹木"], answer: 1, exp: "創世記 2:7：耶和華神用地上的塵土造人，將生氣吹在他鼻孔裡，他就成了有靈的活人。" },
+          { type: "簡單", xp: 10, q: "神將那人安置在東方的伊甸園，交給他的工作職責是什麼？", options: ["建造高塔", "只管休息不用工作", "修理，看守園子", "打造方舟"], answer: 2, exp: "創世記 2:15：耶和華神將那人安置在伊甸園，使他修理，看守。" },
+          { type: "簡單", xp: 10, q: "伊甸園當中除了生命樹之外，還有哪一棵樹的果子是神特別吩咐不可吃的？", options: ["無花果樹", "橄欖樹", "香柏樹", "分別善惡樹"], answer: 3, exp: "創世記 2:9, 17：園子當中又有生命樹和分別善惡的樹；分別善惡樹上的果子不可吃。" },
+          { type: "簡單", xp: 10, q: "耶和華神使亞當沉睡後，取下他身體的哪一個部位造成一個女人？", options: ["一條肋骨", "一根手指", "一塊肩胛骨", "一撮頭髮"], answer: 0, exp: "創世記 2:21-22：耶和華神使他沉睡，取下他的一條肋骨，把肉合起來，造成一個女人。" },
+          { type: "困難", xp: 25, q: "【命令細節】在伊甸園中，神對亞當頒布命令時，關於園中樹上的果子是怎麼規定的？", options: ["所有果子都要經過批准才能吃", "園中各樣樹上的果子你可以隨意吃，只是分別善惡樹上的果子不可吃", "生命樹和分別善惡樹都不可吃", "只能吃生命樹的果子"], answer: 1, exp: "創世記 2:16-17：神先給予極大的恩典與自由（各樣果子可隨意吃），才立下唯一的界線。" },
+          { type: "困難", xp: 25, q: "【地理背景】創世記第 2 章記載有河從伊甸流出來滋潤那園子，從那裡分為四道；其中第四道河是哪一條大河？", options: ["尼羅河", "約旦河", "伯拉河（幼發拉底河）", "紅海"], answer: 2, exp: "創世記 2:10-14：四道河分別是比遜、基訓、希底結（底格里斯河），第四道就是伯拉河（幼發拉底河）。" },
+          { type: "困難", xp: 25, q: "【婚姻真理】創世記 2:24「人要離開父母，與妻子連合，二人成為一體」，在新約中被哪位使徒引用來說明基督與教會的奧秘？", options: ["使徒彼得", "使徒約翰", "施洗約翰", "使徒保羅（以弗所書第 5 章）"], answer: 3, exp: "以弗所書 5:31-32 保羅引用此經文，指出「這是極大的奧秘，但我是指著基督和教會說的」。" },
+          { type: "困難", xp: 25, q: "【起初光景】創世記 2:25 提到「當時夫妻二人赤身露體，並不羞恥」，這反映了人墮落前的什麼屬靈狀態？", options: ["毫無罪咎、完全透明，在神聖潔愛中彼此信任而毫無防備", "因為當時氣候炎熱不需要穿衣", "因為還沒發明紡織技術", "因為尚未擁有道德意識"], answer: 0, exp: "赤身露體並不羞恥，象徵人類犯罪前在神面前與彼此之間完全的純潔、坦誠與和諧。" },
+          { type: "困難", xp: 25, q: "【原文意涵】神說「那人獨居不好，我要為他造一個配偶幫助他」，這裡的「幫助者（ezer）」在舊約聖經中的主要意義為何？", options: ["指地位次等的僕役", "指強而有力的扶持者與同盟夥伴（舊約常用來形容「神是我們的幫助」）", "指單純分擔家務的助手", "指附庸關係"], answer: 1, exp: "原文 ezer 在舊約多數用來形容「神是人在患難中的幫助與拯救」，絕非次等附屬。" }
+        ]
+      },
+      "創世記_3": {
+        title: "創世記 第 3 章：人類的墮落與原始福音",
+        questions: [
+          { type: "簡單", xp: 10, q: "亞當和夏娃吃了禁果後，知道自己赤身露體，最初拿什麼植物的葉子為自己編作裙子？", options: ["無花果樹的葉子", "橄欖樹的葉子", "葡萄樹的葉子", "棕樹的枝葉"], answer: 0, exp: "創世記 3:7：他們二人的眼睛就明亮了，便拿無花果樹的葉子為自己編作裙子。" },
+          { type: "簡單", xp: 10, q: "當亞當和妻子聽見神在園中行走的聲音而躲藏時，耶和華神對那人發出的第一句呼喚是什麼？", options: ["你做了什麼事？", "你在哪裡？", "誰叫你吃那果子的？", "你為什麼怕我？"], answer: 1, exp: "創世記 3:9：耶和華神呼喚那人，對他說：「你在哪裡？」展現神主動尋找失落之人的愛。" },
+          { type: "簡單", xp: 10, q: "當神追問亞當「莫非你吃了我吩咐你不可吃的那樹上的果子嗎」，亞當第一時間把責任推給誰？", options: ["推給天上的飛鳥", "承認完全是自己的錯", "推給神所賜給他的女人（「你所賜給我、與我同居的女人，她把那樹上的果子給我，我就吃了」）", "推給園中的河水"], answer: 2, exp: "創世記 3:12：亞當把責任推卸給夏娃與神。" },
+          { type: "簡單", xp: 10, q: "亞當給他妻子起名叫什麼，因為她是「眾生之母」？", options: ["撒拉", "利百加", "拉結", "夏娃"], answer: 3, exp: "創世記 3:20：「亞當給他妻子起名叫夏娃，因為她是眾生之母。」" },
+          { type: "簡單", xp: 10, q: "在將亞當和夏娃趕出伊甸園之前，耶和華神用什麼為他們作衣服穿，遮蓋他們的羞恥？", options: ["皮子（動物毛皮）", "細麻布", "羊毛毯", "樹皮"], answer: 0, exp: "創世記 3:21：耶和華神為亞當和他妻子用皮子作衣服給他們穿，預表流血代贖遮蓋罪恥。" },
+          { type: "困難", xp: 25, q: "【試探剖析】蛇引誘女人時，第一句話是如何扭曲神原本在創世記第 2 章的命令？", options: ["蛇說：「神說吃了生命樹的果子就會死嗎？」", "蛇說：「神豈是真說不許你們吃園中所有樹上的果子嗎？」", "蛇說：「神自己天天吃那棵樹的果子！」", "蛇說：「亞當已經先偷吃了！」"], answer: 1, exp: "創世記 3:1：蛇故意把神的恩典扭曲成嚴苛的剝奪。" },
+          { type: "困難", xp: 25, q: "【新舊約對照】創世記 3:6 記載女人見那果子「好作食物，也悅人的眼目，且是可喜愛的，能使人有智慧」，這對應約翰一書 2:16 所說的哪三樣試探？", options: ["金錢、權力、名聲", "懶惰、嫉妒、紛爭", "肉體的情慾、眼目的情慾、並今生的驕傲", "過去、現在、未來"], answer: 2, exp: "「好作食物」對應肉體的情慾，「悅人的眼目」對應眼目的情慾，「能使人有智慧」對應今生的驕傲。" },
+          { type: "困難", xp: 25, q: "【神學核心】創世記 3:15 被稱為「原始福音（第一個救贖預言）」，神對蛇宣告「女人的後裔」與「蛇」將發生什麼事？", options: ["女人的後裔要把蛇趕入深海", "女人的後裔要砍斷蛇的尾巴", "女人的後裔要與蛇立約", "女人的後裔要傷你的頭，你要傷他的腳跟"], answer: 3, exp: "創世記 3:15 預言耶穌基督（女人的後裔）將在十字架上受苦（傷腳跟），卻徹底擊碎撒但權勢（傷蛇的頭）。" },
+          { type: "困難", xp: 25, q: "【守護生命樹】神將亞當趕出伊甸園後，在伊甸園的東邊安設了什麼，把守生命樹的道路？", options: ["基路伯和四面轉動發火焰的劍", "高聳入雲的石牆", "四條洶湧的大河", "十二營的天軍"], answer: 0, exp: "創世記 3:24：「又在伊甸園的東邊安設基路伯和四面轉動發火焰的劍，要把守生命樹的道路。」" },
+          { type: "困難", xp: 25, q: "【救贖恩典】為什麼神不讓犯罪後的亞當繼續留在伊甸園摘取「生命樹」的果子吃？", options: ["因為生命樹已經枯乾了", "免得人在罪與咒詛的敗壞狀態中「永遠活著」，無法經歷神後來預備的救贖與更新", "因為神捨不得果子", "因為生命樹搬到了天上"], answer: 1, exp: "創世記 3:22：若帶著罪身永遠不死，人類將永遠困在罪惡中；直到啟示錄 22 章救贖完成，得勝者才重新享用生命樹。" }
+        ]
+      }
+    };
 
     const firebaseConfig = { databaseURL: "https://bible-challenge-game-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -914,26 +1358,26 @@
         const val = snap.val();
         if (!val) return;
         allCloudUsersCache = Object.values(val).sort((a, b) => (b.total_xp || 0) - (a.total_xp || 0));
-        
+
         if (userId && val[userId]) {
-            userRole = val[userId].role || userRole; 
-            localStorage.setItem('bq_userrole', userRole);
+          userRole = val[userId].role || userRole;
+          localStorage.setItem('bq_userrole', userRole);
         }
 
         renderMyGroupDashboard();
         renderAdminConsole();
         renderPublicProgressBoard();
         if (currentTab === 'badges') renderLeaderboardSection();
-        updateTopBarStats(); 
+        updateTopBarStats();
       });
 
       db.ref('bible_quest/question_bank').on('value', snap => {
         const cloudBank = snap.val();
         if (cloudBank && typeof cloudBank === 'object') {
-           Object.keys(cloudBank).forEach(k => {
-               window.CURATED_CHAPTER_DATA = window.CURATED_CHAPTER_DATA || {};
-               window.CURATED_CHAPTER_DATA[k] = cloudBank[k];
-           });
+          Object.keys(cloudBank).forEach(k => {
+            window.CURATED_CHAPTER_DATA = window.CURATED_CHAPTER_DATA || {};
+            window.CURATED_CHAPTER_DATA[k] = cloudBank[k];
+          });
         }
       });
 
@@ -959,6 +1403,10 @@
       localStorage.setItem('bq_hearts', userHearts);
       localStorage.setItem('bq_gems', userGems);
       localStorage.setItem('bq_streak', userStreak);
+      localStorage.setItem('bq_pkwins', userPKWins);
+      localStorage.setItem('bq_blitz_best', blitzBestScore);
+      localStorage.setItem('bq_max_combo', maxComboEver);
+      localStorage.setItem('bq_mastered_wrong', masteredWrongCount);
       localStorage.setItem('bq_username', userName);
       localStorage.setItem('bq_userrole', userRole);
       localStorage.setItem('bq_completed', JSON.stringify(completedChapters));
@@ -977,6 +1425,7 @@
         streak: userStreak,
         hearts: userHearts,
         gems: userGems,
+        pk_wins: userPKWins,
         current_book: currentBookId,
         completed_chapters: completedChapters,
         cleared_count: Object.keys(completedChapters).length,
@@ -984,7 +1433,7 @@
         notes: bookNotes,
         last_active: new Date().toISOString()
       };
-      
+
       try {
         db.ref('bible_quest/users/' + userId).update(updatePayload);
       } catch (e) {}
@@ -1009,27 +1458,27 @@
     function switchAuthMode(mode) {
       authMode = mode;
       playSound('click');
-      document.getElementById('tab-mode-login').className = mode === 'login' ? "py-2.5 rounded-xl bg-white text-emerald-600 shadow-sm transition" : "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition";
-      document.getElementById('tab-mode-register').className = mode === 'register' ? "py-2.5 rounded-xl bg-white text-emerald-600 shadow-sm transition" : "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition";
+      document.getElementById('tab-mode-login').className = mode === 'login' ? "py-2.5 rounded-xl bg-white text-emerald-600 shadow-sm transition cursor-pointer" : "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition cursor-pointer";
+      document.getElementById('tab-mode-register').className = mode === 'register' ? "py-2.5 rounded-xl bg-white text-emerald-600 shadow-sm transition cursor-pointer" : "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition cursor-pointer";
       document.getElementById('auth-submit-btn').innerText = mode === 'login' ? "🚀 確認登入並載入進度" : "✨ 完成註冊並開始闖關";
-      document.getElementById('auth-subtitle-text').innerText = mode === 'login' ? "輸入帳號密碼登入" : "新玩家請填寫您的專屬帳號、密碼與顯示姓名！";
-      
+      document.getElementById('auth-subtitle-text').innerText = mode === 'login' ? "已註冊玩家請直接輸入帳號密碼登入（免填姓名）" : "新玩家請填寫您的專屬帳號、密碼與顯示姓名！";
+
       if (mode === 'register') {
-          document.getElementById('auth-nickname-wrapper').classList.remove('hidden');
+        document.getElementById('auth-nickname-wrapper').classList.remove('hidden');
       } else {
-          document.getElementById('auth-nickname-wrapper').classList.add('hidden');
+        document.getElementById('auth-nickname-wrapper').classList.add('hidden');
       }
     }
 
     function togglePasswordVisibility() {
       const pwdInput = document.getElementById('auth-password');
       const eyeIcon = document.getElementById('pwd-eye-icon');
-      if (pwdInput.type === 'password') { pwdInput.type = 'text'; eyeIcon.innerText = '🙈'; } 
+      if (pwdInput.type === 'password') { pwdInput.type = 'text'; eyeIcon.innerText = '🙈'; }
       else { pwdInput.type = 'password'; eyeIcon.innerText = '👁️'; }
     }
 
     function handleForgotPassword() {
-        showToast('忘記密碼請聯繫您的導師或小家長，他們可以在「試算表總表」查詢您的密碼！', 'warning');
+      showToast('忘記密碼請聯繫您的領袖或管理員，他們可以在後台或試算表幫您查詢密碼！', 'warning');
     }
 
     async function handleAccountAuth() {
@@ -1044,8 +1493,8 @@
       }
 
       if (rawAcc === 'admin' && pwd === 'admin') {
-          userAccountRaw = 'admin'; userPasswordRaw = 'admin'; userName = '超級管理員'; userId = 'acc_admin';
-          finalizeLogin(); return;
+        userAccountRaw = 'admin'; userPasswordRaw = 'admin'; userName = '超級管理員'; userId = 'acc_admin';
+        finalizeLogin(); return;
       }
 
       const accKey = 'acc_' + rawAcc;
@@ -1056,24 +1505,25 @@
 
         if (existing) {
           if (authMode === 'register') {
-              errEl.innerText = '❌ 此帳號已經被註冊過，請切換至「登入」或換一個帳號！';
-              errEl.classList.remove('hidden'); playSound('wrong'); return;
+            errEl.innerText = '❌ 此帳號已經被註冊過，請切換至「登入」或換一個帳號！';
+            errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
           if (existing.password && String(existing.password) !== pwd) {
-            errEl.innerText = '❌ 密碼不正確！忘記密碼請聯繫負責人。';
+            errEl.innerText = '❌ 密碼不正確！忘記密碼請聯繫領袖。';
             errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
           userId = accKey; userAccountRaw = rawAcc; userPasswordRaw = pwd;
           userName = existing.name || "學員"; userRole = existing.role || "";
           userXP = existing.total_xp || 0; userStreak = existing.streak || 1;
-          userHearts = existing.hearts || 5; userGems = existing.gems || 250;
+          userHearts = existing.hearts || 5; userGems = existing.gems || 50;
+          userPKWins = existing.pk_wins || 0;
           if (existing.completed_chapters) completedChapters = existing.completed_chapters;
           if (existing.wrong_questions) wrongQuestions = existing.wrong_questions;
           if (existing.notes) bookNotes = existing.notes;
         } else {
           if (authMode === 'login') {
-              errEl.innerText = '❌ 找不到此帳號，如果您是新學員，請點選「首次註冊新帳號」！';
-              errEl.classList.remove('hidden'); playSound('wrong'); return;
+            errEl.innerText = '❌ 找不到此帳號，如果您是新學員，請點選「首次註冊新帳號」！';
+            errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
           if (!nick) {
             errEl.innerText = '⚠️ 首次註冊必填「顯示姓名」！';
@@ -1081,7 +1531,7 @@
           }
           userId = accKey; userAccountRaw = rawAcc; userPasswordRaw = pwd; userName = nick; userRole = "";
         }
-        
+
         finalizeLogin();
       } catch (err) {
         errEl.innerText = '⚠️ 網路異常，請重試。';
@@ -1090,69 +1540,71 @@
     }
 
     function finalizeLogin() {
-        localStorage.setItem('bq_logged_account', userId);
-        localStorage.setItem('bq_userid', userId);
-        localStorage.setItem('bq_account_raw', userAccountRaw);
-        localStorage.setItem('bq_password_raw', userPasswordRaw);
-        localStorage.setItem('bq_username', userName);
+      localStorage.setItem('bq_logged_account', userId);
+      localStorage.setItem('bq_userid', userId);
+      localStorage.setItem('bq_account_raw', userAccountRaw);
+      localStorage.setItem('bq_password_raw', userPasswordRaw);
+      localStorage.setItem('bq_username', userName);
 
-        document.getElementById('auth-modal').classList.add('hidden');
-        saveStateAndSync();
-        renderLearningPath();
-        updateTopBarStats();
-        
-        playSound('fanfare');
-        if (userAccountRaw === 'admin') {
-            showToast(`👑 歡迎登入，最高管理員！已解鎖主控台。`, 'success');
-            switchTab('admin');
-        } else {
-            showToast(`🎉 登入成功，${userName}！雲端進度已就緒！`, 'success');
-            switchTab('map');
-        }
+      document.getElementById('auth-modal').classList.add('hidden');
+      saveStateAndSync();
+      renderLearningPath();
+      updateTopBarStats();
+
+      playSound('fanfare');
+      if (userAccountRaw === 'admin') {
+        showToast(`👑 歡迎登入，最高管理員！已解鎖主控台。`, 'success');
+        switchTab('admin');
+      } else {
+        showToast(`🎉 登入成功，${userName}！雲端進度已就緒！`, 'success');
+        switchTab('map');
+      }
     }
 
     function logoutAccount() {
-        playSound('click');
-        localStorage.removeItem('bq_logged_account');
-        localStorage.removeItem('bq_account_raw');
-        userAccountRaw = "";
-        document.getElementById('auth-username').value = '';
-        document.getElementById('auth-password').value = '';
-        document.getElementById('auth-nickname').value = '';
-        document.getElementById('auth-modal').classList.remove('hidden');
-        switchAuthMode('login');
+      playSound('click');
+      leavePkRoom();
+      localStorage.removeItem('bq_logged_account');
+      localStorage.removeItem('bq_account_raw');
+      userAccountRaw = "";
+      document.getElementById('auth-username').value = '';
+      document.getElementById('auth-password').value = '';
+      document.getElementById('auth-nickname').value = '';
+      document.getElementById('auth-modal').classList.remove('hidden');
+      switchAuthMode('login');
     }
 
     function checkPersistentLoginOnLoad() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('view') === 'progress') {
-            document.getElementById('game-app-shell').classList.add('hidden');
-            document.getElementById('public-progress-portal').classList.remove('hidden');
-            return;
-        }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('view') === 'progress') {
+        document.getElementById('game-app-shell').classList.add('hidden');
+        document.getElementById('public-progress-portal').classList.remove('hidden');
+        return;
+      }
 
-        const savedKey = localStorage.getItem('bq_logged_account');
-        if (!savedKey) {
-            document.getElementById('auth-modal').classList.remove('hidden');
-        } else {
-            if (savedKey === 'acc_admin') {
-                userAccountRaw = 'admin'; userName = '超級管理員'; userId = savedKey;
-                finalizeLogin(); return;
-            }
-            db.ref('bible_quest/users/' + savedKey).once('value').then(snap => {
-                if (snap.exists()) {
-                    const val = snap.val();
-                    userId = savedKey; userAccountRaw = val.account || savedKey.replace(/^acc_/, '');
-                    userPasswordRaw = val.password || ""; userName = val.name || userName;
-                    userRole = val.role || ""; userXP = val.total_xp || userXP;
-                    if (val.completed_chapters) completedChapters = val.completed_chapters;
-                    if (val.notes) bookNotes = val.notes;
-                    finalizeLogin();
-                } else {
-                    document.getElementById('auth-modal').classList.remove('hidden');
-                }
-            }).catch(() => {});
+      const savedKey = localStorage.getItem('bq_logged_account');
+      if (!savedKey) {
+        document.getElementById('auth-modal').classList.remove('hidden');
+      } else {
+        if (savedKey === 'acc_admin') {
+          userAccountRaw = 'admin'; userName = '超級管理員'; userId = savedKey;
+          finalizeLogin(); return;
         }
+        db.ref('bible_quest/users/' + savedKey).once('value').then(snap => {
+          if (snap.exists()) {
+            const val = snap.val();
+            userId = savedKey; userAccountRaw = val.account || savedKey.replace(/^acc_/, '');
+            userPasswordRaw = val.password || ""; userName = val.name || userName;
+            userRole = val.role || ""; userXP = val.total_xp || userXP;
+            userPKWins = val.pk_wins || 0;
+            if (val.completed_chapters) completedChapters = val.completed_chapters;
+            if (val.notes) bookNotes = val.notes;
+            finalizeLogin();
+          } else {
+            document.getElementById('auth-modal').classList.remove('hidden');
+          }
+        }).catch(() => {});
+      }
     }
 
     /**************************************************************
@@ -1168,21 +1620,21 @@
 
         const deskBtn = document.getElementById(`nav-btn-${t}`);
         if (deskBtn) {
-            if (t === 'admin' || t === 'flock') {
-                if (t === tabId) deskBtn.style.opacity = "1";
-                else deskBtn.style.opacity = "0.7";
-            } else {
-                deskBtn.className = t === tabId
-                    ? "nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm bg-emerald-50 text-emerald-600 border-2 border-emerald-300 transition cursor-pointer"
-                    : "nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-100 border-2 border-transparent transition cursor-pointer";
-            }
+          if (t === 'admin' || t === 'flock') {
+            if (t === tabId) deskBtn.style.opacity = "1";
+            else deskBtn.style.opacity = "0.7";
+          } else {
+            deskBtn.className = t === tabId
+              ? "nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm bg-emerald-50 text-emerald-600 border-2 border-emerald-300 transition cursor-pointer"
+              : "nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-100 border-2 border-transparent transition cursor-pointer";
+          }
         }
 
         const mobBtn = document.getElementById(`mob-nav-${t}`);
         if (mobBtn) {
-            mobBtn.className = t === tabId
-                ? `flex flex-col items-center py-1 font-black ${t==='admin'?'text-amber-600':t==='flock'?'text-indigo-600':'text-emerald-600'}`
-                : "flex flex-col items-center py-1 text-slate-400 font-bold";
+          mobBtn.className = t === tabId
+            ? `flex flex-col items-center py-1 font-black ${t === 'admin' ? 'text-amber-600' : t === 'flock' ? 'text-indigo-600' : 'text-emerald-600'}`
+            : "flex flex-col items-center py-1 text-slate-400 font-bold";
         }
       });
 
@@ -1191,9 +1643,9 @@
       if (tabId === 'flock') renderMyGroupDashboard();
       if (tabId === 'admin') renderAdminConsole();
       if (tabId === 'badges') {
-          renderBadgesWall();
-          renderLeaderboardSection();
-          renderMyBookNotesList();
+        renderBadgesWall();
+        renderLeaderboardSection();
+        renderMyBookNotesList();
       }
       if (tabId === 'daily') renderDailyQuests();
     }
@@ -1203,14 +1655,25 @@
       document.getElementById('stat-hearts').innerText = userHearts;
       document.getElementById('stat-gems').innerText = userGems;
       document.getElementById('stat-streak').innerText = userStreak;
-      document.getElementById('current-book-title').innerText = `${currentBookId} (${BIBLE_BOOKS.find(b=>b.id===currentBookId)?.eng || ''})`;
-      document.getElementById('header-user-badge').innerText = userName;
+      document.getElementById('current-book-title').innerText = `${currentBookId} (${BIBLE_BOOKS.find(b => b.id === currentBookId)?.eng || ''})`;
+      document.getElementById('header-user-badge').innerText = userName || '尚未登入';
+
+      const winBadge = document.getElementById('pk-win-count-badge');
+      if (winBadge) winBadge.innerText = userPKWins;
 
       const deskWrong = document.getElementById('sidebar-wrong-badge');
       if (deskWrong) deskWrong.innerText = wrongQuestions.length;
 
-      const isMentor = allCloudUsersCache.some(u => (u.role || "").trim().toLowerCase() === userAccountRaw.trim().toLowerCase());
-      
+      const myAcc = (userAccountRaw || "").trim().toLowerCase();
+      const myFlockMembers = allCloudUsersCache.filter(u => {
+        const r = String(u.role || "").trim().toLowerCase();
+        return myAcc && (r === myAcc || r.startsWith(myAcc + ":"));
+      });
+      const isMentor = myFlockMembers.length > 0;
+
+      const flockBadge = document.getElementById('sidebar-flock-badge');
+      if (flockBadge) flockBadge.innerText = myFlockMembers.length;
+
       const flockDeskBtn = document.getElementById('nav-btn-flock');
       const flockMobBtn = document.getElementById('mob-nav-flock');
       if (flockDeskBtn) flockDeskBtn.style.display = isMentor ? 'flex' : 'none';
@@ -1226,883 +1689,1469 @@
      * 6. TAB 1: 闖關地圖與閱讀測驗
      **************************************************************/
     function renderLearningPath() {
-        const book = BIBLE_BOOKS.find(b => b.id === currentBookId) || BIBLE_BOOKS[0];
-        document.getElementById('current-testament-tag').innerText = `${book.testament === 'OT' ? '舊約' : '新約'}・${book.cat}`;
-        
-        let clearedInBook = 0;
-        for (let i = 1; i <= book.chapters; i++) {
-            if (completedChapters[`${book.id}_${i}`]) clearedInBook++;
-        }
-        document.getElementById('current-book-progress-text').innerText = `已完成 ${clearedInBook} / ${book.chapters} 章`;
+      const book = BIBLE_BOOKS.find(b => b.id === currentBookId) || BIBLE_BOOKS[0];
+      document.getElementById('current-testament-tag').innerText = `${book.testament === 'OT' ? '舊約' : '新約'}・${book.cat}`;
 
-        let rangeBar = document.getElementById('chapter-range-bar');
-        let rangeBtnsContainer = document.getElementById('chapter-range-buttons');
-        if (book.chapters > 15) {
-            rangeBar.classList.remove('hidden');
-            let html = '';
-            let chunks = Math.ceil(book.chapters / 15);
-            for (let c = 0; c < chunks; c++) {
-                let start = c * 15 + 1;
-                let end = Math.min((c + 1) * 15, book.chapters);
-                let active = activeBookRangeOffset === c ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600';
-                html += `<button onclick="setActiveBookRange(${c})" class="px-3 py-1 rounded-xl text-xs font-black ${active}">${start}-${end}章</button>`;
-            }
-            rangeBtnsContainer.innerHTML = html;
-        } else {
-            rangeBar.classList.add('hidden');
-        }
+      let clearedInBook = 0;
+      for (let i = 1; i <= book.chapters; i++) {
+        if (completedChapters[`${book.id}_${i}`]) clearedInBook++;
+      }
+      document.getElementById('current-book-progress-text').innerText = `已完成 ${clearedInBook} / ${book.chapters} 章`;
 
-        let container = document.getElementById('chapter-path-container');
+      let rangeBar = document.getElementById('chapter-range-bar');
+      let rangeBtnsContainer = document.getElementById('chapter-range-buttons');
+      if (book.chapters > 15) {
+        rangeBar.classList.remove('hidden');
         let html = '';
-        let startCh = book.chapters > 15 ? activeBookRangeOffset * 15 + 1 : 1;
-        let endCh = book.chapters > 15 ? Math.min(activeBookRangeOffset * 15 + 15, book.chapters) : book.chapters;
-        const offsets = [0, 48, 80, 48, 0, -48, -80, -48];
-
-        for (let ch = startCh; ch <= endCh; ch++) {
-            let key = `${book.id}_${ch}`;
-            let isCompleted = completedChapters[key];
-            let isCurrent = !isCompleted && (ch === startCh || completedChapters[`${book.id}_${ch - 1}`]);
-            let isLocked = !isCompleted && !isCurrent;
-
-            let bgCol = isCompleted ? book.color : isCurrent ? book.color : '#e2e8f0';
-            let borderCol = isCompleted ? book.border : isCurrent ? book.border : '#cbd5e1';
-            let pulseClass = isCurrent ? 'node-current' : isCompleted ? 'node-completed' : 'node-locked';
-            let iconSymbol = isCompleted ? '⭐' : isLocked ? '🔒' : book.icon;
-            
-            let offsetIdx = (ch - startCh) % offsets.length;
-            let translateStyle = `transform: translateX(${offsets[offsetIdx]}px);`;
-
-            html += `<div class="flex flex-col items-center my-2" style="${translateStyle}">
-                <button onclick="handleNodeClick('${book.id}', ${ch}, ${isLocked})" class="quest-node ${pulseClass} shadow-lg font-black text-xl cursor-pointer" style="background-color: ${bgCol}; border-color: ${borderCol}; color: ${isLocked?'#94a3b8':'white'};">
-                    <span class="text-xs font-bold leading-none opacity-80">${ch}</span>
-                    <span>${iconSymbol}</span>
-                </button>
-                <span class="text-[11px] font-black text-slate-600 mt-1.5 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">第 ${ch} 章</span>
-            </div>`;
+        let chunks = Math.ceil(book.chapters / 15);
+        for (let c = 0; c < chunks; c++) {
+          let start = c * 15 + 1;
+          let end = Math.min((c + 1) * 15, book.chapters);
+          let active = activeBookRangeOffset === c ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600';
+          html += `<button onclick="setActiveBookRange(${c})" class="px-3 py-1 rounded-xl text-xs font-black cursor-pointer ${active}">${start}-${end}章</button>`;
         }
-        container.innerHTML = html;
+        rangeBtnsContainer.innerHTML = html;
+      } else {
+        rangeBar.classList.add('hidden');
+      }
+
+      let container = document.getElementById('chapter-path-container');
+      let html = '';
+      let startCh = book.chapters > 15 ? activeBookRangeOffset * 15 + 1 : 1;
+      let endCh = book.chapters > 15 ? Math.min(activeBookRangeOffset * 15 + 15, book.chapters) : book.chapters;
+      const offsets = [0, 48, 80, 48, 0, -48, -80, -48];
+
+      for (let ch = startCh; ch <= endCh; ch++) {
+        let key = `${book.id}_${ch}`;
+        let isCompleted = completedChapters[key];
+        let isCurrent = !isCompleted && (ch === 1 || completedChapters[`${book.id}_${ch - 1}`]);
+        let isLocked = !isCompleted && !isCurrent;
+
+        let bgCol = isCompleted ? book.color : isCurrent ? book.color : '#e2e8f0';
+        let borderCol = isCompleted ? book.border : isCurrent ? book.border : '#cbd5e1';
+        let pulseClass = isCurrent ? 'node-current' : isCompleted ? 'node-completed' : 'node-locked';
+        let iconSymbol = isCompleted ? '⭐' : isLocked ? '🔒' : book.icon;
+
+        let offsetIdx = (ch - startCh) % offsets.length;
+        let translateStyle = `transform: translateX(${offsets[offsetIdx]}px);`;
+
+        html += `<div class="flex flex-col items-center my-2" style="${translateStyle}">
+          <button onclick="handleNodeClick('${book.id}', ${ch}, ${isLocked})" class="quest-node ${pulseClass} shadow-lg font-black text-xl cursor-pointer" style="background-color: ${bgCol}; border-color: ${borderCol}; color: ${isLocked ? '#94a3b8' : 'white'};">
+            <span class="text-xs font-bold leading-none opacity-80">${ch}</span>
+            <span>${iconSymbol}</span>
+          </button>
+          <span class="text-[11px] font-black text-slate-600 mt-1.5 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">第 ${ch} 章</span>
+        </div>`;
+      }
+      container.innerHTML = html;
     }
 
     function setActiveBookRange(offset) {
-        activeBookRangeOffset = offset;
-        playSound('click');
-        renderLearningPath();
+      activeBookRangeOffset = offset;
+      playSound('click');
+      renderLearningPath();
     }
 
     function handleNodeClick(bookId, chapterNum, isLocked) {
-        if (isLocked) {
-            playSound('wrong');
-            showToast('請先完成前一章節！', 'warning');
-            return;
-        }
-        openLessonOverlay(bookId, chapterNum, false);
+      if (isLocked) {
+        playSound('wrong');
+        showToast('請先完成前一章節！', 'warning');
+        return;
+      }
+      openLessonOverlay(bookId, chapterNum, false);
     }
 
+    // =========================================================================
+    // 全本 66 卷、1,189 章和合本經文多來源自動載入引擎（確保每一章每一節完整呈現）
+    // =========================================================================
     async function fetchChapterVerbatimVerses(bookId, chapterNum) {
-        const key = `${bookId}_${chapterNum}`;
-        if (BUILTIN_FULL_VERSES[key]) return BUILTIN_FULL_VERSES[key];
-        const book = BIBLE_BOOKS.find(b => b.id === bookId);
-        if (!book) return [`【${bookId} 第 ${chapterNum} 章】經文載入中...`];
+      const key = `${bookId}_${chapterNum}`;
+      if (BUILTIN_FULL_VERSES[key] && BUILTIN_FULL_VERSES[key].length > 3) {
+        return BUILTIN_FULL_VERSES[key];
+      }
+      // 若雲端題庫中已附帶完整經文則優先使用
+      if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key] && Array.isArray(window.CURATED_CHAPTER_DATA[key].verses) && window.CURATED_CHAPTER_DATA[key].verses.length > 3) {
+        return window.CURATED_CHAPTER_DATA[key].verses;
+      }
 
+      const book = BIBLE_BOOKS.find(b => b.id === bookId);
+      if (!book) return [`1. 【${bookId} 第 ${chapterNum} 章】經文載入中...`];
+
+      const saveToLocalVerseCache = (versesArr) => {
+        BUILTIN_FULL_VERSES[key] = versesArr;
         try {
-            const res = await fetch(`https://bolls.life/get-chapter/CUV/${book.num}/${chapterNum}/`);
-            if (res.ok) {
-                const data = await res.json();
-                if (Array.isArray(data) && data.length > 0) {
-                    const verses = data.map(v => `${v.verse}. ${v.text.replace(/<[^>]*>/g, '')}`);
-                    BUILTIN_FULL_VERSES[key] = verses;
-                    return verses;
-                }
-            }
+          localStorage.setItem('bq_verses_cache', JSON.stringify(BUILTIN_FULL_VERSES));
         } catch (e) {}
+      };
 
-        return [
-            `【${bookId} 第 ${chapterNum} 章】起初神創造萬物，祂的話語安定在天直到永遠。`,
-            `【經文亮光】這是一段滿帶恩典與真理的聖經章節。信徒當存敬畏的心讀經。`,
-            `【金句默想】「你的話是我腳前的燈，是我路上的光。」（詩篇 119:105）`
-        ];
+      // 來源 1：getBible v2 CUV API (全本和合本 CDN JSON，速度快且支援跨網域 CORS)
+      try {
+        const res1 = await fetch(`https://api.getbible.net/v2/cuv/${book.num}/${chapterNum}.json`);
+        if (res1.ok) {
+          const data1 = await res1.json();
+          if (data1 && Array.isArray(data1.verses) && data1.verses.length > 0) {
+            const verses = data1.verses.map(v => `${v.verse}. ${String(v.text || '').replace(/<[^>]*>/g, '').trim()}`);
+            saveToLocalVerseCache(verses);
+            return verses;
+          }
+        }
+      } catch (e) {}
+
+      // 來源 2：Bolls.life CUV API (和合本備援來源)
+      try {
+        const res2 = await fetch(`https://bolls.life/get-chapter/CUV/${book.num}/${chapterNum}/`);
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (Array.isArray(data2) && data2.length > 0) {
+            const verses = data2.map(v => `${v.verse}. ${String(v.text || '').replace(/<[^>]*>/g, '').trim()}`);
+            saveToLocalVerseCache(verses);
+            return verses;
+          }
+        }
+      } catch (e) {}
+
+      // 來源 3：Bible-API CUV 備援來源
+      try {
+        const res3 = await fetch(`https://bible-api.com/${encodeURIComponent(book.eng)}+${chapterNum}?translation=cuv`);
+        if (res3.ok) {
+          const data3 = await res3.json();
+          if (data3 && Array.isArray(data3.verses) && data3.verses.length > 0) {
+            const verses = data3.verses.map(v => `${v.verse}. ${String(v.text || '').replace(/\s+/g, '').trim()}`);
+            saveToLocalVerseCache(verses);
+            return verses;
+          }
+        }
+      } catch (e) {}
+
+      return BUILTIN_FULL_VERSES[key] || [
+        `1. 【${bookId} 第 ${chapterNum} 章】${book.desc}`,
+        `2. 起初神創造萬物，祂的話語安定在天直到永遠。`,
+        `3. 「你的話是我腳前的燈，是我路上的光。」（詩篇 119:105）`
+      ];
     }
 
     let activeLesson = {
-        bookId: '創世記', chapterNum: 1, step: 'read', verses: [],
-        isScrolledBottom: false, secondsElapsed: 0, timerInterval: null, minSecondsRequired: 10,
-        confirmedRead: false, qIdx: 0, questions: [], score: 0, combo: 0, isReviewDrill: false, clearedWrongIds: []
+      bookId: '創世記', chapterNum: 1, step: 'read', verses: [],
+      isScrolledBottom: false, secondsElapsed: 0, timerInterval: null, minSecondsRequired: 10,
+      confirmedRead: false, qIdx: 0, questions: [], score: 0, combo: 0, isReviewDrill: false, clearedWrongIds: []
     };
 
     async function openLessonOverlay(bookId, chapterNum, isReviewDrill = false) {
-        if (!isReviewDrill && userHearts <= 0) {
-            playSound('wrong');
-            showToast('❤️ 愛心不足！請先至「📕 錯題複習特訓營」消滅錯題恢復愛心！', 'error');
-            switchTab('review'); return;
-        }
-        activeLesson.bookId = bookId; activeLesson.chapterNum = chapterNum;
-        activeLesson.isReviewDrill = isReviewDrill; activeLesson.step = isReviewDrill ? 'quiz' : 'read';
-        activeLesson.isScrolledBottom = false; activeLesson.secondsElapsed = 0;
-        activeLesson.confirmedRead = false; activeLesson.qIdx = 0; activeLesson.score = 0; activeLesson.combo = 0;
-        activeLesson.clearedWrongIds = [];
+      if (!isReviewDrill && userHearts <= 0) {
+        playSound('wrong');
+        showToast('❤️ 愛心不足！請先至「📕 錯題複習特訓營」消滅錯題恢復愛心！', 'error');
+        switchTab('review'); return;
+      }
+      activeLesson.bookId = bookId; activeLesson.chapterNum = chapterNum;
+      activeLesson.isReviewDrill = isReviewDrill; activeLesson.step = isReviewDrill ? 'quiz' : 'read';
+      activeLesson.isScrolledBottom = false; activeLesson.secondsElapsed = 0;
+      activeLesson.confirmedRead = false; activeLesson.qIdx = 0; activeLesson.score = 0; activeLesson.combo = 0;
+      activeLesson.clearedWrongIds = [];
 
-        if (isReviewDrill) {
-            activeLesson.questions = wrongQuestions.slice(0, 5).map(wq => ({ ...wq, xp: 15 }));
-        } else {
-            let verses = await fetchChapterVerbatimVerses(bookId, chapterNum);
-            if (!verses || verses.length === 0) {
-                verses = [
-                    `【${bookId} 第 ${chapterNum} 章】起初神創造天地，萬物藉著祂而造。`,
-                    `【和合本聖經精讀】這是一篇滿帶亮光的經文，請細細默想神在其中的帶領。`,
-                    `【金句】「你的話是我腳前的燈，是我路上的光。」（詩篇 119:105）`
-                ];
+      const chkBox = document.getElementById('read-confirm-checkbox');
+      if (chkBox) { chkBox.checked = false; chkBox.disabled = true; }
+
+      // 先打開畫面並顯示經文載入中提示，避免等待網路時白畫面
+      document.getElementById('lesson-overlay').classList.remove('hidden');
+      const scrollBox = document.getElementById('scripture-scroll-box');
+      if (scrollBox && !isReviewDrill) {
+        document.getElementById('read-chapter-heading').innerText = `${bookId} 第 ${chapterNum} 章 (和合本全章經文載入中...)`;
+        scrollBox.innerHTML = `<div class="py-16 text-center text-slate-400 font-bold animate-pulse">📖 正在載入《${bookId}》第 ${chapterNum} 章全章一字不漏經文...</div>`;
+      }
+
+      if (isReviewDrill) {
+        activeLesson.questions = wrongQuestions.slice(0, 5).map(wq => ({ ...wq, xp: 15 }));
+      } else {
+        let verses = await fetchChapterVerbatimVerses(bookId, chapterNum);
+        activeLesson.verses = verses;
+        const data = getChapterQuizData(bookId, chapterNum, verses);
+        activeLesson.questions = data.questions;
+      }
+
+      renderLessonStage();
+      playSound('click');
+
+      if (activeLesson.step === 'read') {
+        setTimeout(() => {
+          const box = document.getElementById('scripture-scroll-box');
+          if (box) {
+            box.scrollTop = 0;
+            if (box.scrollHeight <= box.clientHeight + 45) {
+              activeLesson.isScrolledBottom = true;
             }
-            activeLesson.verses = verses;
-            const data = getChapterQuizData(bookId, chapterNum);
-            activeLesson.questions = data.questions;
-        }
+          }
+          updateReadingLockUI();
+        }, 120);
 
-        document.getElementById('lesson-overlay').classList.remove('hidden');
-        renderLessonStage();
-        playSound('click');
-
-        if (activeLesson.step === 'read') {
-            if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
-            activeLesson.timerInterval = setInterval(() => {
-                activeLesson.secondsElapsed++;
-                updateReadingLockUI();
-            }, 1000);
-        }
+        if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
+        activeLesson.timerInterval = setInterval(() => {
+          activeLesson.secondsElapsed++;
+          updateReadingLockUI();
+        }, 1000);
+      }
     }
 
     function closeLessonOverlay() {
-        if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
-        document.getElementById('lesson-overlay').classList.add('hidden');
-        document.getElementById('stage-reading').classList.remove('hidden');
-        document.getElementById('stage-quiz').classList.add('hidden');
-        if (currentTab === 'map') renderLearningPath();
-        saveStateAndSync();
+      if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
+      document.getElementById('lesson-overlay').classList.add('hidden');
+      document.getElementById('stage-reading').classList.remove('hidden');
+      document.getElementById('stage-quiz').classList.add('hidden');
+      if (currentTab === 'map') renderLearningPath();
+      saveStateAndSync();
     }
 
     function handleReaderScroll() {
-        const box = document.getElementById('scripture-scroll-box');
-        if (!box || activeLesson.step !== 'read') return;
-        const threshold = 40;
-        if (box.scrollTop + box.clientHeight >= box.scrollHeight - threshold) {
-            if (!activeLesson.isScrolledBottom) {
-                activeLesson.isScrolledBottom = true;
-                playSound('click');
-                updateReadingLockUI();
-            }
+      const box = document.getElementById('scripture-scroll-box');
+      if (!box || activeLesson.step !== 'read') return;
+      const threshold = 40;
+      if (box.scrollTop + box.clientHeight >= box.scrollHeight - threshold) {
+        if (!activeLesson.isScrolledBottom) {
+          activeLesson.isScrolledBottom = true;
+          playSound('click');
+          updateReadingLockUI();
         }
+      }
     }
 
     function updateReadingLockUI() {
-        const timeBadge = document.getElementById('read-timer-badge');
-        const scrollBadge = document.getElementById('read-scroll-badge');
-        const chkBox = document.getElementById('read-confirm-checkbox');
-        const chkLabel = document.getElementById('read-confirm-label');
-        const startBtn = document.getElementById('start-quiz-btn');
+      const timeBadge = document.getElementById('read-timer-badge');
+      const scrollBadge = document.getElementById('read-scroll-badge');
+      const chkBox = document.getElementById('read-confirm-checkbox');
+      const chkLabel = document.getElementById('read-confirm-label');
+      const startBtn = document.getElementById('start-quiz-btn');
 
-        if (!startBtn) return;
-        const timeRemaining = Math.max(0, activeLesson.minSecondsRequired - activeLesson.secondsElapsed);
-        if (timeBadge) timeBadge.innerText = timeRemaining > 0 ? `⏱️ 專注閱讀：還需 ${timeRemaining} 秒` : `⏱️ 專注閱讀：已完成 ✓`;
-        if (scrollBadge) scrollBadge.innerText = activeLesson.isScrolledBottom ? `📜 滑動進度：100% (已到底)` : `📜 滑動進度：請滑到底部 ⬇️`;
+      if (!startBtn) return;
+      const timeRemaining = Math.max(0, activeLesson.minSecondsRequired - activeLesson.secondsElapsed);
+      if (timeBadge) timeBadge.innerText = timeRemaining > 0 ? `⏱️ 專注閱讀：還需 ${timeRemaining} 秒` : `⏱️ 專注閱讀：已完成 ✓`;
+      if (scrollBadge) scrollBadge.innerText = activeLesson.isScrolledBottom ? `📜 滑動進度：100% (已到底)` : `📜 滑動進度：請滑到底部 ⬇️`;
 
-        const canUnlock = activeLesson.isScrolledBottom && activeLesson.secondsElapsed >= activeLesson.minSecondsRequired;
-        if (canUnlock && chkBox) {
-            chkBox.disabled = false;
-            if (chkLabel) chkLabel.className = "flex items-center gap-2.5 text-xs md:text-sm font-bold text-slate-800 cursor-pointer";
-        }
+      const canUnlock = activeLesson.isScrolledBottom && activeLesson.secondsElapsed >= activeLesson.minSecondsRequired;
+      if (canUnlock && chkBox) {
+        chkBox.disabled = false;
+        if (chkLabel) chkLabel.className = "flex items-center gap-2.5 text-xs md:text-sm font-bold text-slate-800 cursor-pointer";
+      }
 
-        if (chkBox && chkBox.checked && canUnlock) {
-            startBtn.disabled = false;
-            startBtn.className = "w-full quest-btn-green font-black py-3.5 rounded-2xl text-sm md:text-base shadow-lg cursor-pointer";
-            startBtn.innerText = "🚀 開始挑戰 10 題雙軌測驗！";
-        } else {
-            startBtn.disabled = true;
-            startBtn.className = "w-full quest-btn-gray font-black py-3.5 rounded-2xl text-sm md:text-base cursor-not-allowed opacity-60";
-            if (!activeLesson.isScrolledBottom) startBtn.innerText = "🔒 請向下滾動經文至底部";
-            else if (timeRemaining > 0) startBtn.innerText = `🔒 請靜心讀經還需 ${timeRemaining} 秒`;
-            else startBtn.innerText = "🔒 請勾選上方確認框以解鎖測驗";
-        }
+      if (chkBox && chkBox.checked && canUnlock) {
+        startBtn.disabled = false;
+        startBtn.className = "w-full quest-btn-green font-black py-3.5 rounded-2xl text-sm md:text-base shadow-lg cursor-pointer";
+        startBtn.innerText = "🚀 開始挑戰測驗！";
+      } else {
+        startBtn.disabled = true;
+        startBtn.className = "w-full quest-btn-gray font-black py-3.5 rounded-2xl text-sm md:text-base cursor-not-allowed opacity-60";
+        if (!activeLesson.isScrolledBottom) startBtn.innerText = "🔒 請向下滾動經文至底部";
+        else if (timeRemaining > 0) startBtn.innerText = `🔒 請靜心讀經還需 ${timeRemaining} 秒`;
+        else startBtn.innerText = "🔒 請勾選上方確認框以解鎖測驗";
+      }
     }
 
     function onReadCheckboxChanged() { updateReadingLockUI(); playSound('click'); }
 
     function beginChapterQuiz() {
-        if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
-        activeLesson.step = 'quiz';
-        document.getElementById('stage-reading').classList.add('hidden');
-        document.getElementById('stage-quiz').classList.remove('hidden');
-        document.getElementById('stage-quiz').classList.add('flex');
-        renderLessonStage();
-        playSound('click');
+      if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
+      activeLesson.step = 'quiz';
+      document.getElementById('stage-reading').classList.add('hidden');
+      document.getElementById('stage-quiz').classList.remove('hidden');
+      document.getElementById('stage-quiz').classList.add('flex');
+      renderLessonStage();
+      playSound('click');
     }
 
-    function getChapterQuizData(bookId, chapterNum) {
-        const key = `${bookId}_${chapterNum}`;
-        if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key]) {
-            return window.CURATED_CHAPTER_DATA[key];
-        }
-        const book = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
-        return {
-            title: `${book.id} 第 ${chapterNum} 章：${book.cat}精華`,
-            questions: [
-                { type: "簡單", xp: 10, q: `《${book.id}》第 ${chapterNum} 章屬於聖經中的哪一個分類？`, options: [`${book.testament === 'OT' ? '舊約' : '新約'}・${book.cat}`, "歷史傳記", "法典", "詩歌"], answer: 0, exp: `屬於${book.cat}。` },
-                { type: "簡單", xp: 10, q: `請問《${book.id}》全卷總共有幾章？`, options: [`共 ${book.chapters} 章`, `共 50 章`, `共 100 章`, `共 12 章`], answer: 0, exp: `全卷共有 ${book.chapters} 章。` },
-                { type: "簡單", xp: 10, q: `下列何者最符合《${book.id}》第 ${chapterNum} 章的教訓？`, options: [book.desc, "隨從世俗", "不必讀經", "財富第一"], answer: 0, exp: `重點：${book.desc}` },
-                { type: "困難", xp: 25, q: `【深層應用】研讀《${book.id}》時應抱持何種態度？`, options: ["存敬畏之心領受，並行道", "只作學術研究", "隨意刪改", "同流合污"], answer: 0, exp: "信徒讀經為了順服神旨意。" },
-                { type: "困難", xp: 25, q: `【靈命實踐】如何將本章教訓應用在生活中？`, options: ["在愛心信心中作榜樣", "隱藏基督徒身分", "勾心鬥角", "求自己利益"], answer: 0, exp: "馬太福音 5:16 要將榮耀歸給天上的父。" }
-            ]
-        };
+    // 支援雲端/內建題庫 ＋ 依據當章真實經文自動生成 10 題雙軌測驗（5簡單 + 5困難）
+    function getChapterQuizData(bookId, chapterNum, loadedVerses = []) {
+      const key = `${bookId}_${chapterNum}`;
+      if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key] && Array.isArray(window.CURATED_CHAPTER_DATA[key].questions) && window.CURATED_CHAPTER_DATA[key].questions.length > 0) {
+        return window.CURATED_CHAPTER_DATA[key];
+      }
+      const book = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
+      const vList = (loadedVerses && loadedVerses.length > 0) ? loadedVerses : (BUILTIN_FULL_VERSES[key] || []);
+      const cleanV = (idx) => (vList[idx] || `${book.desc}`).replace(/^\d+\.\s*/, '');
+      const totalV = vList.length || 20;
+
+      return {
+        title: `${book.id} 第 ${chapterNum} 章：${book.cat}精讀`,
+        questions: [
+          { type: "簡單", xp: 10, q: `《${book.id}》第 ${chapterNum} 章第 1 節記載的經文內容為何？`, options: [cleanV(0).slice(0, 45), "大衛在耶路撒冷作王四十年", "保羅與西拉在腓立比坐監", "摩西在西乃山領受法版"], answer: 0, exp: `本章第 1 節：「${cleanV(0)}」` },
+          { type: "簡單", xp: 10, q: `請問你剛剛完整讀完的《${book.id}》第 ${chapterNum} 章，全章共有幾節經文？`, options: [`共 ${totalV} 節`, `共 ${totalV + 12} 節`, `共 ${Math.max(1, totalV - 9)} 節`, `共 150 節`], answer: 0, exp: `《${book.id}》第 ${chapterNum} 章全章共有 ${totalV} 節經文。` },
+          { type: "簡單", xp: 10, q: `《${book.id}》第 ${chapterNum} 章屬於聖經中的哪一個書卷分類？`, options: [`${book.testament === 'OT' ? '舊約' : '新約'}・${book.cat}`, "次經歷史選集", "中世紀教會法典", "希臘哲學語錄"], answer: 0, exp: `《${book.id}》屬於${book.testament === 'OT' ? '舊約' : '新約'}的「${book.cat}」。` },
+          { type: "簡單", xp: 10, q: `下列哪一節經文確實出現在《${book.id}》第 ${chapterNum} 章中？`, options: [cleanV(Math.floor(totalV / 2)).slice(0, 45), "你們往普天下去，傳福音給萬民聽", "凡勞苦擔重擔的人可以到我這裡來", "我靠著那加給我力量的，凡事都能做"], answer: 0, exp: `出自本章經文：「${cleanV(Math.floor(totalV / 2))}」` },
+          { type: "簡單", xp: 10, q: `《${book.id}》第 ${chapterNum} 章最後一節（第 ${totalV} 節）的經文結尾是什麼？`, options: [cleanV(totalV - 1).slice(0, 45), "此後猶太人分散在列國中", "眾人就都驚奇歸榮耀與神", "願主耶穌的恩惠常與眾人同在"], answer: 0, exp: `本章最後一節：「${cleanV(totalV - 1)}」` },
+          { type: "困難", xp: 25, q: `【經文細節考察】在《${book.id}》第 ${chapterNum} 章前半段（第 ${Math.min(2, totalV)} 節）中，經文如何接續敘述？`, options: [cleanV(Math.min(1, totalV - 1)).slice(0, 48), "百姓在曠野發怨言求肉吃", "先知在河邊看見四活物的異象", "門徒在加利利海邊補網"], answer: 0, exp: `本章第 ${Math.min(2, totalV)} 節：「${cleanV(Math.min(1, totalV - 1))}」` },
+          { type: "困難", xp: 25, q: `【卷書核心主題】綜合《${book.id}》全卷（共 ${book.chapters} 章）與本章內容，其核心信息為何？`, options: [book.desc, "教導人倚靠世俗的財富與軍事力量", "主張人不需要悔改與順服神", "認為歷史發展純屬巧合"], answer: 0, exp: `《${book.id}》核心重點：${book.desc}` },
+          { type: "困難", xp: 25, q: `【經文上下文辨析】下列哪一句話出自《${book.id}》第 ${chapterNum} 章後半段（第 ${Math.max(1, totalV - 1)} 節）？`, options: [cleanV(Math.max(0, totalV - 2)).slice(0, 48), "所羅門建造聖殿共用了七年時間", "尼希米帶領百姓五十二天修造城牆", "彼得在五旬節站起來高聲講道"], answer: 0, exp: `出自本章第 ${Math.max(1, totalV - 1)} 節：「${cleanV(Math.max(0, totalV - 2))}」` },
+          { type: "困難", xp: 25, q: `【神學反思】研讀完《${book.id}》第 ${chapterNum} 章全章 ${totalV} 節經文後，信徒應抱持何種態度回應神的話語？`, options: ["存敬畏與謙卑之心領受，將神的話語藏在心裡並在生活中行道", "只當作歷史文學研究而不必實踐", "按個人喜好隨意挑選經文", "讀過即忘不必默想"], answer: 0, exp: "雅各書 1:22：「只是你們要行道，不要單單聽道，自己欺哄自己。」" },
+          { type: "困難", xp: 25, q: `【靈命實踐】如何將《${book.id}》第 ${chapterNum} 章的真理落實於今日的小家與日常生活中？`, options: ["專心信靠神的應許，在言語行為、愛心與信心中作美好的見證", "在面對挑戰時只靠個人的血氣爭競", "隱藏信仰隨從世俗潮流", "忽略肢體間的彼此相愛"], answer: 0, exp: "提摩太前書 4:12：「總要在言語、行為、愛心、信心、清潔上，都作信徒的榜樣。」" }
+        ]
+      };
     }
 
     function renderLessonStage() {
-        const container = document.getElementById('lesson-stage-container');
-        const bottomBar = document.getElementById('lesson-bottom-inner');
-        const progressBar = document.getElementById('lesson-progress-bar'); 
-        document.getElementById('lesson-hearts-display').innerText = userHearts;
+      const container = document.getElementById('lesson-stage-container');
+      const bottomBar = document.getElementById('lesson-bottom-inner');
+      const progressBar = document.getElementById('lesson-progress-bar');
+      document.getElementById('lesson-hearts-display').innerText = userHearts;
 
-        if (activeLesson.step === 'read') {
-            document.getElementById('stage-reading').classList.remove('hidden');
-            document.getElementById('stage-quiz').classList.add('hidden');
-            progressBar.style.width = '15%';
-            const book = BIBLE_BOOKS.find(b => b.id === activeLesson.bookId) || BIBLE_BOOKS[0];
-            document.getElementById('read-chapter-heading').innerText = `${book.id} 第 ${activeLesson.chapterNum} 章 (和合本全章)`;
-            document.getElementById('scripture-scroll-box').innerHTML = activeLesson.verses.map((v, idx) => `<p class="text-sm sm:text-base font-bold"><span class="text-emerald-600 font-mono mr-2">${idx + 1}.</span>${v.replace(/^\d+\.\s*/, '')}</p>`).join('');
-            updateReadingLockUI();
-        } else if (activeLesson.step === 'quiz') {
-            document.getElementById('stage-reading').classList.add('hidden');
-            document.getElementById('stage-quiz').classList.remove('hidden');
-            const qList = activeLesson.questions;
-            const qIdx = activeLesson.qIdx;
-            progressBar.style.width = `${Math.round(((qIdx + 1) / qList.length) * 85) + 15}%`;
+      if (activeLesson.step === 'read') {
+        document.getElementById('stage-reading').classList.remove('hidden');
+        document.getElementById('stage-quiz').classList.add('hidden');
+        progressBar.style.width = '15%';
+        const book = BIBLE_BOOKS.find(b => b.id === activeLesson.bookId) || BIBLE_BOOKS[0];
+        document.getElementById('read-chapter-heading').innerText = `${book.id} 第 ${activeLesson.chapterNum} 章 (和合本全章)`;
+        document.getElementById('scripture-scroll-box').innerHTML = activeLesson.verses.map((v, idx) => `<p class="text-sm sm:text-base font-bold"><span class="text-emerald-600 font-mono mr-2">${idx + 1}.</span>${v.replace(/^\d+\.\s*/, '')}</p>`).join('');
+        updateReadingLockUI();
+      } else if (activeLesson.step === 'quiz') {
+        document.getElementById('stage-reading').classList.add('hidden');
+        document.getElementById('stage-quiz').classList.remove('hidden');
+        const qList = activeLesson.questions;
+        const qIdx = activeLesson.qIdx;
+        progressBar.style.width = `${Math.round(((qIdx + 1) / qList.length) * 85) + 15}%`;
 
-            if (qIdx >= qList.length) {
-                finishLessonSuccess();
-                return;
-            }
-
-            const q = qList[qIdx];
-            const badgeCol = q.type === '困難' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800';
-            const modeTag = activeLesson.isReviewDrill ? `🔥 錯題消滅特訓` : `${q.type || '簡單'}題 (+${q.xp || 10} XP)`;
-
-            container.innerHTML = `
-                <div class="space-y-5">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs ${badgeCol} px-3 py-1 rounded-full font-black">${modeTag}</span>
-                        <span class="text-xs font-bold text-slate-400">第 ${qIdx + 1} / ${qList.length} 題 (連擊 x${activeLesson.combo})</span>
-                    </div>
-                    <h3 class="text-lg sm:text-xl font-black text-slate-800 leading-snug">${q.q}</h3>
-                    <div class="space-y-3">
-                        ${q.options.map((opt, i) => `
-                            <button onclick="selectQuizOption(${i})" class="option-btn quest-btn-gray w-full text-left p-4 rounded-2xl font-bold text-sm flex items-center justify-between cursor-pointer">
-                                <span>${opt}</span>
-                                <span class="w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center text-xs text-slate-400">${i + 1}</span>
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            bottomBar.innerHTML = `<div class="text-xs font-bold text-slate-500 text-center">請點擊正確選項作答</div>`;
+        if (qIdx >= qList.length) {
+          finishLessonSuccess();
+          return;
         }
+
+        const q = qList[qIdx];
+        const badgeCol = q.type === '困難' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800';
+        const modeTag = activeLesson.isReviewDrill ? `🔥 錯題特訓` : `${q.type || '簡單'}題 (+${q.xp || 10} XP)`;
+
+        container.innerHTML = `
+          <div class="space-y-5">
+            <div class="flex justify-between items-center">
+              <span class="text-xs ${badgeCol} px-3 py-1 rounded-full font-black">${modeTag}</span>
+              <span class="text-xs font-bold text-slate-400">第 ${qIdx + 1} / ${qList.length} 題 (連擊 x${activeLesson.combo})</span>
+            </div>
+            <h3 class="text-lg sm:text-xl font-black text-slate-800 leading-snug">${q.q}</h3>
+            <div class="space-y-3">
+              ${q.options.map((opt, i) => `
+                <button onclick="selectQuizOption(${i})" class="option-btn quest-btn-gray w-full text-left p-4 rounded-2xl font-bold text-sm flex items-center justify-between cursor-pointer">
+                  <span>${opt}</span>
+                  <span class="w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center text-xs text-slate-400">${i + 1}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        bottomBar.innerHTML = `<div class="text-xs font-bold text-slate-500 text-center">請點擊正確選項作答</div>`;
+      }
     }
 
     function selectQuizOption(selectedIdx) {
-        const q = activeLesson.questions[activeLesson.qIdx];
-        const btns = document.querySelectorAll('.option-btn');
-        btns.forEach(b => b.disabled = true);
-        const bottomBar = document.getElementById('lesson-bottom-inner');
+      const q = activeLesson.questions[activeLesson.qIdx];
+      const btns = document.querySelectorAll('.option-btn');
+      btns.forEach(b => b.disabled = true);
+      const bottomBar = document.getElementById('lesson-bottom-inner');
 
-        if (selectedIdx === q.answer) {
-            btns[selectedIdx].className = "option-btn w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-black text-sm text-emerald-900 flex items-center justify-between";
-            activeLesson.combo++;
-            activeLesson.score += (q.xp || 10);
-            if (activeLesson.isReviewDrill && q.id) activeLesson.clearedWrongIds.push(q.id);
-            playSound('correct');
-            spawnFloatingFX(`+${q.xp || 10} XP!`, 'text-emerald-500');
+      if (selectedIdx === q.answer) {
+        btns[selectedIdx].className = "option-btn w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-black text-sm text-emerald-900 flex items-center justify-between";
+        activeLesson.combo++;
+        if (activeLesson.combo > maxComboEver) maxComboEver = activeLesson.combo;
+        activeLesson.score += (q.xp || 10);
+        if (activeLesson.isReviewDrill && q.id) activeLesson.clearedWrongIds.push(q.id);
+        playSound('correct');
+        spawnFloatingFX(`+${q.xp || 10} XP!`, 'text-emerald-500');
 
-            bottomBar.innerHTML = `
-                <div class="space-y-1">
-                    <div class="text-emerald-600 font-black text-base">✓ 答對了！太棒了！</div>
-                    <p class="text-xs font-bold text-slate-600">${q.exp || ''}</p>
-                </div>
-                <button onclick="activeLesson.qIdx++; renderLessonStage();" class="quest-btn-green w-full px-8 py-3.5 rounded-2xl font-black text-sm mt-3 cursor-pointer">繼續 &rarr;</button>
-            `;
-        } else {
-            btns[selectedIdx].className = "option-btn w-full text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-50 font-black text-sm text-rose-900 flex items-center justify-between animate-shake";
-            btns[q.answer].className = "option-btn w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-black text-sm text-emerald-900 flex items-center justify-between";
-            activeLesson.combo = 0;
-            if (!activeLesson.isReviewDrill) userHearts = Math.max(0, userHearts - 1);
-            recordWrongQuestion(activeLesson.bookId, activeLesson.chapterNum, q);
-            playSound('wrong');
+        bottomBar.innerHTML = `
+          <div class="space-y-1">
+            <div class="text-emerald-600 font-black text-base">✓ 答對了！太棒了！</div>
+            <p class="text-xs font-bold text-slate-600">${q.exp || ''}</p>
+          </div>
+          <button onclick="activeLesson.qIdx++; renderLessonStage();" class="quest-btn-green w-full px-8 py-3.5 rounded-2xl font-black text-sm mt-3 cursor-pointer">繼續 &rarr;</button>
+        `;
+      } else {
+        btns[selectedIdx].className = "option-btn w-full text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-50 font-black text-sm text-rose-900 flex items-center justify-between animate-shake";
+        btns[q.answer].className = "option-btn w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-black text-sm text-emerald-900 flex items-center justify-between";
+        activeLesson.combo = 0;
+        if (!activeLesson.isReviewDrill) userHearts = Math.max(0, userHearts - 1);
+        recordWrongQuestion(activeLesson.bookId, activeLesson.chapterNum, q);
+        playSound('wrong');
 
-            bottomBar.innerHTML = `
-                <div class="space-y-1">
-                    <div class="text-rose-600 font-black text-base">✕ 答錯囉（已收錄至📕錯題本）</div>
-                    <p class="text-xs font-bold text-slate-600">${q.exp || ''}</p>
-                </div>
-                <button onclick="activeLesson.qIdx++; renderLessonStage();" class="quest-btn-rose w-full px-8 py-3.5 rounded-2xl font-black text-sm mt-3 cursor-pointer">繼續 &rarr;</button>
-            `;
-        }
+        bottomBar.innerHTML = `
+          <div class="space-y-1">
+            <div class="text-rose-600 font-black text-base">✕ 答錯囉（已收錄至📕錯題本）</div>
+            <p class="text-xs font-bold text-slate-600">${q.exp || ''}</p>
+          </div>
+          <button onclick="activeLesson.qIdx++; renderLessonStage();" class="quest-btn-rose w-full px-8 py-3.5 rounded-2xl font-black text-sm mt-3 cursor-pointer">繼續 &rarr;</button>
+        `;
+      }
     }
 
     function finishLessonSuccess() {
-        const oldHundreds = Math.floor(userXP / 100);
-        if (activeLesson.isReviewDrill) {
-            wrongQuestions = wrongQuestions.filter(w => !activeLesson.clearedWrongIds.includes(w.id));
-            userXP += activeLesson.score;
-            userHearts = Math.min(5, userHearts + 1);
+      const oldHundreds = Math.floor(userXP / 100);
+      const nowTimeStr = new Date().toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
+      if (activeLesson.isReviewDrill) {
+        wrongQuestions = wrongQuestions.filter(w => !activeLesson.clearedWrongIds.includes(w.id));
+        userXP += activeLesson.score;
+        userHearts = Math.min(5, userHearts + 1);
+      } else {
+        completedChapters[`${activeLesson.bookId}_${activeLesson.chapterNum}`] = nowTimeStr;
+        userXP += activeLesson.score + 50;
+        userGems += 30;
+        if (Math.floor(userXP / 100) > oldHundreds) {
+          broadcastMilestone(`通關【${activeLesson.bookId} 第 ${activeLesson.chapterNum} 章】並突破 ${Math.floor(userXP / 100) * 100} XP 里程碑！`);
         } else {
-            completedChapters[`${activeLesson.bookId}_${activeLesson.chapterNum}`] = true;
-            userXP += activeLesson.score + 50;
-            userGems += 30;
-            if (Math.floor(userXP / 100) > oldHundreds) {
-                broadcastMilestone(`通關【${activeLesson.bookId} 第 ${activeLesson.chapterNum} 章】並突破 ${Math.floor(userXP / 100) * 100} XP 里程碑！`);
-            } else {
-                broadcastMilestone(`成功通關【${activeLesson.bookId} 第 ${activeLesson.chapterNum} 章】！`);
-            }
+          broadcastMilestone(`成功通關【${activeLesson.bookId} 第 ${activeLesson.chapterNum} 章】！`);
         }
-        saveStateAndSync();
-        try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } }); } catch (e) {}
+      }
+      saveStateAndSync();
+      try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } }); } catch (e) {}
 
-        document.getElementById('lesson-stage-container').innerHTML = `
-            <div class="text-center space-y-6 py-8">
-                <div class="w-24 h-24 rounded-full bg-amber-400 text-white text-5xl flex items-center justify-center mx-auto shadow-xl animate-bounce">🏆</div>
-                <h2 class="text-3xl font-black text-slate-800">恭喜通關 ${activeLesson.bookId} 第 ${activeLesson.chapterNum} 章！</h2>
-                <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto text-xs">
-                    <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl">
-                        <div class="text-amber-700 font-bold">獲得經驗值</div>
-                        <div class="text-2xl font-black text-amber-600 mt-1">+${activeLesson.score + (activeLesson.isReviewDrill ? 0 : 50)} XP</div>
-                    </div>
-                    <div class="bg-emerald-50 border-2 border-emerald-200 p-4 rounded-2xl">
-                        <div class="text-emerald-700 font-bold">寶石獎勵</div>
-                        <div class="text-2xl font-black text-emerald-600 mt-1">+30 💎</div>
-                    </div>
-                </div>
+      document.getElementById('lesson-stage-container').innerHTML = `
+        <div class="text-center space-y-6 py-8">
+          <div class="w-24 h-24 rounded-full bg-amber-400 text-white text-5xl flex items-center justify-center mx-auto shadow-xl animate-bounce">🏆</div>
+          <h2 class="text-3xl font-black text-slate-800">恭喜通關 ${activeLesson.bookId} 第 ${activeLesson.chapterNum} 章！</h2>
+          <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto text-xs">
+            <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl">
+              <div class="text-amber-700 font-bold">獲得經驗值</div>
+              <div class="text-2xl font-black text-amber-600 mt-1">+${activeLesson.score + (activeLesson.isReviewDrill ? 0 : 50)} XP</div>
             </div>
-        `;
-        document.getElementById('lesson-bottom-inner').innerHTML = `
-            <div class="text-xs font-bold text-slate-500 text-center mb-2">進度已自動同步雲端</div>
-            <button onclick="closeLessonOverlay()" class="w-full quest-btn-green px-10 py-4 rounded-2xl font-black text-lg cursor-pointer">
-                領取獎勵並返回
-            </button>
-        `;
-        document.getElementById('lesson-progress-bar').style.width = '100%';
+            <div class="bg-emerald-50 border-2 border-emerald-200 p-4 rounded-2xl">
+              <div class="text-emerald-700 font-bold">獎勵</div>
+              <div class="text-2xl font-black text-emerald-600 mt-1">+30 💎</div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('lesson-bottom-inner').innerHTML = `
+        <div class="text-xs font-bold text-slate-500 text-center mb-2">進度已自動同步至 Firebase 雲端總表</div>
+        <button onclick="closeLessonOverlay()" class="w-full quest-btn-green px-10 py-4 rounded-2xl font-black text-lg cursor-pointer">
+          領取獎勵並返回
+        </button>
+      `;
+      document.getElementById('lesson-progress-bar').style.width = '100%';
     }
 
     /**************************************************************
-     * 7. OTHER TABS (Review, Badges, Book Notes, Daily, PK, Admin, Flock)
+     * 7. TAB 3: 支援 2～4 人同時連線 PK 對戰引擎 (Firebase Realtime)
      **************************************************************/
-    // Review Vault
-    function recordWrongQuestion(bookId, chapter, qObj) {
-        if (!wrongQuestions.some(w => w.q === qObj.q)) {
-            wrongQuestions.unshift({
-                id: "wq_" + Date.now(), bookId: bookId || currentBookId, chapter: chapter || 1,
-                type: qObj.type || "簡單", q: qObj.q, options: qObj.options, answer: qObj.answer, exp: qObj.exp
+    const DEFAULT_PK_POOL = [
+      { type: "簡單", q: "「起初，神創造天地」是聖經哪一卷書的第一節？", options: ["創世記", "出埃及記", "詩篇", "約翰福音"], answer: 0 },
+      { type: "簡單", q: "神在創造完萬物後，將第幾日賜福定為聖日？", options: ["第七日", "第六日", "第一日", "第三日"], answer: 0 },
+      { type: "簡單", q: "挪亞方舟在洪水消退後停在哪一座山上？", options: ["亞拉臘山", "西乃山", "迦密山", "橄欖山"], answer: 0 },
+      { type: "簡單", q: "帶領以色列人出埃及、過紅海的領袖是誰？", options: ["摩西", "約書亞", "大衛", "以利亞"], answer: 0 },
+      { type: "簡單", q: "「耶和華是我的牧者，我必不致缺乏」出自哪一篇？", options: ["詩篇 23 篇", "詩篇 1 篇", "詩篇 91 篇", "詩篇 119 篇"], answer: 0 },
+      { type: "困難", q: "耶穌基督降生在猶太地的哪一座城鎮？", options: ["伯利恆", "拿撒勒", "迦百農", "耶利哥"], answer: 0 },
+      { type: "困難", q: "施洗約翰看見耶穌來到他那裡，宣告說：「看哪，________，除去世人罪孽的！」", options: ["神的羔羊", "猶大的獅子", "大衛的子孫", "和平的君"], answer: 0 },
+      { type: "困難", q: "「太初有道，道與神同在，道就是神」記載於哪一卷福音書第 1 章？", options: ["約翰福音", "馬太福音", "馬可福音", "路加福音"], answer: 0 },
+      { type: "簡單", q: "大衛年輕時倚靠萬軍之耶和華的名，用機弦甩石擊敗了誰？", options: ["歌利亞", "掃羅", "押沙龍", "尼布甲尼撒"], answer: 0 },
+      { type: "困難", q: "五旬節聖靈降臨、門徒得著能力作見證記載於哪一卷書？", options: ["使徒行傳", "羅馬書", "希伯來書", "啟示錄"], answer: 0 },
+      { type: "困難", q: "全本聖經的最後一卷書（第 66 卷）是哪一卷？", options: ["啟示錄", "猶大書", "瑪拉基書", "約翰三書"], answer: 0 }
+    ];
+
+    let pkState = {
+      roomCode: "",
+      roomRef: null,
+      isHost: false,
+      localRoundRendered: -1,
+      myAnsweredRound: -1,
+      timerId: null,
+      timeLeft: 12,
+      rewardClaimed: false
+    };
+
+    function buildMatchQuestions7() {
+      let pool = [...DEFAULT_PK_POOL];
+      if (window.CURATED_CHAPTER_DATA) {
+        Object.values(window.CURATED_CHAPTER_DATA).forEach(ch => {
+          if (Array.isArray(ch.questions)) {
+            ch.questions.forEach(q => {
+              if (q && q.q && Array.isArray(q.options) && q.options.length === 4) {
+                pool.push({ type: q.type || "簡單", q: q.q, options: q.options, answer: q.answer || 0 });
+              }
             });
-            saveStateAndSync();
+          }
+        });
+      }
+      // 隨機洗牌抽 7 題，並預先打亂選項順序讓房內 4 人看到的選項完全一致
+      pool.sort(() => Math.random() - 0.5);
+      return pool.slice(0, 7).map(item => {
+        const tagged = item.options.map((text, idx) => ({ text, isCorrect: idx === item.answer }));
+        tagged.sort(() => Math.random() - 0.5);
+        return {
+          type: item.type || "簡單",
+          q: item.q,
+          options: tagged.map(t => t.text),
+          answer: tagged.findIndex(t => t.isCorrect)
+        };
+      });
+    }
+
+    function showPkSubPanel(panelName) {
+      ['lobby', 'waiting', 'arena', 'result'].forEach(p => {
+        const el = document.getElementById(`pk-${p}-panel`);
+        if (el) el.classList.toggle('hidden', p !== panelName);
+      });
+    }
+
+    async function createPkRoom() {
+      playSound('click');
+      const code = Math.floor(1000 + Math.random() * 9000).toString();
+      const myKey = userId || ('acc_' + (userAccountRaw || 'player'));
+      const myDisplayName = userName || userAccountRaw || '玩家1';
+
+      pkState.roomCode = code;
+      pkState.isHost = true;
+      pkState.localRoundRendered = -1;
+      pkState.myAnsweredRound = -1;
+      pkState.rewardClaimed = false;
+
+      if (pkState.roomRef) pkState.roomRef.off();
+      pkState.roomRef = db.ref('bible_quest/pk_rooms/' + code);
+
+      const initialRoomData = {
+        roomCode: code,
+        hostId: myKey,
+        hostName: myDisplayName,
+        status: 'waiting',
+        currentRound: 0,
+        createdAt: Date.now(),
+        players: {
+          [myKey]: {
+            id: myKey,
+            name: myDisplayName,
+            score: 0,
+            correctCount: 0,
+            answeredRound: -1,
+            lastStatus: '👑 房主已就緒',
+            isHost: true,
+            joinedAt: Date.now()
+          }
         }
+      };
+
+      try {
+        await pkState.roomRef.set(initialRoomData);
+        document.getElementById('pk-wait-room-code').innerText = code;
+        showPkSubPanel('waiting');
+        attachPkRoomListener(code);
+        showToast(`✅ 已建立 4 人對戰房【${code}】！請把房號分享給同伴！`, 'success');
+      } catch (e) {
+        showToast('建立房間失敗，請檢查網路連線', 'error');
+      }
+    }
+
+    async function joinPkRoom() {
+      const code = document.getElementById('pk-room-input').value.trim();
+      if (!/^\d{4}$/.test(code)) {
+        playSound('wrong');
+        showToast('⚠️ 請輸入正確的 4 位數字房號！', 'warning');
+        return;
+      }
+
+      playSound('click');
+      const myKey = userId || ('acc_' + (userAccountRaw || 'player_' + Math.floor(Math.random() * 999)));
+      const myDisplayName = userName || userAccountRaw || '參賽玩家';
+
+      try {
+        const roomRef = db.ref('bible_quest/pk_rooms/' + code);
+        const snap = await roomRef.once('value');
+        if (!snap.exists()) {
+          playSound('wrong');
+          showToast(`❌ 找不到房號【${code}】，請向房主確認房號！`, 'error');
+          return;
+        }
+
+        const room = snap.val();
+        const playersObj = room.players || {};
+        const playerIds = Object.keys(playersObj);
+
+        if (room.status !== 'waiting' && !playersObj[myKey]) {
+          playSound('wrong');
+          showToast('⚠️ 該房間對戰已經開始，無法中途加入！', 'warning');
+          return;
+        }
+
+        if (playerIds.length >= 4 && !playersObj[myKey]) {
+          playSound('wrong');
+          showToast('⚠️ 該房間已滿 4 人上限！請建立新房間。', 'warning');
+          return;
+        }
+
+        pkState.roomCode = code;
+        pkState.isHost = (room.hostId === myKey);
+        pkState.localRoundRendered = -1;
+        pkState.myAnsweredRound = -1;
+        pkState.rewardClaimed = false;
+
+        if (pkState.roomRef) pkState.roomRef.off();
+        pkState.roomRef = roomRef;
+
+        await roomRef.child('players/' + myKey).set({
+          id: myKey,
+          name: myDisplayName,
+          score: 0,
+          correctCount: 0,
+          answeredRound: -1,
+          lastStatus: '⚔️ 已進入房間',
+          isHost: pkState.isHost,
+          joinedAt: Date.now()
+        });
+
+        document.getElementById('pk-wait-room-code').innerText = code;
+        showPkSubPanel('waiting');
+        attachPkRoomListener(code);
+        showToast(`🎉 成功加入房間【${code}】！等待房主開始對戰！`, 'success');
+      } catch (e) {
+        showToast('加入房間發生錯誤，請重試', 'error');
+      }
+    }
+
+    function attachPkRoomListener(code) {
+      if (!pkState.roomRef) return;
+      pkState.roomRef.on('value', snap => {
+        const room = snap.val();
+        if (!room) return;
+
+        const playersList = Object.values(room.players || {}).sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
+
+        // 1. 等候室狀態更新
+        if (room.status === 'waiting') {
+          showPkSubPanel('waiting');
+          renderWaitingRoomSlots(playersList);
+          const startBtn = document.getElementById('pk-host-start-btn');
+          const hintText = document.getElementById('pk-wait-hint-text');
+          if (pkState.isHost) {
+            startBtn.classList.remove('hidden');
+            startBtn.innerText = `🚀 房主開始對戰（目前 ${playersList.length} / 4 人）`;
+            hintText.innerText = playersList.length >= 2
+              ? `已有 ${playersList.length} 位玩家就緒，房主可隨時點擊「開始對戰」！`
+              : `目前 1 人，可等待好友加入（最多 4 人），或直接點擊開始練習！`;
+          } else {
+            startBtn.classList.add('hidden');
+            hintText.innerText = `已連線就緒（目前 ${playersList.length} / 4 人），正在等待房主【${room.hostName}】按下開始對戰...`;
+          }
+        }
+        // 2. 對戰進行中狀態
+        else if (room.status === 'playing') {
+          showPkSubPanel('arena');
+          document.getElementById('pk-arena-room-badge').innerText = `房號 #${code} (${playersList.length}人對戰)`;
+          renderPkLiveScoreboard(playersList, room.currentRound || 0);
+
+          const rIdx = room.currentRound || 0;
+          const qDeck = room.questions || [];
+          if (rIdx >= qDeck.length) {
+            if (pkState.isHost) {
+              pkState.roomRef.update({ status: 'finished' });
+            }
+            return;
+          }
+
+          // 若進入新的一題，重新渲染題目並啟動 12 秒倒數
+          if (pkState.localRoundRendered !== rIdx) {
+            pkState.localRoundRendered = rIdx;
+            renderPkQuestionRound(qDeck[rIdx], rIdx, qDeck.length);
+          }
+
+          // 檢查是否房內所有玩家都已作答完本題，若是則由房主自動推進下一題
+          const allAnswered = playersList.length > 0 && playersList.every(p => p.answeredRound === rIdx);
+          if (allAnswered && pkState.isHost) {
+            if (!pkState.advancingTimeout) {
+              pkState.advancingTimeout = setTimeout(() => {
+                pkState.advancingTimeout = null;
+                if (rIdx + 1 >= qDeck.length) {
+                  pkState.roomRef.update({ status: 'finished' });
+                } else {
+                  pkState.roomRef.update({ currentRound: rIdx + 1, roundStartTime: Date.now() });
+                }
+              }, 1200);
+            }
+          }
+        }
+        // 3. 對戰結束結算畫面
+        else if (room.status === 'finished') {
+          if (pkState.timerId) clearInterval(pkState.timerId);
+          showPkSubPanel('result');
+          renderPkFinalRankings(playersList);
+        }
+      });
+    }
+
+    function renderWaitingRoomSlots(playersList) {
+      const container = document.getElementById('pk-waiting-slots');
+      if (!container) return;
+      let html = '';
+      for (let i = 0; i < 4; i++) {
+        const p = playersList[i];
+        if (p) {
+          html += `
+            <div class="p-4 rounded-2xl bg-white border-2 border-emerald-400 shadow-xs flex flex-col items-center space-y-1.5">
+              <div class="w-12 h-12 rounded-2xl ${p.isHost ? 'bg-amber-400 text-slate-950' : 'bg-emerald-500 text-white'} font-black text-xl flex items-center justify-center">
+                ${p.isHost ? '👑' : p.name.charAt(0)}
+              </div>
+              <div class="font-black text-slate-800 text-sm truncate w-full text-center">${p.name}</div>
+              <span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full">
+                ${p.isHost ? '房主已就緒 ✓' : `玩家 ${i + 1} 已就緒 ✓`}
+              </span>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="p-4 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center space-y-1.5 opacity-70">
+              <div class="w-12 h-12 rounded-2xl bg-slate-200 text-slate-400 font-black text-xl flex items-center justify-center">⏳</div>
+              <div class="font-bold text-slate-400 text-xs">座位 ${i + 1} 空位</div>
+              <span class="text-[10px] font-bold text-slate-400">等待輸入房號...</span>
+            </div>
+          `;
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    async function hostStartPkMatch() {
+      if (!pkState.isHost || !pkState.roomRef) return;
+      playSound('fanfare');
+      const questions7 = buildMatchQuestions7();
+      await pkState.roomRef.update({
+        questions: questions7,
+        currentRound: 0,
+        roundStartTime: Date.now(),
+        status: 'playing'
+      });
+    }
+
+    function renderPkLiveScoreboard(playersList, currentRound) {
+      const box = document.getElementById('pk-players-scoreboard');
+      if (!box) return;
+      const sorted = [...playersList].sort((a, b) => (b.score || 0) - (a.score || 0));
+      const maxScore = Math.max(100, sorted[0]?.score || 100);
+      const myKey = userId || ('acc_' + (userAccountRaw || 'player'));
+
+      box.innerHTML = sorted.map((p, idx) => {
+        const isMe = p.id === myKey;
+        const pct = Math.min(100, Math.round(((p.score || 0) / maxScore) * 100));
+        const hasDoneRound = p.answeredRound === currentRound;
+        const rankIcon = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '🏅';
+        return `
+          <div class="p-3.5 rounded-2xl border-2 ${isMe ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200 bg-white'} space-y-1.5 shadow-2xs">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-black text-slate-800 truncate">${rankIcon} ${p.name} ${isMe ? '(你)' : ''}</span>
+              <span class="font-black text-amber-600">${p.score || 0}分</span>
+            </div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${pct}%"></div>
+            </div>
+            <div class="text-[10px] font-bold ${hasDoneRound ? 'text-emerald-600' : 'text-slate-400'}">
+              ${hasDoneRound ? (p.lastStatus || '✓ 本題已作答') : '🤔 思考搶答中...'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPkQuestionRound(qObj, roundIdx, totalRounds) {
+      if (pkState.timerId) clearInterval(pkState.timerId);
+      pkState.timeLeft = 12;
+
+      document.getElementById('pk-round-badge').innerText = `第 ${roundIdx + 1} / ${totalRounds} 題`;
+      document.getElementById('pk-timer-text').innerText = `${pkState.timeLeft}s`;
+      document.getElementById('pk-q-diff-tag').innerText = `${qObj.type || '簡單'}題 (基礎 100 分)`;
+      document.getElementById('pk-q-speed-bonus').innerText = `⚡ 搶答速度加成 +${pkState.timeLeft * 5} 分`;
+      document.getElementById('pk-question-text').innerText = qObj.q;
+      document.getElementById('pk-round-status-msg').innerText = '請點擊正確答案搶答！';
+
+      document.getElementById('pk-options-list').innerHTML = qObj.options.map((opt, i) => `
+        <button onclick="submitPkAnswer(${i}, ${qObj.answer}, ${roundIdx})" class="pk-choice-btn quest-btn-gray w-full text-left p-4 rounded-2xl font-black text-sm flex items-center justify-between cursor-pointer hover:bg-indigo-50 hover:text-indigo-700">
+          <span>${opt}</span>
+          <span class="w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center text-xs">${i + 1}</span>
+        </button>
+      `).join('');
+
+      pkState.timerId = setInterval(() => {
+        pkState.timeLeft = Math.max(0, pkState.timeLeft - 1);
+        document.getElementById('pk-timer-text').innerText = `${pkState.timeLeft}s`;
+        document.getElementById('pk-q-speed-bonus').innerText = `⚡ 搶答速度加成 +${pkState.timeLeft * 5} 分`;
+
+        if (pkState.timeLeft <= 0) {
+          clearInterval(pkState.timerId);
+          // 時間到若尚未作答，自動標記超時並由房主推進下一題
+          if (pkState.myAnsweredRound !== roundIdx) {
+            submitPkAnswer(-1, qObj.answer, roundIdx);
+          }
+          if (pkState.isHost && pkState.roomRef) {
+            setTimeout(() => {
+              if (roundIdx + 1 >= totalRounds) {
+                pkState.roomRef.update({ status: 'finished' });
+              } else {
+                pkState.roomRef.update({ currentRound: roundIdx + 1, roundStartTime: Date.now() });
+              }
+            }, 1000);
+          }
+        }
+      }, 1000);
+    }
+
+    async function submitPkAnswer(selectedIdx, correctIdx, roundIdx) {
+      if (pkState.myAnsweredRound === roundIdx) return;
+      pkState.myAnsweredRound = roundIdx;
+
+      const btns = document.querySelectorAll('.pk-choice-btn');
+      btns.forEach(b => b.disabled = true);
+
+      const myKey = userId || ('acc_' + (userAccountRaw || 'player'));
+      let earnedPts = 0;
+      let statusLabel = '';
+
+      if (selectedIdx === correctIdx) {
+        earnedPts = 100 + (pkState.timeLeft * 5);
+        statusLabel = `⚡ 答對 +${earnedPts}分`;
+        if (btns[selectedIdx]) {
+          btns[selectedIdx].className = "pk-choice-btn w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-black text-sm text-emerald-900 flex items-center justify-between";
+        }
+        playSound('correct');
+        spawnFloatingFX(`+${earnedPts} 分！`, 'text-emerald-500');
+        document.getElementById('pk-round-status-msg').innerText = `✅ 答對了！獲得 +${earnedPts} 分，等待其他玩家作答...`;
+      } else {
+        statusLabel = selectedIdx === -1 ? `⌛ 超時 +0分` : `💥 答錯 +0分`;
+        if (selectedIdx >= 0 && btns[selectedIdx]) {
+          btns[selectedIdx].className = "pk-choice-btn w-full text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-50 font-black text-sm text-rose-900 flex items-center justify-between animate-shake";
+        }
+        if (btns[correctIdx]) {
+          btns[correctIdx].className = "pk-choice-btn w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-black text-sm text-emerald-900 flex items-center justify-between";
+        }
+        playSound('wrong');
+        document.getElementById('pk-round-status-msg').innerText = `❌ 答錯囉！等待其他玩家完成本題...`;
+      }
+
+      if (pkState.roomRef) {
+        const pRef = pkState.roomRef.child('players/' + myKey);
+        const snap = await pRef.once('value');
+        const cur = snap.val() || {};
+        await pRef.update({
+          score: (cur.score || 0) + earnedPts,
+          correctCount: (cur.correctCount || 0) + (selectedIdx === correctIdx ? 1 : 0),
+          answeredRound: roundIdx,
+          lastStatus: statusLabel
+        });
+      }
+    }
+
+    function renderPkFinalRankings(playersList) {
+      const sorted = [...playersList].sort((a, b) => (b.score || 0) - (a.score || 0));
+      const myKey = userId || ('acc_' + (userAccountRaw || 'player'));
+      const medals = ['🥇 冠軍 (第1名)', '🥈 亞軍 (第2名)', '🥉 季軍 (第3名)', '🏅 殿軍 (第4名)'];
+
+      if (!pkState.rewardClaimed) {
+        pkState.rewardClaimed = true;
+        const myRankIdx = sorted.findIndex(p => p.id === myKey);
+        const xpBonus = myRankIdx === 0 ? 100 : myRankIdx === 1 ? 70 : 50;
+        userXP += xpBonus;
+        userGems += 20;
+        if (myRankIdx === 0) {
+          userPKWins++;
+          broadcastMilestone(`在「多人聖經 PK 擂台」勇奪第一名冠軍 🏆！`);
+        }
+        saveStateAndSync();
+        playSound('fanfare');
+        try { confetti({ particleCount: 110, spread: 80, origin: { y: 0.6 } }); } catch (e) {}
+      }
+
+      document.getElementById('pk-result-rankings').innerHTML = sorted.map((p, idx) => {
+        const isMe = p.id === myKey;
+        return `
+          <div class="p-4 rounded-2xl border-2 ${idx === 0 ? 'border-amber-400 bg-amber-50' : isMe ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 bg-white'} flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-black px-2.5 py-1 rounded-lg ${idx === 0 ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'}">${medals[idx] || `第${idx + 1}名`}</span>
+              <div>
+                <div class="font-black text-slate-800 text-sm">${p.name} ${isMe ? '(你)' : ''}</div>
+                <div class="text-[11px] font-bold text-slate-500">答對 ${p.correctCount || 0} / 7 題</div>
+              </div>
+            </div>
+            <div class="text-xl font-black text-amber-600">${p.score || 0} 分</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function copyPkRoomCode() {
+      const code = pkState.roomCode;
+      if (!code) return;
+      const temp = document.createElement('textarea');
+      temp.value = code;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      playSound('click');
+      showToast(`📋 已複製房號【${code}】！快傳給好友加入吧！`, 'success');
+    }
+
+    function leavePkRoom() {
+      if (pkState.timerId) clearInterval(pkState.timerId);
+      if (pkState.roomRef) {
+        pkState.roomRef.off();
+        pkState.roomRef = null;
+      }
+      pkState.roomCode = "";
+      showPkSubPanel('lobby');
+    }
+
+    /**************************************************************
+     * 8. OTHER TABS (閃電戰、錯題本、徽章、書卷筆記、領袖小家、主控台)
+     **************************************************************/
+    // 60秒閃電戰
+    let blitzState = { timerId: null, timeLeft: 60, score: 0, combo: 1, currentQ: null };
+
+    function startBlitzGame() {
+      playSound('click');
+      if (blitzState.timerId) clearInterval(blitzState.timerId);
+      blitzState.timeLeft = 60;
+      blitzState.score = 0;
+      blitzState.combo = 1;
+
+      document.getElementById('blitz-play-area').classList.remove('hidden');
+      document.getElementById('blitz-timer-text').innerText = 60;
+      document.getElementById('blitz-score-text').innerText = 0;
+      document.getElementById('blitz-combo-badge').innerText = 'Combo x1';
+      document.getElementById('blitz-timer-bar').style.width = '100%';
+
+      loadNextBlitzQuestion();
+      blitzState.timerId = setInterval(() => {
+        blitzState.timeLeft--;
+        document.getElementById('blitz-timer-text').innerText = blitzState.timeLeft;
+        document.getElementById('blitz-timer-bar').style.width = `${Math.max(0, (blitzState.timeLeft / 60) * 100)}%`;
+        if (blitzState.timeLeft <= 0) {
+          clearInterval(blitzState.timerId);
+          document.getElementById('blitz-play-area').classList.add('hidden');
+          const earnedXP = Math.max(15, Math.round(blitzState.score / 3));
+          userXP += earnedXP;
+          if (blitzState.score > blitzBestScore) blitzBestScore = blitzState.score;
+          saveStateAndSync();
+          playSound('fanfare');
+          showToast(`⚡ 60秒閃電戰結束！總分 ${blitzState.score} 分，獲得 +${earnedXP} XP！`, 'success');
+        }
+      }, 1000);
+    }
+
+    function loadNextBlitzQuestion() {
+      const q = DEFAULT_PK_POOL[Math.floor(Math.random() * DEFAULT_PK_POOL.length)];
+      const tagged = q.options.map((t, i) => ({ t, ok: i === q.answer })).sort(() => Math.random() - 0.5);
+      blitzState.currentQ = { q: q.q, tagged, raw: q };
+      document.getElementById('blitz-question-text').innerText = q.q;
+      document.getElementById('blitz-options-grid').innerHTML = tagged.map((item, idx) => `
+        <button onclick="answerBlitzQuestion(${idx})" class="quest-btn-gray p-3.5 rounded-xl font-black text-xs sm:text-sm text-left hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer">
+          ${item.t}
+        </button>
+      `).join('');
+    }
+
+    function answerBlitzQuestion(idx) {
+      const chosen = blitzState.currentQ?.tagged[idx];
+      if (!chosen) return;
+      if (chosen.ok) {
+        blitzState.score += 20 * blitzState.combo;
+        blitzState.combo = Math.min(3, blitzState.combo + 1);
+        playSound('correct');
+      } else {
+        blitzState.combo = 1;
+        recordWrongQuestion("閃電戰", 1, blitzState.currentQ.raw);
+        playSound('wrong');
+      }
+      document.getElementById('blitz-score-text').innerText = blitzState.score;
+      document.getElementById('blitz-combo-badge').innerText = `Combo x${blitzState.combo}`;
+      loadNextBlitzQuestion();
+    }
+
+    // 錯題本
+    function recordWrongQuestion(bookId, chapter, qObj) {
+      if (!wrongQuestions.some(w => w.q === qObj.q)) {
+        wrongQuestions.unshift({
+          id: "wq_" + Date.now(), bookId: bookId || currentBookId, chapter: chapter || 1,
+          type: qObj.type || "簡單", q: qObj.q, options: qObj.options, answer: qObj.answer, exp: qObj.exp
+        });
+        saveStateAndSync();
+      }
     }
 
     function renderWrongQuestionsVault() {
-        const container = document.getElementById('wrong-questions-container');
-        if (wrongQuestions.length === 0) {
-            container.innerHTML = `<div class="bg-slate-50 p-8 rounded-3xl border-2 border-slate-200 text-center">錯題本目前空空如也！</div>`;
-            return;
-        }
-        container.innerHTML = wrongQuestions.map((item, idx) => `
-            <div class="bg-white p-4 rounded-2xl border-2 border-rose-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-                <div>
-                    <span class="text-[10px] bg-rose-100 text-rose-700 font-black px-2 py-0.5 rounded-full">${item.bookId} 第 ${item.chapter} 章</span>
-                    <h4 class="font-black text-slate-800 text-sm mt-1">${item.q}</h4>
-                    <p class="text-xs font-bold text-emerald-600 mt-0.5">正確答案：${item.options[item.answer]}</p>
-                </div>
-                <button onclick="masterSingleWrongQuestion('${item.id}')" class="quest-btn-green px-3 py-2 rounded-xl text-xs font-black shrink-0 cursor-pointer">
-                    已掌握 ✓
-                </button>
-            </div>
-        `).join('');
+      const container = document.getElementById('wrong-questions-container');
+      if (wrongQuestions.length === 0) {
+        container.innerHTML = `<div class="bg-slate-50 p-8 rounded-3xl border-2 border-slate-200 text-center font-bold text-slate-400">錯題本目前空空如也！</div>`;
+        return;
+      }
+      container.innerHTML = wrongQuestions.map(item => `
+        <div class="bg-white p-4 rounded-2xl border-2 border-rose-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div>
+            <span class="text-[10px] bg-rose-100 text-rose-700 font-black px-2 py-0.5 rounded-full">${item.bookId} 第 ${item.chapter} 章</span>
+            <h4 class="font-black text-slate-800 text-sm mt-1">${item.q}</h4>
+            <p class="text-xs font-bold text-emerald-600 mt-0.5">正確答案：${item.options[item.answer]}</p>
+          </div>
+          <button onclick="masterSingleWrongQuestion('${item.id}')" class="quest-btn-green px-3 py-2 rounded-xl text-xs font-black shrink-0 cursor-pointer">
+            已掌握 ✓
+          </button>
+        </div>
+      `).join('');
     }
 
     function masterSingleWrongQuestion(id) {
-        wrongQuestions = wrongQuestions.filter(w => w.id !== id);
-        masteredWrongCount++; userXP += 15; userHearts = Math.min(5, userHearts + 1);
-        playSound('correct'); saveStateAndSync(); renderWrongQuestionsVault();
-        showToast('訂正成功！愛心 ❤️ +1，經驗值 +15 XP！', 'success');
+      wrongQuestions = wrongQuestions.filter(w => w.id !== id);
+      masteredWrongCount++; userXP += 15; userHearts = Math.min(5, userHearts + 1);
+      playSound('correct'); saveStateAndSync(); renderWrongQuestionsVault();
+      showToast('訂正成功！愛心 ❤️ +1，經驗值 +15 XP！', 'success');
     }
 
     function startWrongReviewQuiz() {
-        if (wrongQuestions.length === 0) { showToast('沒有錯題需特訓', 'info'); return; }
-        openLessonOverlay("錯題特訓", 1, true);
+      if (wrongQuestions.length === 0) { showToast('沒有錯題需特訓', 'info'); return; }
+      openLessonOverlay("錯題特訓", 1, true);
     }
 
-    // Badges & Leaderboard
+    // 徽章與風雲榜
     function renderBadgesWall() {
-        document.getElementById('badges-grid').innerHTML = BADGES_CATALOG.map(b => {
-            const unlocked = b.check();
-            return `
-            <div class="${unlocked ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200 opacity-60 grayscale'} p-4 rounded-3xl border-2 flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-white border-2 border-amber-400 flex items-center justify-center text-2xl shrink-0">${b.icon}</div>
-                <div>
-                    <h4 class="font-black text-slate-800 text-sm">${b.title}</h4>
-                    <p class="text-[10px] font-bold text-slate-500">${b.desc}</p>
-                </div>
-            </div>`;
-        }).join('');
+      document.getElementById('badges-grid').innerHTML = BADGES_CATALOG.map(b => {
+        const unlocked = b.check();
+        return `
+        <div class="${unlocked ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200 opacity-60 grayscale'} p-4 rounded-3xl border-2 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-white border-2 border-amber-400 flex items-center justify-center text-2xl shrink-0">${b.icon}</div>
+          <div>
+            <h4 class="font-black text-slate-800 text-sm">${b.title}</h4>
+            <p class="text-[10px] font-bold text-slate-500">${b.desc}</p>
+          </div>
+        </div>`;
+      }).join('');
     }
 
     function renderLeaderboardSection() {
-        const fullEl = document.getElementById('global-leaderboard-list');
-        if (!fullEl) return;
-        fullEl.innerHTML = allCloudUsersCache.slice(0, 50).map((u, idx) => {
-            const isMe = u.id === userId;
-            return `
-            <div class="p-3 rounded-2xl border-2 ${isMe ? 'border-emerald-400 bg-emerald-50' : 'border-slate-100 bg-slate-50'} flex items-center justify-between text-xs">
-                <div class="flex items-center gap-3">
-                    <span class="w-6 text-center font-black text-slate-500">#${idx + 1}</span>
-                    <div>
-                        <div class="font-black text-slate-800">${u.name} ${isMe ? '(你)' : ''} <span class="text-[10px] text-slate-400">・${u.role || '學員'}</span></div>
-                        <div class="text-[10px] font-bold text-slate-500">${u.current_book||'創世記'} (${u.cleared_count||0}章) ・ 🏅${u.badges_count||0}枚</div>
-                    </div>
-                </div>
-                <span class="font-black text-amber-600 text-sm">${u.total_xp || 0} XP</span>
-            </div>`;
-        }).join('');
-    }
-
-    // Daily Quests
-    function renderDailyQuests() {
-        const listEl = document.getElementById('daily-quests-list');
-        if (!listEl) return;
-        const quests = [
-            { t: "📖 每日經文闖關", d: "完成任意 1 章聖經閱讀與測驗", r: "+30 XP" },
-            { t: "⚡ 閃電神學反應", d: "在 60秒閃電戰獲得 150 分以上", r: "+50 XP" },
-            { t: "🔥 真理連擊無誤", d: "在測驗達成連續答對 5 題", r: "+40 XP" }
-        ];
-        listEl.innerHTML = quests.map(q => `
-            <div class="p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 flex items-center justify-between">
-                <div>
-                    <h4 class="font-black text-slate-800 text-sm">${q.t}</h4>
-                    <p class="text-xs font-bold text-slate-500">${q.d}</p>
-                </div>
-                <span class="text-[10px] bg-amber-100 text-amber-800 font-black px-2 py-1 rounded-full">${q.r}</span>
+      const fullEl = document.getElementById('global-leaderboard-list');
+      if (!fullEl) return;
+      fullEl.innerHTML = allCloudUsersCache.slice(0, 50).map((u, idx) => {
+        const isMe = u.id === userId;
+        return `
+        <div class="p-3 rounded-2xl border-2 ${isMe ? 'border-emerald-400 bg-emerald-50' : 'border-slate-100 bg-slate-50'} flex items-center justify-between text-xs">
+          <div class="flex items-center gap-3">
+            <span class="w-6 text-center font-black text-slate-500">#${idx + 1}</span>
+            <div>
+              <div class="font-black text-slate-800">${u.name} ${isMe ? '(你)' : ''} <span class="text-[10px] text-slate-400">・領袖:${u.role || '無'}</span></div>
+              <div class="text-[10px] font-bold text-slate-500">${u.current_book || '創世記'} (${u.cleared_count || 0}章) ・ 🏅${u.badges_count || 0}枚</div>
             </div>
-        `).join('');
+          </div>
+          <span class="font-black text-amber-600 text-sm">${u.total_xp || 0} XP</span>
+        </div>`;
+      }).join('');
     }
 
-    function startBlitzGame() {
-        playSound('click');
-        showToast('⚡ 進入閃電戰模式！(此為演示，將於後續整合題庫)', 'info');
+    function renderDailyQuests() {
+      const listEl = document.getElementById('daily-quests-list');
+      if (!listEl) return;
+      const quests = [
+        { t: "📖 每日經文闖關", d: "完成任意 1 章聖經閱讀與測驗", r: "+30 XP" },
+        { t: "⚡ 快速命中", d: "在 60秒獲得 150 分以上", r: "+50 XP" },
+        { t: "🔥 真理連擊", d: "在測驗達成連續答對 5 題", r: "+40 XP" }
+      ];
+      listEl.innerHTML = quests.map(q => `
+        <div class="p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 flex items-center justify-between">
+          <div>
+            <h4 class="font-black text-slate-800 text-sm">${q.t}</h4>
+            <p class="text-xs font-bold text-slate-500">${q.d}</p>
+          </div>
+          <span class="text-[10px] bg-amber-100 text-amber-800 font-black px-2 py-1 rounded-full">${q.r}</span>
+        </div>
+      `).join('');
     }
 
-    function createPkRoom() { showToast('已建立 PK 房間，房號 1234', 'success'); }
-    function joinPkRoom() { showToast('加入房間中...', 'info'); }
-    function startAiPk(name, diff) { showToast(`開始與 ${name} 對戰！`, 'success'); }
-
-    // Book Catalog Modal
+    // 66卷書選擇彈窗
     function openBookSelectorModal() {
-        document.getElementById('books-catalog-body').innerHTML = BIBLE_BOOKS.map(b => `
-            <button onclick="selectBookFromCatalog('${b.id}')" class="p-3 rounded-2xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-left transition flex items-center gap-3 bg-white w-full cursor-pointer">
-                <span class="text-2xl">${b.icon}</span>
-                <div>
-                    <h4 class="font-black text-slate-800 text-sm">${b.id}</h4>
-                    <p class="text-[10px] font-bold text-slate-400">${b.chapters} 章 ・ ${b.cat}</p>
-                </div>
-            </button>
-        `).join('');
-        document.getElementById('book-selector-modal').classList.remove('hidden');
+      document.getElementById('books-catalog-body').innerHTML = BIBLE_BOOKS.map(b => `
+        <button onclick="selectBookFromCatalog('${b.id}')" class="p-3 rounded-2xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-left transition flex items-center gap-3 bg-white w-full cursor-pointer">
+          <span class="text-2xl">${b.icon}</span>
+          <div class="overflow-hidden">
+            <h4 class="font-black text-slate-800 text-sm truncate">${b.id}</h4>
+            <p class="text-[10px] font-bold text-slate-400">${b.chapters} 章 ・ ${b.cat}</p>
+          </div>
+        </button>
+      `).join('');
+      document.getElementById('book-selector-modal').classList.remove('hidden');
     }
     function closeBookSelectorModal() { document.getElementById('book-selector-modal').classList.add('hidden'); }
     function selectBookFromCatalog(id) { currentBookId = id; activeBookRangeOffset = 0; closeBookSelectorModal(); renderLearningPath(); saveStateAndSync(); }
-    
-    // Flock
+
+    // 領袖專屬小家進度
     function refreshFlockView() {
-        playSound('click'); renderMyGroupDashboard(); showToast('小家資料已更新', 'info');
+      playSound('click'); renderMyGroupDashboard(); showToast('小家資料已更新', 'info');
     }
 
     function renderMyGroupDashboard() {
-        if (!userAccountRaw) return;
-        const leaderAcc = userAccountRaw;
-        document.getElementById('flock-leader-account-tag').innerText = leaderAcc;
+      if (!userAccountRaw) return;
+      const leaderAcc = userAccountRaw.trim().toLowerCase();
+      document.getElementById('flock-leader-account-tag').innerText = leaderAcc;
 
-        let allMyMembers = allCloudUsersCache.filter(u => {
-            const roleStr = String(u.role || "").trim().toLowerCase();
-            return roleStr === leaderAcc || roleStr.startsWith(leaderAcc + ":");
-        });
+      let allMyMembers = allCloudUsersCache.filter(u => {
+        const roleStr = String(u.role || "").trim().toLowerCase();
+        return roleStr === leaderAcc || roleStr.startsWith(leaderAcc + ":");
+      });
 
-        const selectEl = document.getElementById('flock-subgroup-select');
-        const groups = new Set();
-        allMyMembers.forEach(u => {
-            const roleStr = String(u.role || "").trim();
-            if (roleStr.includes(":")) groups.add(roleStr.split(":")[1]);
-        });
-        
-        if (selectEl) {
-            const currentSelection = selectEl.value;
-            let optionsHtml = `<option value="ALL">全部小家人</option>`;
-            groups.forEach(g => { optionsHtml += `<option value="${g}">${g}</option>`; });
-            selectEl.innerHTML = optionsHtml;
-            selectEl.value = groups.has(currentSelection) ? currentSelection : "ALL";
-            
-            if (selectEl.value !== "ALL") {
-                allMyMembers = allMyMembers.filter(u => String(u.role || "").includes(":" + selectEl.value));
-            }
+      const selectEl = document.getElementById('flock-subgroup-select');
+      const groups = new Set();
+      allMyMembers.forEach(u => {
+        const roleStr = String(u.role || "").trim();
+        if (roleStr.includes(":")) groups.add(roleStr.split(":")[1]);
+      });
+
+      if (selectEl) {
+        const currentSelection = selectEl.value;
+        let optionsHtml = `<option value="ALL">全部小家人</option>`;
+        groups.forEach(g => { optionsHtml += `<option value="${g}">${g}</option>`; });
+        selectEl.innerHTML = optionsHtml;
+        selectEl.value = groups.has(currentSelection) ? currentSelection : "ALL";
+
+        if (selectEl.value !== "ALL") {
+          allMyMembers = allMyMembers.filter(u => String(u.role || "").includes(":" + selectEl.value));
         }
+      }
 
-        const totalXP = allMyMembers.reduce((sum, u) => sum + (u.total_xp || 0), 0);
-        const totalCh = allMyMembers.reduce((sum, u) => sum + (u.cleared_count || 0), 0);
-        const elCount = document.getElementById('flock-stat-count');
-        const elXP = document.getElementById('flock-stat-total-xp');
-        const elCh = document.getElementById('flock-stat-total-chapters');
-        
-        if(elCount) elCount.innerText = `${allMyMembers.length} 人`;
-        if(elXP) elXP.innerText = `${totalXP} XP`;
-        if(elCh) elCh.innerText = `${totalCh} 章`;
+      const totalXP = allMyMembers.reduce((sum, u) => sum + (u.total_xp || 0), 0);
+      const totalCh = allMyMembers.reduce((sum, u) => sum + (u.cleared_count || 0), 0);
+      const elCount = document.getElementById('flock-stat-count');
+      const elXP = document.getElementById('flock-stat-total-xp');
+      const elCh = document.getElementById('flock-stat-total-chapters');
 
-        const listEl = document.getElementById('flock-members-list');
-        if (listEl) {
-            if (allMyMembers.length === 0) {
-                listEl.innerHTML = `<p class="text-xs text-slate-400 font-bold p-4 text-center">目前尚無學員將 D 欄設為您的帳號。</p>`;
-            } else {
-                listEl.innerHTML = allMyMembers.map(u => `
-                <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 flex justify-between items-center gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-lg">${u.name.charAt(0)}</div>
-                        <div>
-                            <div class="font-black text-slate-800">${u.name} <span class="text-[10px] text-slate-400 font-normal">(${u.account})</span></div>
-                            <div class="text-[11px] font-bold text-slate-500">進度: ${u.current_book} (${u.cleared_count || 0}章)</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-amber-600 font-black text-sm">${u.total_xp || 0} XP</div>
-                    </div>
+      if (elCount) elCount.innerText = `${allMyMembers.length} 人`;
+      if (elXP) elXP.innerText = `${totalXP} XP`;
+      if (elCh) elCh.innerText = `${totalCh} 章`;
+
+      const listEl = document.getElementById('flock-members-list');
+      if (listEl) {
+        if (allMyMembers.length === 0) {
+          listEl.innerHTML = `<p class="text-xs text-slate-400 font-bold p-4 text-center">目前尚無學員將領袖帳號設為您的帳號。</p>`;
+        } else {
+          listEl.innerHTML = allMyMembers.map(u => `
+            <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 flex justify-between items-center gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-lg">${(u.name || '學').charAt(0)}</div>
+                <div>
+                  <div class="font-black text-slate-800">${u.name} <span class="text-[10px] text-slate-400 font-normal">(${u.account})</span></div>
+                  <div class="text-[11px] font-bold text-slate-500">進度: ${u.current_book} (${u.cleared_count || 0}章)</div>
                 </div>
-                `).join('');
-            }
+              </div>
+              <div class="text-right">
+                <div class="text-amber-600 font-black text-sm">${u.total_xp || 0} XP</div>
+              </div>
+            </div>
+          `).join('');
         }
+      }
     }
 
-    // Admin
+    // 最高主控台 Admin
     function switchAdminSubTab(sub) {
-        playSound('click');
-        ['users', 'notes', 'qbank'].forEach(t => {
-            const el = document.getElementById(`admin-panel-${t}`);
-            if (el) el.classList.toggle('hidden', t !== sub);
-            const btn = document.getElementById(`adm-sub-${t}`);
-            if (btn) {
-                btn.className = t === sub 
-                    ? "px-4 py-2 rounded-xl font-black text-xs bg-slate-900 text-white cursor-pointer"
-                    : "px-4 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer";
-            }
-        });
-        if (sub === 'users' || sub === 'notes') renderAdminConsole();
+      playSound('click');
+      ['users', 'notes', 'qbank'].forEach(t => {
+        const el = document.getElementById(`admin-panel-${t}`);
+        if (el) el.classList.toggle('hidden', t !== sub);
+        const btn = document.getElementById(`adm-sub-${t}`);
+        if (btn) {
+          btn.className = t === sub
+            ? "px-4 py-2 rounded-xl font-black text-xs bg-slate-900 text-white cursor-pointer"
+            : "px-4 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer";
+        }
+      });
+      if (sub === 'users' || sub === 'notes') renderAdminConsole();
     }
 
     function renderAdminConsole() {
-        if (userAccountRaw !== 'admin') return;
-        const query = (document.getElementById('admin-user-search')?.value || '').trim().toLowerCase();
-        
-        const filtered = allCloudUsersCache.filter(u => {
-            if (!query) return true;
-            return (u.name || "").toLowerCase().includes(query) || 
-                   (u.account || "").toLowerCase().includes(query) || 
-                   (u.role || "").toLowerCase().includes(query);
-        });
+      if (userAccountRaw !== 'admin') return;
+      const query = (document.getElementById('admin-user-search')?.value || '').trim().toLowerCase();
 
-        const tbody = document.getElementById('admin-users-tbody');
-        if (tbody) {
-            tbody.innerHTML = filtered.map(u => {
-                const isAuth = u.portal_auth === true;
-                return `
-                <tr class="hover:bg-amber-50/50">
-                    <td class="py-2.5 px-3 font-mono text-xs text-slate-600">${u.account || ''}</td>
-                    <td class="py-2.5 px-3 font-black text-slate-800">${u.name || ''}</td>
-                    <td class="py-2.5 px-3 font-mono text-[11px] text-rose-600">${u.password || ''}</td>
-                    <td class="py-2.5 px-3">
-                        <div class="flex gap-1">
-                            <input type="text" id="adm-role-${u.id}" value="${u.role || ''}" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded outline-none focus:border-amber-500">
-                            <button onclick="adminSaveUserField('${u.id}', 'role')" class="bg-slate-200 text-slate-700 px-2 rounded text-[10px] font-bold cursor-pointer">儲存</button>
-                        </div>
-                    </td>
-                    <td class="py-2.5 px-3 text-center">
-                        <label class="cursor-pointer flex items-center justify-center gap-1 text-xs font-bold ${isAuth ? 'text-emerald-600':'text-slate-400'}">
-                            <input type="checkbox" ${isAuth ? 'checked':''} onchange="adminTogglePortalAuth('${u.id}', this.checked)" class="accent-emerald-600">
-                            ${isAuth ? '已開通' : '未開通'}
-                        </label>
-                    </td>
-                    <td class="py-2.5 px-3 text-center text-xs">${u.cleared_count || 0}</td>
-                    <td class="py-2.5 px-3 text-right font-black text-amber-600 text-xs">${u.total_xp || 0}</td>
-                </tr>
-                `;
-            }).join('');
-        }
+      const filtered = allCloudUsersCache.filter(u => {
+        if (!query) return true;
+        return (u.name || "").toLowerCase().includes(query) ||
+               (u.account || "").toLowerCase().includes(query) ||
+               (u.role || "").toLowerCase().includes(query);
+      });
 
-        const notesContainer = document.getElementById('admin-panel-notes');
-        if (notesContainer && !notesContainer.classList.contains('hidden')) {
-            let notesHtml = '';
-            filtered.forEach(u => {
-                if (u.notes && Object.keys(u.notes).length > 0) {
-                    Object.keys(u.notes).forEach(book => {
-                        notesHtml += `
-                        <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200">
-                            <div class="flex justify-between text-xs font-black text-indigo-800 mb-2">
-                                <span>👤 ${u.name} (${u.account})</span>
-                                <span class="bg-indigo-200 px-2 py-0.5 rounded">${book}</span>
-                            </div>
-                            <p class="text-sm font-bold text-slate-700 whitespace-pre-wrap">${u.notes[book]}</p>
-                        </div>
-                        `;
-                    });
-                }
+      const tbody = document.getElementById('admin-users-tbody');
+      if (tbody) {
+        tbody.innerHTML = filtered.map(u => {
+          const isAuth = u.portal_auth === true;
+          return `
+            <tr class="hover:bg-amber-50/50">
+              <td class="py-2.5 px-3 font-mono text-xs text-slate-600">${u.account || ''}</td>
+              <td class="py-2.5 px-3 font-black text-slate-800">${u.name || ''}</td>
+              <td class="py-2.5 px-3 font-mono text-[11px] text-rose-600">${u.password || ''}</td>
+              <td class="py-2.5 px-3">
+                <div class="flex gap-1">
+                  <input type="text" id="adm-role-${u.id}" value="${u.role || ''}" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded outline-none focus:border-amber-500">
+                  <button onclick="adminSaveUserField('${u.id}', 'role')" class="bg-slate-200 text-slate-700 px-2 rounded text-[10px] font-bold cursor-pointer">儲存</button>
+                </div>
+              </td>
+              <td class="py-2.5 px-3 text-center">
+                <label class="cursor-pointer flex items-center justify-center gap-1 text-xs font-bold ${isAuth ? 'text-emerald-600' : 'text-slate-400'}">
+                  <input type="checkbox" ${isAuth ? 'checked' : ''} onchange="adminTogglePortalAuth('${u.id}', this.checked)" class="accent-emerald-600">
+                  ${isAuth ? '已開通' : '未開通'}
+                </label>
+              </td>
+              <td class="py-2.5 px-3 text-center text-xs">${u.cleared_count || 0}</td>
+              <td class="py-2.5 px-3 text-right font-black text-amber-600 text-xs">${u.total_xp || 0}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const notesContainer = document.getElementById('admin-panel-notes');
+      if (notesContainer && !notesContainer.classList.contains('hidden')) {
+        let notesHtml = '';
+        filtered.forEach(u => {
+          if (u.notes && Object.keys(u.notes).length > 0) {
+            Object.keys(u.notes).forEach(book => {
+              notesHtml += `
+                <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200">
+                  <div class="flex justify-between text-xs font-black text-indigo-800 mb-2">
+                    <span>👤 ${u.name} (${u.account})</span>
+                    <span class="bg-indigo-200 px-2 py-0.5 rounded">${book}</span>
+                  </div>
+                  <p class="text-sm font-bold text-slate-700 whitespace-pre-wrap">${u.notes[book]}</p>
+                </div>
+              `;
             });
-            notesContainer.innerHTML = notesHtml || '<p class="text-xs text-slate-400 p-4">查無筆記資料。</p>';
-        }
+          }
+        });
+        notesContainer.innerHTML = notesHtml || '<p class="text-xs text-slate-400 p-4">查無筆記資料。</p>';
+      }
     }
 
     function adminSaveUserField(uId, field) {
-        const val = document.getElementById(`adm-${field}-${uId}`).value.trim();
-        db.ref(`bible_quest/users/${uId}/${field}`).set(val).then(() => showToast('已儲存！', 'success'));
+      const val = document.getElementById(`adm-${field}-${uId}`).value.trim();
+      db.ref(`bible_quest/users/${uId}/${field}`).set(val).then(() => showToast('已儲存！', 'success'));
     }
 
     function adminTogglePortalAuth(uId, isAuth) {
-        db.ref(`bible_quest/users/${uId}/portal_auth`).set(isAuth).then(() => showToast('權限已更新！', 'success'));
+      db.ref(`bible_quest/users/${uId}/portal_auth`).set(isAuth).then(() => showToast('權限已更新！', 'success'));
     }
 
     function adminUploadQuestionBank() {
-        const txt = document.getElementById('admin-qbank-json').value.trim();
-        if (!txt) { showToast('請貼上 JSON', 'warning'); return; }
-        try {
-            const parsed = JSON.parse(txt);
-            db.ref('bible_quest/question_bank').update(parsed).then(() => {
-                showToast('🚀 題庫上傳成功！', 'success');
-                document.getElementById('admin-qbank-json').value = '';
-            });
-        } catch (e) {
-            showToast('JSON 格式錯誤', 'error');
-        }
+      const txt = document.getElementById('admin-qbank-json').value.trim();
+      if (!txt) { showToast('請貼上 JSON', 'warning'); return; }
+      try {
+        const parsed = JSON.parse(txt);
+        db.ref('bible_quest/question_bank').update(parsed).then(() => {
+          showToast('🚀 題庫上傳成功！', 'success');
+          document.getElementById('admin-qbank-json').value = '';
+        });
+      } catch (e) {
+        showToast('JSON 格式錯誤', 'error');
+      }
     }
 
     function exportAdminCSV() {
-        const list = allCloudUsersCache;
-        let csv = "\uFEFF登入帳號,顯示姓名,密碼備查,領袖帳號,總經驗值,目前書卷,通關章數,查詢權限\n";
-        list.forEach(u => {
-            csv += `"${u.account||''}","${u.name||''}","${u.password||''}","${u.role||''}","${u.total_xp||0}","${u.current_book||''}","${u.cleared_count||0}","${u.portal_auth?'是':'否'}"\n`;
-        });
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `聖經闖關王_後台總匯出_${new Date().toISOString().slice(0,10)}.csv`;
-        link.click();
-        showToast('📥 匯出成功！', 'success');
+      const list = allCloudUsersCache;
+      let csv = "\uFEFF登入帳號,顯示姓名,密碼備查,領袖帳號,總經驗值,目前書卷,通關章數,查詢權限\n";
+      list.forEach(u => {
+        csv += `"${u.account || ''}","${u.name || ''}","${u.password || ''}","${u.role || ''}","${u.total_xp || 0}","${u.current_book || ''}","${u.cleared_count || 0}","${u.portal_auth ? '是' : '否'}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `聖經闖關王_後台總匯出_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      showToast('📥 匯出成功！', 'success');
     }
 
     /**************************************************************
-     * 8. BOOK REFLECTIONS (NOTES) & PUBLIC PORTAL
+     * 9. 書卷收穫筆記與查詢專用看板
      **************************************************************/
     function openBookReflectionModal(defaultBookId = "創世記") {
-        const selectEl = document.getElementById('reflection-book-select');
-        selectEl.innerHTML = BIBLE_BOOKS.map(b => `<option value="${b.id}">${b.id}</option>`).join('');
-        selectEl.value = defaultBookId;
-        loadBookReflectionText(defaultBookId);
-        document.getElementById('book-reflection-modal').classList.remove('hidden');
+      const selectEl = document.getElementById('reflection-book-select');
+      selectEl.innerHTML = BIBLE_BOOKS.map(b => `<option value="${b.id}">${b.id}</option>`).join('');
+      selectEl.value = defaultBookId;
+      loadBookReflectionText(defaultBookId);
+      document.getElementById('book-reflection-modal').classList.remove('hidden');
     }
 
     function closeBookReflectionModal() {
-        document.getElementById('book-reflection-modal').classList.add('hidden');
+      document.getElementById('book-reflection-modal').classList.add('hidden');
     }
 
     function loadBookReflectionText(bookId) {
-        document.getElementById('reflection-modal-title').innerText = `《${bookId}》最大收穫與筆記`;
-        document.getElementById('reflection-note-textarea').value = bookNotes[bookId] || "";
+      document.getElementById('reflection-modal-title').innerText = `《${bookId}》最大收穫與筆記`;
+      document.getElementById('reflection-note-textarea').value = bookNotes[bookId] || "";
     }
 
     function saveBookReflection() {
-        const bookId = document.getElementById('reflection-book-select').value;
-        const text = document.getElementById('reflection-note-textarea').value.trim();
-        if (!text) {
-            showToast('請填寫筆記內容再儲存！', 'warning'); return;
-        }
-        
-        const isNew = !bookNotes[bookId];
-        bookNotes[bookId] = text;
-        
-        if (isNew) {
-            userXP += 50;
-            broadcastMilestone(`發表了《${bookId}》的書卷收穫筆記！獲得 +50 XP`);
-        } else {
-            showToast(`已更新《${bookId}》筆記！`, 'success');
-        }
-        
-        saveStateAndSync();
-        closeBookReflectionModal();
-        if (currentTab === 'badges') renderMyBookNotesList();
+      const bookId = document.getElementById('reflection-book-select').value;
+      const text = document.getElementById('reflection-note-textarea').value.trim();
+      if (!text) {
+        showToast('請填寫筆記內容再儲存！', 'warning'); return;
+      }
+
+      const isNew = !bookNotes[bookId];
+      bookNotes[bookId] = text;
+
+      if (isNew) {
+        userXP += 50;
+        broadcastMilestone(`發表了《${bookId}》的書卷收穫筆記！獲得 +50 XP`);
+      } else {
+        showToast(`已更新《${bookId}》筆記！`, 'success');
+      }
+
+      saveStateAndSync();
+      closeBookReflectionModal();
+      if (currentTab === 'badges') renderMyBookNotesList();
     }
 
     function renderMyBookNotesList() {
-        const listEl = document.getElementById('my-book-reflections-list');
-        if (!listEl) return;
-        const keys = Object.keys(bookNotes);
-        if (keys.length === 0) {
-            listEl.innerHTML = `<div class="col-span-full text-center text-xs font-bold text-slate-400 p-4">您尚未撰寫任何書卷筆記。點擊右上角新增吧！</div>`;
-            return;
-        }
-        listEl.innerHTML = keys.map(k => `
-            <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 flex flex-col justify-between space-y-2 cursor-pointer" onclick="openBookReflectionModal('${k}')">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-black text-indigo-800 bg-indigo-200 px-2 py-0.5 rounded">《${k}》</span>
-                    <span class="text-[10px] text-slate-400">點擊編輯 ✏️</span>
-                </div>
-                <p class="text-xs font-bold text-slate-700 line-clamp-3">${bookNotes[k]}</p>
-            </div>
-        `).join('');
+      const listEl = document.getElementById('my-book-reflections-list');
+      if (!listEl) return;
+      const keys = Object.keys(bookNotes);
+      if (keys.length === 0) {
+        listEl.innerHTML = `<div class="col-span-full text-center text-xs font-bold text-slate-400 p-4">您尚未撰寫任何書卷筆記。點擊右上角新增吧！</div>`;
+        return;
+      }
+      listEl.innerHTML = keys.map(k => `
+        <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 flex flex-col justify-between space-y-2 cursor-pointer" onclick="openBookReflectionModal('${k}')">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-indigo-800 bg-indigo-200 px-2 py-0.5 rounded">《${k}》</span>
+            <span class="text-[10px] text-slate-400">點擊編輯 ✏️</span>
+          </div>
+          <p class="text-xs font-bold text-slate-700 line-clamp-3">${bookNotes[k]}</p>
+        </div>
+      `).join('');
     }
 
     async function verifyPortalAccess() {
-        const acc = document.getElementById('portal-acc-input').value.trim().toLowerCase().replace(/[.#$\[\]\s\/]/g, '');
-        const pwd = document.getElementById('portal-pwd-input').value.trim();
-        const errEl = document.getElementById('portal-auth-error');
+      const acc = document.getElementById('portal-acc-input').value.trim().toLowerCase().replace(/[.#$\[\]\s\/]/g, '');
+      const pwd = document.getElementById('portal-pwd-input').value.trim();
+      const errEl = document.getElementById('portal-auth-error');
 
-        if (!acc || !pwd) {
-            errEl.innerText = "請輸入帳號密碼"; errEl.classList.remove('hidden'); return;
-        }
+      if (!acc || !pwd) {
+        errEl.innerText = "請輸入帳號密碼"; errEl.classList.remove('hidden'); return;
+      }
 
-        if (acc === 'admin' && pwd === 'admin') {
-            grantPortalAccess('超級管理員 (Admin)');
-            return;
-        }
+      if (acc === 'admin' && pwd === 'admin') {
+        grantPortalAccess('超級管理員 (Admin)');
+        return;
+      }
 
-        const ref = db.ref('bible_quest/users/acc_' + acc);
-        const snap = await ref.once('value');
-        const data = snap.val();
+      const ref = db.ref('bible_quest/users/acc_' + acc);
+      const snap = await ref.once('value');
+      const data = snap.val();
 
-        if (data && data.password === pwd && data.portal_auth === true) {
-            grantPortalAccess(data.name);
-        } else {
-            errEl.innerText = "⛔ 您的帳號尚未開通查詢看板權限，或帳密錯誤！請洽管理員於試算表開通。";
-            errEl.classList.remove('hidden');
-        }
+      if (data && data.password === pwd && data.portal_auth === true) {
+        grantPortalAccess(data.name);
+      } else {
+        errEl.innerText = "⛔ 您的帳號尚未開通查詢看板權限，或帳密錯誤！請洽管理員於試算表開通。";
+        errEl.classList.remove('hidden');
+      }
     }
 
     function grantPortalAccess(viewerName) {
-        document.getElementById('portal-auth-gate').classList.add('hidden');
-        document.getElementById('portal-viewer-tag').innerText = `授權檢視中：${viewerName}`;
-        
-        if (allCloudUsersCache.length === 0) {
-            db.ref('bible_quest/users').once('value').then(snap => {
-                if (snap.val()) {
-                    allCloudUsersCache = Object.values(snap.val()).sort((a, b) => (b.total_xp || 0) - (a.total_xp || 0));
-                    buildPortalFilters();
-                    renderPublicProgressBoard();
-                }
-            });
-        } else {
+      document.getElementById('portal-auth-gate').classList.add('hidden');
+      document.getElementById('portal-viewer-tag').innerText = `授權檢視中：${viewerName}`;
+
+      if (allCloudUsersCache.length === 0) {
+        db.ref('bible_quest/users').once('value').then(snap => {
+          if (snap.val()) {
+            allCloudUsersCache = Object.values(snap.val()).sort((a, b) => (b.total_xp || 0) - (a.total_xp || 0));
             buildPortalFilters();
             renderPublicProgressBoard();
-        }
+          }
+        });
+      } else {
+        buildPortalFilters();
+        renderPublicProgressBoard();
+      }
     }
 
     function logoutPortalAccess() {
-        document.getElementById('portal-acc-input').value = '';
-        document.getElementById('portal-pwd-input').value = '';
-        document.getElementById('portal-auth-gate').classList.remove('hidden');
+      document.getElementById('portal-acc-input').value = '';
+      document.getElementById('portal-pwd-input').value = '';
+      document.getElementById('portal-auth-gate').classList.remove('hidden');
     }
 
     function buildPortalFilters() {
-        const filterEl = document.getElementById('pub-leader-filter');
-        if (!filterEl) return;
-        const groups = new Set();
-        allCloudUsersCache.forEach(u => { if (u.role) groups.add(u.role); });
-        let html = `<option value="ALL">全部學員</option>`;
-        groups.forEach(g => { html += `<option value="${g}">${g}</option>`; });
-        filterEl.innerHTML = html;
+      const filterEl = document.getElementById('pub-leader-filter');
+      if (!filterEl) return;
+      const groups = new Set();
+      allCloudUsersCache.forEach(u => { if (u.role) groups.add(u.role); });
+      let html = `<option value="ALL">全部學員</option>`;
+      groups.forEach(g => { html += `<option value="${g}">${g}</option>`; });
+      filterEl.innerHTML = html;
     }
 
     function renderPublicProgressBoard() {
-        const grp = document.getElementById('pub-leader-filter')?.value || 'ALL';
-        const q = (document.getElementById('pub-search-input')?.value || '').toLowerCase();
+      const grp = document.getElementById('pub-leader-filter')?.value || 'ALL';
+      const q = (document.getElementById('pub-search-input')?.value || '').toLowerCase();
 
-        let filtered = allCloudUsersCache.filter(u => {
-            if (grp !== 'ALL' && u.role !== grp) return false;
-            if (q) {
-                return (u.name||'').toLowerCase().includes(q) || (u.account||'').toLowerCase().includes(q);
-            }
-            return true;
-        });
-
-        const totalXp = filtered.reduce((sum, u) => sum + (u.total_xp||0), 0);
-        const totalCh = filtered.reduce((sum, u) => sum + (u.cleared_count||0), 0);
-        const totalNotes = filtered.reduce((sum, u) => sum + (u.notes ? Object.keys(u.notes).length : 0), 0);
-
-        document.getElementById('pub-stat-users').innerText = `${filtered.length} 人`;
-        document.getElementById('pub-stat-chapters').innerText = `${totalCh} 章`;
-        document.getElementById('pub-stat-xp').innerText = `${totalXp} XP`;
-        document.getElementById('pub-stat-notes').innerText = `${totalNotes} 篇`;
-
-        const tbody = document.getElementById('pub-progress-tbody');
-        if (tbody) {
-            tbody.innerHTML = filtered.map((u, i) => {
-                let chList = '';
-                if (u.completed_chapters) {
-                    const mapped = {};
-                    Object.keys(u.completed_chapters).forEach(k => {
-                        const parts = k.split('_');
-                        if (!mapped[parts[0]]) mapped[parts[0]] = [];
-                        mapped[parts[0]].push(parts[1]);
-                    });
-                    chList = Object.keys(mapped).map(bk => `<span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[10px] mr-1">${bk}(${mapped[bk].length})</span>`).join('');
-                }
-                return `
-                <tr class="hover:bg-slate-50">
-                    <td class="py-3 px-4">${i+1}</td>
-                    <td class="py-3 px-4 font-black">${u.name||''} <span class="text-[10px] text-slate-400 font-normal">(${u.account||''})</span></td>
-                    <td class="py-3 px-4 text-indigo-600 text-xs">${u.role||'-'}</td>
-                    <td class="py-3 px-4 text-xs">${u.current_book||''}</td>
-                    <td class="py-3 px-4 text-center">${u.cleared_count||0}</td>
-                    <td class="py-3 px-4 w-1/3 leading-relaxed">${chList}</td>
-                    <td class="py-3 px-4 text-right font-black text-amber-600">${u.total_xp||0}</td>
-                </tr>
-                `;
-            }).join('');
+      let filtered = allCloudUsersCache.filter(u => {
+        if (grp !== 'ALL' && u.role !== grp) return false;
+        if (q) {
+          return (u.name || '').toLowerCase().includes(q) || (u.account || '').toLowerCase().includes(q);
         }
+        return true;
+      });
 
-        const notesGrid = document.getElementById('pub-reflections-grid');
-        if (notesGrid) {
-            let notesHtml = '';
-            filtered.forEach(u => {
-                if (u.notes) {
-                    Object.keys(u.notes).forEach(bk => {
-                        notesHtml += `
-                        <div class="bg-indigo-50/70 border border-indigo-200 p-4 rounded-2xl flex flex-col justify-between">
-                            <div class="flex items-center justify-between mb-2 border-b border-indigo-200 pb-2">
-                                <span class="font-black text-indigo-900 text-sm">👤 ${u.name}</span>
-                                <span class="bg-indigo-200 text-indigo-800 text-[10px] font-black px-2 py-0.5 rounded">《${bk}》筆記</span>
-                            </div>
-                            <p class="text-xs font-bold text-slate-700 whitespace-pre-wrap leading-relaxed">${u.notes[bk]}</p>
-                        </div>
-                        `;
-                    });
-                }
+      const totalXp = filtered.reduce((sum, u) => sum + (u.total_xp || 0), 0);
+      const totalCh = filtered.reduce((sum, u) => sum + (u.cleared_count || 0), 0);
+      const totalNotes = filtered.reduce((sum, u) => sum + (u.notes ? Object.keys(u.notes).length : 0), 0);
+
+      document.getElementById('pub-stat-users').innerText = `${filtered.length} 人`;
+      document.getElementById('pub-stat-chapters').innerText = `${totalCh} 章`;
+      document.getElementById('pub-stat-xp').innerText = `${totalXp} XP`;
+      document.getElementById('pub-stat-notes').innerText = `${totalNotes} 篇`;
+
+      const tbody = document.getElementById('pub-progress-tbody');
+      if (tbody) {
+        tbody.innerHTML = filtered.map((u, i) => {
+          let chList = '';
+          if (u.completed_chapters) {
+            const mapped = {};
+            Object.keys(u.completed_chapters).forEach(k => {
+              const parts = k.split('_');
+              if (!mapped[parts[0]]) mapped[parts[0]] = [];
+              mapped[parts[0]].push(parts[1]);
             });
-            notesGrid.innerHTML = notesHtml || '<p class="text-xs text-slate-400">目前沒有相關筆記。</p>';
-        }
+            chList = Object.keys(mapped).map(bk => `<span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[10px] mr-1">${bk}(${mapped[bk].length})</span>`).join('');
+          }
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 px-4">${i + 1}</td>
+              <td class="py-3 px-4 font-black">${u.name || ''} <span class="text-[10px] text-slate-400 font-normal">(${u.account || ''})</span></td>
+              <td class="py-3 px-4 text-indigo-600 text-xs">${u.role || '-'}</td>
+              <td class="py-3 px-4 text-xs">${u.current_book || ''}</td>
+              <td class="py-3 px-4 text-center">${u.cleared_count || 0}</td>
+              <td class="py-3 px-4 w-1/3 leading-relaxed">${chList}</td>
+              <td class="py-3 px-4 text-right font-black text-amber-600">${u.total_xp || 0}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const notesGrid = document.getElementById('pub-reflections-grid');
+      if (notesGrid) {
+        let notesHtml = '';
+        filtered.forEach(u => {
+          if (u.notes) {
+            Object.keys(u.notes).forEach(bk => {
+              notesHtml += `
+                <div class="bg-indigo-50/70 border border-indigo-200 p-4 rounded-2xl flex flex-col justify-between">
+                  <div class="flex items-center justify-between mb-2 border-b border-indigo-200 pb-2">
+                    <span class="font-black text-indigo-900 text-sm">👤 ${u.name}</span>
+                    <span class="bg-indigo-200 text-indigo-800 text-[10px] font-black px-2 py-0.5 rounded">《${bk}》筆記</span>
+                  </div>
+                  <p class="text-xs font-bold text-slate-700 whitespace-pre-wrap leading-relaxed">${u.notes[bk]}</p>
+                </div>
+              `;
+            });
+          }
+        });
+        notesGrid.innerHTML = notesHtml || '<p class="text-xs text-slate-400">目前沒有相關筆記。</p>';
+      }
     }
 
     function copyPublicProgressUrl() {
-        const url = window.location.origin + window.location.pathname + '?view=progress';
-        const temp = document.createElement('textarea');
-        temp.value = url;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand('copy');
-        document.body.removeChild(temp);
-        alert('已複製查詢專用網址！\n(分享給試算表已授權的同工)');
+      const url = window.location.origin + window.location.pathname + '?view=progress';
+      const temp = document.createElement('textarea');
+      temp.value = url;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      showToast('🔗 已複製查詢專用網址！（可分享給已開通權限的同工）', 'success');
     }
 
     window.onload = function() {
-        updateTopBarStats();
-        renderLearningPath();
-        renderDailyQuests();
-        initFirebaseSync();
-        checkPersistentLoginOnLoad();
+      updateTopBarStats();
+      renderLearningPath();
+      renderDailyQuests();
+      initFirebaseSync();
+      checkPersistentLoginOnLoad();
     };
-
   </script>
 </body>
 </html>
