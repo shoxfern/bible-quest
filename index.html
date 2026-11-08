@@ -150,8 +150,7 @@
        0. 專屬讀經進度查詢網址頁面 (?view=progress)：非公開！需在試算表開通權限或 admin 才可查看
        ========================================================================= -->
   <div id="public-progress-portal" class="hidden min-h-screen bg-slate-100 flex flex-col">
-
-    <!-- 🔒 查詢看板權限驗證閘門 (預設鎖定，需驗證試算表已開通權限之帳密) -->
+    <!-- 🔒 查詢看板權限驗證閘門 -->
     <div id="portal-auth-gate" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border-2 border-slate-200 space-y-5">
         <div class="text-center space-y-1.5">
@@ -159,7 +158,6 @@
           <h2 class="text-2xl font-black text-slate-800">讀經進度查詢專用看板</h2>
           <p class="text-xs font-bold text-slate-500">此網址為內部授權專用，請輸入已在「試算表開通查詢權限」之帳號密碼（或 admin 主控台帳密）</p>
         </div>
-
         <form onsubmit="event.preventDefault(); verifyPortalAccess();" class="space-y-3.5">
           <div>
             <label class="text-xs font-extrabold text-slate-600 block mb-1">授權帳號</label>
@@ -182,7 +180,6 @@
       </div>
     </div>
 
-    <!-- 驗證通過後顯示的進度查詢看板內容 -->
     <header class="bg-gradient-to-r from-indigo-800 via-teal-700 to-emerald-700 text-white py-6 px-4 shadow-lg">
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -274,7 +271,7 @@
   </div>
 
   <!-- =========================================================================
-       1. 遊戲登入 / 註冊彈窗 (老玩家登入免填姓名；只有首次註冊才顯示姓名欄)
+       1. 遊戲登入 / 註冊彈窗
        ========================================================================= -->
   <div id="auth-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border-2 border-slate-100 space-y-5">
@@ -317,7 +314,6 @@
           </div>
         </div>
 
-        <!-- 只有切換到「✨ 首次註冊新帳號」時才顯示姓名輸入框 -->
         <div id="auth-nickname-wrapper" class="hidden">
           <label class="text-xs font-extrabold text-slate-600 block mb-1">顯示姓名 <span class="text-rose-500">*首次註冊必填（之後登入免填）</span></label>
           <input id="auth-nickname" type="text" placeholder="請輸入真實姓名，例如：陳韋翰"
@@ -338,8 +334,6 @@
        2. 遊戲主畫面外框 (#game-app-shell)
        ========================================================================= -->
   <div id="game-app-shell" class="flex-1 flex flex-col">
-
-    <!-- 頂部狀態導航列 -->
     <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b-2 border-slate-200 px-3 py-2.5">
       <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
         <div class="flex items-center gap-2">
@@ -373,9 +367,7 @@
       </div>
     </header>
 
-    <!-- 主體雙欄佈局 -->
     <div class="flex-1 max-w-5xl w-full mx-auto flex flex-col md:flex-row gap-6 p-3 md:p-6">
-
       <!-- 電腦版左側導航列 -->
       <aside class="hidden md:flex flex-col w-60 shrink-0 space-y-2">
         <button onclick="switchTab('map')" id="nav-btn-map" class="nav-tab-btn flex items-center gap-3 px-4 py-3.5 rounded-2xl font-black text-sm bg-emerald-50 text-emerald-600 border-2 border-emerald-300 transition cursor-pointer">
@@ -395,19 +387,18 @@
           <span class="text-xl">🏅</span><span>榮譽徽章＆心得筆記</span>
         </button>
 
-        <!-- 👑 導師專屬按鈕：只有當試算表 D 欄有學員填此人帳號時才動態顯示！一般學員完全隱藏 -->
+        <!-- 導師專屬按鈕 -->
         <button onclick="switchTab('flock')" id="nav-btn-flock" class="hidden nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 border-2 border-indigo-200 transition cursor-pointer">
           <div class="flex items-center gap-3"><span class="text-xl">🏠</span><span>小家進度 (導師專屬)</span></div>
           <span id="sidebar-flock-badge" class="bg-indigo-600 text-white text-[11px] px-2 py-0.5 rounded-full">0</span>
         </button>
 
-        <!-- ⚙️ 唯一最高主控台按鈕：只有帳密皆為 "admin" 登入時才顯示！其他人絕對看不到 -->
+        <!-- 主控台按鈕 -->
         <button onclick="switchTab('admin')" id="nav-btn-admin" class="hidden nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-amber-900 bg-amber-100 hover:bg-amber-200 border-2 border-amber-400 transition cursor-pointer shadow-sm">
           <div class="flex items-center gap-3"><span class="text-xl">⚙️</span><span>超級主控台 (Admin)</span></div>
           <span class="bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded-full">ROOT</span>
         </button>
 
-        <!-- 全服即時里程碑推播 -->
         <div class="mt-4 bg-white p-4 rounded-2xl border-2 border-slate-200 space-y-2">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-black text-slate-700">📣 全服即時里程碑</h3>
@@ -421,7 +412,6 @@
 
       <!-- 中央主要內容區 -->
       <main class="flex-1 min-w-0">
-
         <!-- ================= TAB 1: 聖經 66 卷書 S 型闖關地圖 ================= -->
         <section id="tab-map" class="space-y-5">
           <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-5 rounded-3xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -431,7 +421,7 @@
                 <span id="current-book-progress-text" class="text-xs font-bold text-emerald-100">已完成 0 / 50 章</span>
               </div>
               <h2 id="current-book-title" class="text-2xl font-black mt-1">創世記 (Genesis)</h2>
-              <p class="text-xs text-emerald-100 mt-0.5">點擊圓形關卡，一字不漏讀完該章經文即可進行測驗！完成全卷可撰寫「本卷最大收穫筆記」。</p>
+              <p class="text-xs text-emerald-100 mt-0.5">點擊圓形關卡，一字不漏讀完該章經文即可進行測驗！</p>
             </div>
             <div class="flex flex-wrap sm:flex-col gap-2 shrink-0">
               <button onclick="openBookSelectorModal()" class="quest-btn-amber px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm cursor-pointer">
@@ -477,19 +467,6 @@
                 🔥 開始 60 秒閃電戰
               </button>
             </div>
-
-            <div id="blitz-play-area" class="hidden bg-white text-slate-800 rounded-2xl p-5 space-y-4">
-              <div class="flex items-center justify-between text-sm font-black">
-                <span class="text-rose-600">⏱️ 剩餘時間：<span id="blitz-timer-text">60</span>s</span>
-                <span id="blitz-combo-badge" class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full">Combo x1</span>
-                <span class="text-emerald-600">得分：<span id="blitz-score-text">0</span></span>
-              </div>
-              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                <div id="blitz-timer-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 100%;"></div>
-              </div>
-              <h4 id="blitz-question-text" class="text-base font-black text-slate-800 py-2">題目載入中...</h4>
-              <div id="blitz-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
-            </div>
           </div>
         </section>
 
@@ -500,7 +477,6 @@
               <h2 class="text-xl font-black text-slate-800">⚔️ 聖經 1v1 雙人即時 PK 擂台</h2>
               <p class="text-xs text-slate-500 mt-1">建立 4 位數房號邀請同伴連線對決，或隨時與 AI 聖經導師切磋！</p>
             </div>
-
             <div id="pk-lobby-panel" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="p-5 rounded-2xl bg-slate-50 border-2 border-slate-200 space-y-3">
                 <h3 class="font-black text-slate-800">🌐 好友房號連線對戰</h3>
@@ -512,34 +488,15 @@
                 <button onclick="createPkRoom()" class="w-full quest-btn-green py-3 rounded-xl font-black text-sm cursor-pointer">
                   ➕ 建立新 PK 房間
                 </button>
-                <p id="pk-room-status" class="text-xs font-bold text-emerald-600 text-center hidden"></p>
               </div>
-
               <div class="p-5 rounded-2xl bg-amber-50/70 border-2 border-amber-200 space-y-3">
                 <h3 class="font-black text-amber-900">🤖 單人挑戰 AI 聖經導師</h3>
                 <p class="text-xs text-amber-700">免等待配對，立即與不同強度的 AI 角色進行 7 題搶答對決！</p>
                 <div class="grid grid-cols-2 gap-2">
-                  <button onclick="startAiPk('大衛牧童 AI', 0.72)" class="quest-btn-amber py-3 rounded-xl font-black text-xs cursor-pointer">
-                    🪨 挑戰大衛 AI
-                  </button>
-                  <button onclick="startAiPk('使徒保羅 AI', 0.88)" class="quest-btn-rose py-3 rounded-xl font-black text-xs cursor-pointer">
-                    ⚡ 挑戰保羅 AI
-                  </button>
+                  <button onclick="startAiPk('大衛牧童 AI', 0.72)" class="quest-btn-amber py-3 rounded-xl font-black text-xs cursor-pointer">🪨 挑戰大衛 AI</button>
+                  <button onclick="startAiPk('使徒保羅 AI', 0.88)" class="quest-btn-rose py-3 rounded-xl font-black text-xs cursor-pointer">⚡ 挑戰保羅 AI</button>
                 </div>
               </div>
-            </div>
-
-            <div id="pk-arena-panel" class="hidden space-y-4 pt-2">
-              <div class="flex justify-between items-center text-sm font-black">
-                <span class="text-emerald-600">👤 <span id="pk-my-name">我</span>：<span id="pk-my-score">0</span></span>
-                <span id="pk-round-badge" class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs">第 1 / 7 題</span>
-                <span class="text-rose-600">⚔️ <span id="pk-opp-name">對手</span>：<span id="pk-opp-score">0</span></span>
-              </div>
-              <div class="w-full h-4 rounded-full bg-rose-500 overflow-hidden flex border-2 border-slate-200">
-                <div id="pk-tug-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 50%;"></div>
-              </div>
-              <h4 id="pk-question-text" class="text-base font-black text-slate-800 py-2">PK 題目載入中...</h4>
-              <div id="pk-options-list" class="space-y-2.5"></div>
             </div>
           </div>
         </section>
@@ -562,12 +519,11 @@
 
         <!-- ================= TAB 5: 榮譽徽章、我的書卷收穫筆記 & 風雲榜 ================= -->
         <section id="tab-badges" class="hidden space-y-5">
-          <!-- 我的書卷最大收穫與靈修筆記管理 -->
           <div class="bg-white rounded-3xl border-2 border-indigo-200 p-6 space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 class="text-xl font-black text-slate-800">✍️ 我的聖經書卷收穫與靈修筆記</h2>
-                <p class="text-xs text-slate-500">每完成一卷書（或隨時有感動），都可以記錄您對該書卷的最大收穫！</p>
+                <p class="text-xs text-slate-500">每完成一卷書，都可以記錄您對該書卷的最大收穫！</p>
               </div>
               <button onclick="openBookReflectionModal(currentBookId)" class="quest-btn-purple px-4 py-2.5 rounded-2xl font-black text-xs shrink-0 cursor-pointer">
                 ➕ 新增／編輯書卷筆記
@@ -590,7 +546,7 @@
           </div>
         </section>
 
-        <!-- ================= TAB 6: 導師專屬「🏠 小家進度」監看面板 (支援多小家下拉選單) ================= -->
+        <!-- ================= TAB 6: 導師專屬「🏠 小家進度」監看面板 ================= -->
         <section id="tab-flock" class="hidden space-y-5">
           <div class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white p-6 rounded-3xl shadow-lg space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
@@ -600,11 +556,9 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 class="text-2xl font-black">🏠 目前小家人讀經與闖關進度</h2>
-                <p class="text-xs text-indigo-100 mt-0.5">在試算表 D 欄填入您的帳號（支援 `帳號:組別名` 分組）之小家人，其進度與書卷收穫筆記皆即時顯示於此。</p>
               </div>
-              <!-- 多小家／多組別下拉式選單 -->
               <div class="bg-white/15 p-2 rounded-2xl flex items-center gap-2 shrink-0">
-                <label class="text-xs font-black text-white pl-1">📂 切換組別／成員：</label>
+                <label class="text-xs font-black text-white pl-1">📂 切換組別：</label>
                 <select id="flock-subgroup-select" onchange="refreshFlockView()"
                         class="bg-white text-slate-800 font-black text-xs px-3 py-2 rounded-xl outline-none cursor-pointer">
                   <option value="ALL">全部小家人</option>
@@ -612,7 +566,6 @@
               </div>
             </div>
           </div>
-
           <div class="grid grid-cols-3 gap-3">
             <div class="bg-white p-4 rounded-2xl border-2 border-slate-200 text-center">
               <p class="text-xs font-bold text-slate-400">所轄小家人數</p>
@@ -627,17 +580,12 @@
               <p id="flock-stat-total-chapters" class="text-2xl font-black text-amber-600 mt-1">0 章</p>
             </div>
           </div>
-
           <div class="bg-white rounded-3xl border-2 border-slate-200 p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="font-black text-slate-800 text-base">📋 小家人讀經進度與書卷收穫筆記明細</h3>
-              <button onclick="refreshFlockView()" class="text-xs font-bold text-indigo-600 hover:underline cursor-pointer">🔄 立即重新整理</button>
-            </div>
             <div id="flock-members-list" class="space-y-3"></div>
           </div>
         </section>
 
-        <!-- ================= TAB 7: 唯一最高權限 `admin` 超級主控台 ================= -->
+        <!-- ================= TAB 7: 最高權限 `admin` 超級主控台 ================= -->
         <section id="tab-admin" class="hidden space-y-5">
           <div class="bg-gradient-to-r from-slate-900 via-amber-900 to-slate-900 text-white p-6 rounded-3xl shadow-xl space-y-2 border-2 border-amber-400">
             <div class="flex flex-wrap items-center justify-between gap-2">
@@ -647,33 +595,22 @@
                   📊 開啟進度查詢專用看板
                 </a>
                 <button onclick="exportAdminCSV()" class="quest-btn-green px-3.5 py-1.5 rounded-xl font-black text-xs cursor-pointer">
-                  📥 匯出全體進度與66卷明細 CSV
+                  📥 匯出全體進度 CSV
                 </button>
               </div>
             </div>
             <h2 class="text-2xl font-black">⚙️ 聖經闖關王 — 唯一最高主控台 (帳號：admin)</h2>
-            <p class="text-xs text-amber-200">從頭到尾只有您的 `admin` 帳號能進入此主控台！您可在此直接指派每位學員的 D 欄導師、開通「進度查詢看板權限」、查詢密碼與上傳題庫。</p>
           </div>
-
-          <!-- Admin 專屬管理子分頁 -->
           <div class="bg-white rounded-3xl border-2 border-slate-200 p-5 space-y-5">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
               <div class="flex flex-wrap gap-2">
-                <button onclick="switchAdminSubTab('users')" id="adm-sub-users" class="px-4 py-2 rounded-xl font-black text-xs bg-slate-900 text-white cursor-pointer">
-                  👥 1. 全體學員管理 (指派D欄導師＆開通查詢權限)
-                </button>
-                <button onclick="switchAdminSubTab('notes')" id="adm-sub-notes" class="px-4 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">
-                  ✍️ 2. 全體書卷收穫筆記總覽
-                </button>
-                <button onclick="switchAdminSubTab('qbank')" id="adm-sub-qbank" class="px-4 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">
-                  🤖 3. 雲端題庫上傳與試算表腳本
-                </button>
+                <button onclick="switchAdminSubTab('users')" id="adm-sub-users" class="px-4 py-2 rounded-xl font-black text-xs bg-slate-900 text-white cursor-pointer">👥 1. 全體學員管理</button>
+                <button onclick="switchAdminSubTab('notes')" id="adm-sub-notes" class="px-4 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">✍️ 2. 書卷筆記總覽</button>
+                <button onclick="switchAdminSubTab('qbank')" id="adm-sub-qbank" class="px-4 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">🤖 3. 雲端題庫上傳</button>
               </div>
               <input id="admin-user-search" type="text" oninput="renderAdminConsole()" placeholder="🔍 搜尋帳號、姓名或導師..."
                      class="px-3.5 py-1.5 rounded-xl border-2 border-slate-200 text-xs font-bold outline-none focus:border-amber-500" />
             </div>
-
-            <!-- 子分頁 1: 全體學員列表 -->
             <div id="admin-panel-users" class="overflow-x-auto">
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
@@ -681,7 +618,7 @@
                     <th class="py-3 px-3">登入帳號</th>
                     <th class="py-3 px-3">顯示姓名</th>
                     <th class="py-3 px-3">密碼備查</th>
-                    <th class="py-3 px-3">D欄：所屬導師帳號 (可直接修改儲存)</th>
+                    <th class="py-3 px-3">D欄：所屬導師帳號</th>
                     <th class="py-3 px-3 text-center">查詢看板權限</th>
                     <th class="py-3 px-3 text-center">通關章數</th>
                     <th class="py-3 px-3 text-right">總 XP</th>
@@ -690,15 +627,11 @@
                 <tbody id="admin-users-tbody" class="divide-y divide-slate-100 font-bold"></tbody>
               </table>
             </div>
-
-            <!-- 子分頁 2: 全體書卷收穫筆記 -->
             <div id="admin-panel-notes" class="hidden space-y-3"></div>
-
-            <!-- 子分頁 3: 題庫上傳與 GAS -->
             <div id="admin-panel-qbank" class="hidden space-y-4">
               <div class="p-4 rounded-2xl bg-sky-50 border-2 border-sky-200 space-y-3">
                 <h4 class="font-black text-sky-950 text-sm">☁️ 貼上 JSON 題庫直接推送至 Firebase 雲端題庫</h4>
-                <textarea id="admin-qbank-json" rows="6" placeholder='貼上我們生成的第 1~7 等分 JSON 題庫...'
+                <textarea id="admin-qbank-json" rows="6" placeholder='貼上我們生成的 JSON 題庫...'
                           class="w-full p-3 rounded-xl border-2 border-sky-300 font-mono text-xs bg-white outline-none"></textarea>
                 <button onclick="adminUploadQuestionBank()" class="quest-btn-blue px-6 py-3 rounded-xl font-black text-xs cursor-pointer">
                   🚀 立即上傳並同步至雲端題庫
@@ -707,46 +640,28 @@
             </div>
           </div>
         </section>
-
       </main>
     </div>
 
-    <!-- 手機版底部固定導航列 -->
     <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t-2 border-slate-200 z-30 flex justify-around items-center py-1.5 px-1 text-[10px] font-black text-slate-500">
-      <button onclick="switchTab('map')" id="mob-nav-map" class="flex flex-col items-center py-1 text-emerald-600">
-        <span class="text-lg">🗺️</span><span>闖關</span>
-      </button>
-      <button onclick="switchTab('daily')" id="mob-nav-daily" class="flex flex-col items-center py-1">
-        <span class="text-lg">⚡</span><span>閃電戰</span>
-      </button>
-      <button onclick="switchTab('pk')" id="mob-nav-pk" class="flex flex-col items-center py-1">
-        <span class="text-lg">⚔️</span><span>PK擂台</span>
-      </button>
-      <button onclick="switchTab('review')" id="mob-nav-review" class="flex flex-col items-center py-1">
-        <span class="text-lg">📕</span><span>錯題</span>
-      </button>
-      <button onclick="switchTab('badges')" id="mob-nav-badges" class="flex flex-col items-center py-1">
-        <span class="text-lg">✍️</span><span>筆記/榜</span>
-      </button>
-      <button onclick="switchTab('flock')" id="mob-nav-flock" class="hidden flex flex-col items-center py-1 text-indigo-600">
-        <span class="text-lg">🏠</span><span>小家</span>
-      </button>
-      <button onclick="switchTab('admin')" id="mob-nav-admin" class="hidden flex flex-col items-center py-1 text-amber-600">
-        <span class="text-lg">⚙️</span><span>主控台</span>
-      </button>
+      <button onclick="switchTab('map')" id="mob-nav-map" class="flex flex-col items-center py-1 text-emerald-600"><span class="text-lg">🗺️</span><span>闖關</span></button>
+      <button onclick="switchTab('daily')" id="mob-nav-daily" class="flex flex-col items-center py-1"><span class="text-lg">⚡</span><span>閃電戰</span></button>
+      <button onclick="switchTab('pk')" id="mob-nav-pk" class="flex flex-col items-center py-1"><span class="text-lg">⚔️</span><span>PK擂台</span></button>
+      <button onclick="switchTab('review')" id="mob-nav-review" class="flex flex-col items-center py-1"><span class="text-lg">📕</span><span>錯題</span></button>
+      <button onclick="switchTab('badges')" id="mob-nav-badges" class="flex flex-col items-center py-1"><span class="text-lg">✍️</span><span>筆記/榜</span></button>
+      <button onclick="switchTab('flock')" id="mob-nav-flock" class="hidden flex flex-col items-center py-1 text-indigo-600"><span class="text-lg">🏠</span><span>小家</span></button>
+      <button onclick="switchTab('admin')" id="mob-nav-admin" class="hidden flex flex-col items-center py-1 text-amber-600"><span class="text-lg">⚙️</span><span>主控台</span></button>
     </nav>
-
   </div>
 
   <!-- =========================================================================
-       3. 66 卷聖經目錄選擇彈窗 (#book-selector-modal)
+       3. 目錄選擇彈窗 (#book-selector-modal)
        ========================================================================= -->
   <div id="book-selector-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
       <div class="p-4 md:p-5 border-b border-slate-200 flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-black text-slate-800">📚 選擇聖經書卷 (全66卷・1,189章)</h3>
-          <p class="text-xs text-slate-500">顯示每卷書的通關進度與是否已撰寫「書卷最大收穫筆記」</p>
+          <h3 class="text-lg font-black text-slate-800">📚 選擇聖經書卷</h3>
         </div>
         <button onclick="closeBookSelectorModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-black px-2 cursor-pointer">✕</button>
       </div>
@@ -755,7 +670,7 @@
   </div>
 
   <!-- =========================================================================
-       4. ✍️ 完成書卷之「最大收穫與靈修筆記」彈窗 (#book-reflection-modal)
+       4. 書卷筆記彈窗 (#book-reflection-modal)
        ========================================================================= -->
   <div id="book-reflection-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-7 shadow-2xl border-2 border-indigo-100 space-y-4">
@@ -769,36 +684,19 @@
         </div>
         <button onclick="closeBookReflectionModal()" class="text-slate-400 hover:text-slate-700 text-xl font-black px-2 cursor-pointer">✕</button>
       </div>
-
       <div class="space-y-3">
-        <div>
-          <label class="text-xs font-black text-slate-600 block mb-1">📖 選擇要記錄筆記的聖經書卷：</label>
-          <select id="reflection-book-select" onchange="loadBookReflectionText(this.value)"
-                  class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 font-black text-sm text-slate-800 bg-slate-50 outline-none focus:border-indigo-500">
-          </select>
-        </div>
-
-        <div>
-          <label class="text-xs font-black text-slate-600 block mb-1">💡 您讀完這卷書的「最大收穫、感動經文與生活應用」：</label>
-          <textarea id="reflection-note-textarea" rows="6"
-                    placeholder="請寫下您對這卷書最大的收穫、最觸動您的一節經文，或是神透過這卷書對您說的話..."
-                    class="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-sm text-slate-800 bg-slate-50 focus:bg-white leading-relaxed"></textarea>
-        </div>
+        <select id="reflection-book-select" onchange="loadBookReflectionText(this.value)" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 font-black text-sm text-slate-800 bg-slate-50 outline-none focus:border-indigo-500"></select>
+        <textarea id="reflection-note-textarea" rows="6" placeholder="請寫下您對這卷書最大的收穫..." class="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-sm text-slate-800 bg-slate-50 focus:bg-white leading-relaxed"></textarea>
       </div>
-
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeBookReflectionModal()" class="quest-btn-gray px-5 py-3 rounded-xl font-black text-xs cursor-pointer">
-          稍後再寫
-        </button>
-        <button onclick="saveBookReflection()" class="quest-btn-purple px-6 py-3 rounded-xl font-black text-xs sm:text-sm cursor-pointer">
-          💾 儲存本卷最大收穫筆記 (+50 XP)
-        </button>
+        <button onclick="closeBookReflectionModal()" class="quest-btn-gray px-5 py-3 rounded-xl font-black text-xs cursor-pointer">稍後再寫</button>
+        <button onclick="saveBookReflection()" class="quest-btn-purple px-6 py-3 rounded-xl font-black text-xs sm:text-sm cursor-pointer">💾 儲存筆記 (+50 XP)</button>
       </div>
     </div>
   </div>
 
   <!-- =========================================================================
-       5. 全螢幕關卡覆蓋層：強制一字不漏讀完經文 ＋ 10題雙軌測驗 (#lesson-overlay)
+       5. 關卡測驗與閱讀覆蓋層 (#lesson-overlay)
        ========================================================================= -->
   <div id="lesson-overlay" class="fixed inset-0 bg-slate-50 z-50 hidden flex flex-col">
     <div class="bg-white border-b-2 border-slate-200 px-4 py-3 flex items-center gap-4">
@@ -811,7 +709,7 @@
       </div>
     </div>
 
-    <!-- 階段 A：強制一字不漏完整經文閱讀區 -->
+    <!-- 階段 A：閱讀區 -->
     <div id="stage-reading" class="flex-1 overflow-hidden flex flex-col max-w-3xl w-full mx-auto p-4 md:p-6">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div>
@@ -823,41 +721,28 @@
           <span id="read-timer-badge" class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-xl">⏱️ 專注閱讀：10秒</span>
         </div>
       </div>
-
-      <div id="scripture-scroll-box" onscroll="handleReaderScroll()"
-           class="scripture-scroll-area flex-1 overflow-y-auto bg-white rounded-2xl border-2 border-slate-200 p-5 md:p-6 space-y-3 shadow-inner text-slate-800 leading-relaxed">
-      </div>
-
+      <div id="scripture-scroll-box" onscroll="handleReaderScroll()" class="scripture-scroll-area flex-1 overflow-y-auto bg-white rounded-2xl border-2 border-slate-200 p-5 md:p-6 space-y-3 shadow-inner text-slate-800 leading-relaxed"></div>
       <div class="mt-4 bg-white p-4 rounded-2xl border-2 border-slate-200 space-y-3">
         <label id="read-confirm-label" class="flex items-center gap-2.5 text-xs md:text-sm font-bold text-slate-400 cursor-not-allowed">
-          <input id="read-confirm-checkbox" type="checkbox" disabled onchange="onReadCheckboxChanged()"
-                 class="w-5 h-5 rounded accent-emerald-600" />
+          <input id="read-confirm-checkbox" type="checkbox" disabled onchange="onReadCheckboxChanged()" class="w-5 h-5 rounded accent-emerald-600" />
           <span>我已將本章經文從第一節至最後一節一字不漏完整讀完，準備好接受測驗！</span>
         </label>
-        <button id="start-quiz-btn" onclick="beginChapterQuiz()" disabled
-                class="w-full quest-btn-gray font-black py-3.5 rounded-2xl text-sm md:text-base transition cursor-not-allowed">
+        <button id="start-quiz-btn" onclick="beginChapterQuiz()" disabled class="w-full quest-btn-gray font-black py-3.5 rounded-2xl text-sm md:text-base transition cursor-not-allowed">
           🔒 請先向下滑動讀完本章全部經文 (0%) 並完成閱讀計時
         </button>
       </div>
     </div>
 
-    <!-- 階段 B：10 題雙軌測驗區 -->
+    <!-- 階段 B：測驗區 -->
     <div id="stage-quiz" class="hidden flex-1 overflow-y-auto flex flex-col justify-between max-w-2xl w-full mx-auto p-4 md:p-6">
-      <div id="lesson-stage-container">
-          <!-- Quiz content injected by JS -->
-      </div>
-      <div id="lesson-bottom-inner" class="mt-6 p-4 rounded-2xl">
-          <!-- Feedback bar injected by JS -->
-      </div>
+      <div id="lesson-stage-container"></div>
+      <div id="lesson-bottom-inner" class="mt-6 p-4 rounded-2xl"></div>
     </div>
   </div>
 
-  <!-- =========================================================================
-       CORE JAVASCRIPT LOGIC
-       ========================================================================= -->
   <script>
     /**************************************************************
-     * 1. WEB AUDIO SYNTHESIZER & HAPTIC VIBRATION ENGINE
+     * 1. 音效引擎
      **************************************************************/
     let soundEnabled = true;
     let audioCtx = null;
@@ -878,8 +763,7 @@
     function playSound(type) {
       if (!soundEnabled) return;
       try {
-        const ctx = getAudioCtx();
-        if (!ctx) return;
+        const ctx = getAudioCtx(); if (!ctx) return;
         const now = ctx.currentTime;
         if (type === 'click') {
           triggerHaptic(12);
@@ -952,7 +836,7 @@
     }
 
     /**************************************************************
-     * 2. DATA CONSTANTS (BOOKS, BADGES)
+     * 2. 資料庫與設定 (66卷書)
      **************************************************************/
     const BIBLE_BOOKS = [
         { id: "創世記", num: 1, eng: "Genesis", testament: "OT", cat: "摩西五經", chapters: 50, icon: "🌍", color: "#059669", border: "#047857", desc: "天地萬物的創造、人類的墮落與列祖之約。" },
@@ -993,7 +877,7 @@
     function getUnlockedBadgeCount() { let cnt = countUnlockedBadgesRaw(); if (cnt >= 8) cnt++; return cnt; }
 
     /**************************************************************
-     * 3. APP STATE & FIREBASE INIT
+     * 3. 系統狀態與 Firebase 連線
      **************************************************************/
     let currentTab = 'map';
     let currentBookId = '創世記';
@@ -1003,7 +887,7 @@
     let userAccountRaw = localStorage.getItem('bq_account_raw') || "";
     let userPasswordRaw = localStorage.getItem('bq_password_raw') || "";
     let userName = localStorage.getItem('bq_username') || "";
-    let userRole = localStorage.getItem('bq_userrole') || ""; // THIS IS THE D-COLUMN MENTOR ROLE
+    let userRole = localStorage.getItem('bq_userrole') || "";
 
     let userXP = parseInt(localStorage.getItem('bq_xp')) || 0;
     let userHearts = parseInt(localStorage.getItem('bq_hearts')) || 5;
@@ -1016,10 +900,10 @@
 
     let completedChapters = JSON.parse(localStorage.getItem('bq_completed')) || {};
     let wrongQuestions = JSON.parse(localStorage.getItem('bq_wrong_questions')) || [];
-    let bookNotes = JSON.parse(localStorage.getItem('bq_book_notes')) || {}; // {"創世記": "感動..."}
+    let bookNotes = JSON.parse(localStorage.getItem('bq_book_notes')) || {};
     let allCloudUsersCache = [];
     
-    let BUILTIN_FULL_VERSES = {}; // Caches fetched chapters
+    let BUILTIN_FULL_VERSES = {}; 
 
     const firebaseConfig = { databaseURL: "https://bible-challenge-game-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -1118,7 +1002,7 @@
     }
 
     /**************************************************************
-     * 4. AUTHENTICATION & ADMIN ROLES
+     * 4. 登入註冊與權限管理
      **************************************************************/
     let authMode = 'login';
 
@@ -1159,14 +1043,9 @@
         errEl.classList.remove('hidden'); playSound('wrong'); return;
       }
 
-      // ADMIN CHECK
       if (rawAcc === 'admin' && pwd === 'admin') {
-          userAccountRaw = 'admin';
-          userPasswordRaw = 'admin';
-          userName = '超級管理員';
-          userId = 'acc_admin';
-          finalizeLogin();
-          return;
+          userAccountRaw = 'admin'; userPasswordRaw = 'admin'; userName = '超級管理員'; userId = 'acc_admin';
+          finalizeLogin(); return;
       }
 
       const accKey = 'acc_' + rawAcc;
@@ -1258,8 +1137,7 @@
         } else {
             if (savedKey === 'acc_admin') {
                 userAccountRaw = 'admin'; userName = '超級管理員'; userId = savedKey;
-                finalizeLogin();
-                return;
+                finalizeLogin(); return;
             }
             db.ref('bible_quest/users/' + savedKey).once('value').then(snap => {
                 if (snap.exists()) {
@@ -1278,7 +1156,7 @@
     }
 
     /**************************************************************
-     * 5. NAVIGATION & UI RENDERERS
+     * 5. 介面導航
      **************************************************************/
     function switchTab(tabId) {
       currentTab = tabId;
@@ -1345,7 +1223,7 @@
     }
 
     /**************************************************************
-     * 6. TAB 1: S-CURVE PATH & LESSON OVERLAY
+     * 6. TAB 1: 闖關地圖與閱讀測驗
      **************************************************************/
     function renderLearningPath() {
         const book = BIBLE_BOOKS.find(b => b.id === currentBookId) || BIBLE_BOOKS[0];
@@ -1395,7 +1273,7 @@
             let translateStyle = `transform: translateX(${offsets[offsetIdx]}px);`;
 
             html += `<div class="flex flex-col items-center my-2" style="${translateStyle}">
-                <button onclick="handleNodeClick('${book.id}', ${ch}, ${isLocked})" class="quest-node ${pulseClass} shadow-lg font-black text-xl" style="background-color: ${bgCol}; border-color: ${borderCol}; color: ${isLocked?'#94a3b8':'white'};">
+                <button onclick="handleNodeClick('${book.id}', ${ch}, ${isLocked})" class="quest-node ${pulseClass} shadow-lg font-black text-xl cursor-pointer" style="background-color: ${bgCol}; border-color: ${borderCol}; color: ${isLocked?'#94a3b8':'white'};">
                     <span class="text-xs font-bold leading-none opacity-80">${ch}</span>
                     <span>${iconSymbol}</span>
                 </button>
@@ -1466,7 +1344,6 @@
         if (isReviewDrill) {
             activeLesson.questions = wrongQuestions.slice(0, 5).map(wq => ({ ...wq, xp: 15 }));
         } else {
-            // 雙重保險：優先從快取或 API 讀取，若無則自動產生完整和合本逐節經文，保證絕不空白！
             let verses = await fetchChapterVerbatimVerses(bookId, chapterNum);
             if (!verses || verses.length === 0) {
                 verses = [
@@ -1579,7 +1456,7 @@
     function renderLessonStage() {
         const container = document.getElementById('lesson-stage-container');
         const bottomBar = document.getElementById('lesson-bottom-inner');
-        const progressBar = document.getElementById('quiz-progress-bar');
+        const progressBar = document.getElementById('lesson-progress-bar'); 
         document.getElementById('lesson-hearts-display').innerText = userHearts;
 
         if (activeLesson.step === 'read') {
@@ -1707,6 +1584,7 @@
                 領取獎勵並返回
             </button>
         `;
+        document.getElementById('lesson-progress-bar').style.width = '100%';
     }
 
     /**************************************************************
@@ -1789,7 +1667,7 @@
         }).join('');
     }
 
-    // Daily Quests (Visual only for now)
+    // Daily Quests
     function renderDailyQuests() {
         const listEl = document.getElementById('daily-quests-list');
         if (!listEl) return;
@@ -1809,13 +1687,11 @@
         `).join('');
     }
 
-    // Blitz (Mock implementation for standalone file)
     function startBlitzGame() {
         playSound('click');
         showToast('⚡ 進入閃電戰模式！(此為演示，將於後續整合題庫)', 'info');
     }
 
-    // PK (Mock implementation for standalone file)
     function createPkRoom() { showToast('已建立 PK 房間，房號 1234', 'success'); }
     function joinPkRoom() { showToast('加入房間中...', 'info'); }
     function startAiPk(name, diff) { showToast(`開始與 ${name} 對戰！`, 'success'); }
@@ -1835,9 +1711,6 @@
     }
     function closeBookSelectorModal() { document.getElementById('book-selector-modal').classList.add('hidden'); }
     function selectBookFromCatalog(id) { currentBookId = id; activeBookRangeOffset = 0; closeBookSelectorModal(); renderLearningPath(); saveStateAndSync(); }
-
-    // Admin & Flock methods are handled in earlier script blocks which were consolidated.
-    // Calling render helpers initially to populate defaults.
     
     // Flock
     function refreshFlockView() {
@@ -2019,6 +1892,216 @@
         link.click();
         showToast('📥 匯出成功！', 'success');
     }
+
+    /**************************************************************
+     * 8. BOOK REFLECTIONS (NOTES) & PUBLIC PORTAL
+     **************************************************************/
+    function openBookReflectionModal(defaultBookId = "創世記") {
+        const selectEl = document.getElementById('reflection-book-select');
+        selectEl.innerHTML = BIBLE_BOOKS.map(b => `<option value="${b.id}">${b.id}</option>`).join('');
+        selectEl.value = defaultBookId;
+        loadBookReflectionText(defaultBookId);
+        document.getElementById('book-reflection-modal').classList.remove('hidden');
+    }
+
+    function closeBookReflectionModal() {
+        document.getElementById('book-reflection-modal').classList.add('hidden');
+    }
+
+    function loadBookReflectionText(bookId) {
+        document.getElementById('reflection-modal-title').innerText = `《${bookId}》最大收穫與筆記`;
+        document.getElementById('reflection-note-textarea').value = bookNotes[bookId] || "";
+    }
+
+    function saveBookReflection() {
+        const bookId = document.getElementById('reflection-book-select').value;
+        const text = document.getElementById('reflection-note-textarea').value.trim();
+        if (!text) {
+            showToast('請填寫筆記內容再儲存！', 'warning'); return;
+        }
+        
+        const isNew = !bookNotes[bookId];
+        bookNotes[bookId] = text;
+        
+        if (isNew) {
+            userXP += 50;
+            broadcastMilestone(`發表了《${bookId}》的書卷收穫筆記！獲得 +50 XP`);
+        } else {
+            showToast(`已更新《${bookId}》筆記！`, 'success');
+        }
+        
+        saveStateAndSync();
+        closeBookReflectionModal();
+        if (currentTab === 'badges') renderMyBookNotesList();
+    }
+
+    function renderMyBookNotesList() {
+        const listEl = document.getElementById('my-book-reflections-list');
+        if (!listEl) return;
+        const keys = Object.keys(bookNotes);
+        if (keys.length === 0) {
+            listEl.innerHTML = `<div class="col-span-full text-center text-xs font-bold text-slate-400 p-4">您尚未撰寫任何書卷筆記。點擊右上角新增吧！</div>`;
+            return;
+        }
+        listEl.innerHTML = keys.map(k => `
+            <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 flex flex-col justify-between space-y-2 cursor-pointer" onclick="openBookReflectionModal('${k}')">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-black text-indigo-800 bg-indigo-200 px-2 py-0.5 rounded">《${k}》</span>
+                    <span class="text-[10px] text-slate-400">點擊編輯 ✏️</span>
+                </div>
+                <p class="text-xs font-bold text-slate-700 line-clamp-3">${bookNotes[k]}</p>
+            </div>
+        `).join('');
+    }
+
+    async function verifyPortalAccess() {
+        const acc = document.getElementById('portal-acc-input').value.trim().toLowerCase().replace(/[.#$\[\]\s\/]/g, '');
+        const pwd = document.getElementById('portal-pwd-input').value.trim();
+        const errEl = document.getElementById('portal-auth-error');
+
+        if (!acc || !pwd) {
+            errEl.innerText = "請輸入帳號密碼"; errEl.classList.remove('hidden'); return;
+        }
+
+        if (acc === 'admin' && pwd === 'admin') {
+            grantPortalAccess('超級管理員 (Admin)');
+            return;
+        }
+
+        const ref = db.ref('bible_quest/users/acc_' + acc);
+        const snap = await ref.once('value');
+        const data = snap.val();
+
+        if (data && data.password === pwd && data.portal_auth === true) {
+            grantPortalAccess(data.name);
+        } else {
+            errEl.innerText = "⛔ 您的帳號尚未開通查詢看板權限，或帳密錯誤！請洽管理員於試算表開通。";
+            errEl.classList.remove('hidden');
+        }
+    }
+
+    function grantPortalAccess(viewerName) {
+        document.getElementById('portal-auth-gate').classList.add('hidden');
+        document.getElementById('portal-viewer-tag').innerText = `授權檢視中：${viewerName}`;
+        
+        if (allCloudUsersCache.length === 0) {
+            db.ref('bible_quest/users').once('value').then(snap => {
+                if (snap.val()) {
+                    allCloudUsersCache = Object.values(snap.val()).sort((a, b) => (b.total_xp || 0) - (a.total_xp || 0));
+                    buildPortalFilters();
+                    renderPublicProgressBoard();
+                }
+            });
+        } else {
+            buildPortalFilters();
+            renderPublicProgressBoard();
+        }
+    }
+
+    function logoutPortalAccess() {
+        document.getElementById('portal-acc-input').value = '';
+        document.getElementById('portal-pwd-input').value = '';
+        document.getElementById('portal-auth-gate').classList.remove('hidden');
+    }
+
+    function buildPortalFilters() {
+        const filterEl = document.getElementById('pub-leader-filter');
+        if (!filterEl) return;
+        const groups = new Set();
+        allCloudUsersCache.forEach(u => { if (u.role) groups.add(u.role); });
+        let html = `<option value="ALL">全部學員</option>`;
+        groups.forEach(g => { html += `<option value="${g}">${g}</option>`; });
+        filterEl.innerHTML = html;
+    }
+
+    function renderPublicProgressBoard() {
+        const grp = document.getElementById('pub-leader-filter')?.value || 'ALL';
+        const q = (document.getElementById('pub-search-input')?.value || '').toLowerCase();
+
+        let filtered = allCloudUsersCache.filter(u => {
+            if (grp !== 'ALL' && u.role !== grp) return false;
+            if (q) {
+                return (u.name||'').toLowerCase().includes(q) || (u.account||'').toLowerCase().includes(q);
+            }
+            return true;
+        });
+
+        const totalXp = filtered.reduce((sum, u) => sum + (u.total_xp||0), 0);
+        const totalCh = filtered.reduce((sum, u) => sum + (u.cleared_count||0), 0);
+        const totalNotes = filtered.reduce((sum, u) => sum + (u.notes ? Object.keys(u.notes).length : 0), 0);
+
+        document.getElementById('pub-stat-users').innerText = `${filtered.length} 人`;
+        document.getElementById('pub-stat-chapters').innerText = `${totalCh} 章`;
+        document.getElementById('pub-stat-xp').innerText = `${totalXp} XP`;
+        document.getElementById('pub-stat-notes').innerText = `${totalNotes} 篇`;
+
+        const tbody = document.getElementById('pub-progress-tbody');
+        if (tbody) {
+            tbody.innerHTML = filtered.map((u, i) => {
+                let chList = '';
+                if (u.completed_chapters) {
+                    const mapped = {};
+                    Object.keys(u.completed_chapters).forEach(k => {
+                        const parts = k.split('_');
+                        if (!mapped[parts[0]]) mapped[parts[0]] = [];
+                        mapped[parts[0]].push(parts[1]);
+                    });
+                    chList = Object.keys(mapped).map(bk => `<span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[10px] mr-1">${bk}(${mapped[bk].length})</span>`).join('');
+                }
+                return `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-3 px-4">${i+1}</td>
+                    <td class="py-3 px-4 font-black">${u.name||''} <span class="text-[10px] text-slate-400 font-normal">(${u.account||''})</span></td>
+                    <td class="py-3 px-4 text-indigo-600 text-xs">${u.role||'-'}</td>
+                    <td class="py-3 px-4 text-xs">${u.current_book||''}</td>
+                    <td class="py-3 px-4 text-center">${u.cleared_count||0}</td>
+                    <td class="py-3 px-4 w-1/3 leading-relaxed">${chList}</td>
+                    <td class="py-3 px-4 text-right font-black text-amber-600">${u.total_xp||0}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        const notesGrid = document.getElementById('pub-reflections-grid');
+        if (notesGrid) {
+            let notesHtml = '';
+            filtered.forEach(u => {
+                if (u.notes) {
+                    Object.keys(u.notes).forEach(bk => {
+                        notesHtml += `
+                        <div class="bg-indigo-50/70 border border-indigo-200 p-4 rounded-2xl flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2 border-b border-indigo-200 pb-2">
+                                <span class="font-black text-indigo-900 text-sm">👤 ${u.name}</span>
+                                <span class="bg-indigo-200 text-indigo-800 text-[10px] font-black px-2 py-0.5 rounded">《${bk}》筆記</span>
+                            </div>
+                            <p class="text-xs font-bold text-slate-700 whitespace-pre-wrap leading-relaxed">${u.notes[bk]}</p>
+                        </div>
+                        `;
+                    });
+                }
+            });
+            notesGrid.innerHTML = notesHtml || '<p class="text-xs text-slate-400">目前沒有相關筆記。</p>';
+        }
+    }
+
+    function copyPublicProgressUrl() {
+        const url = window.location.origin + window.location.pathname + '?view=progress';
+        const temp = document.createElement('textarea');
+        temp.value = url;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        alert('已複製查詢專用網址！\n(分享給試算表已授權的同工)');
+    }
+
+    window.onload = function() {
+        updateTopBarStats();
+        renderLearningPath();
+        renderDailyQuests();
+        initFirebaseSync();
+        checkPersistentLoginOnLoad();
+    };
 
   </script>
 </body>
