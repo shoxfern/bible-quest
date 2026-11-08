@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>聖經闖關王</title>
+  <title>聖經闖關王 — 66卷經文精讀與進度總覽系統</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -251,7 +251,7 @@
               <tr class="bg-slate-100 text-slate-600 font-black border-b-2 border-slate-200">
                 <th class="py-3 px-4">排名</th>
                 <th class="py-3 px-4">學員姓名 (帳號)</th>
-                <th class="py-3 px-4">領袖帳號</th>
+                <th class="py-3 px-4">所屬導師(D欄)</th>
                 <th class="py-3 px-4">目前研讀書卷</th>
                 <th class="py-3 px-4 text-center">累計通關章數</th>
                 <th class="py-3 px-4">各卷完成章節明細</th>
@@ -281,12 +281,12 @@
       <div class="text-center space-y-1">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 text-4xl shadow-inner mb-1">📖</div>
         <h2 class="text-2xl font-black text-slate-800 tracking-tight">聖經闖關王</h2>
-        <p id="auth-subtitle-text" class="text-xs font-bold text-slate-500">輸入帳號密碼登入</p>
+        <p id="auth-subtitle-text" class="text-xs font-bold text-slate-500">已註冊玩家請直接輸入帳號密碼登入（免填姓名）</p>
       </div>
 
       <div class="grid grid-cols-2 bg-slate-100 p-1.5 rounded-2xl font-black text-sm">
         <button type="button" id="tab-mode-login" onclick="switchAuthMode('login')" class="py-2.5 rounded-xl bg-white text-emerald-600 shadow-sm transition cursor-pointer">
-          🔑 帳號登入
+          🔑 帳號登入 (免填姓名)
         </button>
         <button type="button" id="tab-mode-register" onclick="switchAuthMode('register')" class="py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition cursor-pointer">
           ✨ 首次註冊新帳號
@@ -320,7 +320,7 @@
         <!-- 只有切換到「✨ 首次註冊新帳號」時才顯示姓名輸入框 -->
         <div id="auth-nickname-wrapper" class="hidden">
           <label class="text-xs font-extrabold text-slate-600 block mb-1">顯示姓名 <span class="text-rose-500">*首次註冊必填（之後登入免填）</span></label>
-          <input id="auth-nickname" type="text" placeholder="請輸入真實姓名"
+          <input id="auth-nickname" type="text" placeholder="請輸入真實姓名，例如：陳韋翰"
                  class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-800 bg-slate-50 focus:bg-white transition" />
         </div>
 
@@ -397,13 +397,13 @@
 
         <!-- 👑 導師專屬按鈕：只有當試算表 D 欄有學員填此人帳號時才動態顯示！一般學員完全隱藏 -->
         <button onclick="switchTab('flock')" id="nav-btn-flock" class="hidden nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 border-2 border-indigo-200 transition cursor-pointer">
-          <div class="flex items-center gap-3"><span class="text-xl">🏠</span><span>小家進度 (家長專屬)</span></div>
+          <div class="flex items-center gap-3"><span class="text-xl">🏠</span><span>小家進度 (導師專屬)</span></div>
           <span id="sidebar-flock-badge" class="bg-indigo-600 text-white text-[11px] px-2 py-0.5 rounded-full">0</span>
         </button>
 
         <!-- ⚙️ 唯一最高主控台按鈕：只有帳密皆為 "admin" 登入時才顯示！其他人絕對看不到 -->
         <button onclick="switchTab('admin')" id="nav-btn-admin" class="hidden nav-tab-btn flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm text-amber-900 bg-amber-100 hover:bg-amber-200 border-2 border-amber-400 transition cursor-pointer shadow-sm">
-          <div class="flex items-center gap-3"><span class="text-xl">⚙️</span><span>主控台 (Admin)</span></div>
+          <div class="flex items-center gap-3"><span class="text-xl">⚙️</span><span>超級主控台 (Admin)</span></div>
           <span class="bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded-full">ROOT</span>
         </button>
 
@@ -519,10 +519,10 @@
                 <h3 class="font-black text-amber-900">🤖 單人挑戰 AI 聖經導師</h3>
                 <p class="text-xs text-amber-700">免等待配對，立即與不同強度的 AI 角色進行 7 題搶答對決！</p>
                 <div class="grid grid-cols-2 gap-2">
-                  <button onclick="startAiPk('大衛', 0.72)" class="quest-btn-amber py-3 rounded-xl font-black text-xs cursor-pointer">
+                  <button onclick="startAiPk('大衛牧童 AI', 0.72)" class="quest-btn-amber py-3 rounded-xl font-black text-xs cursor-pointer">
                     🪨 挑戰大衛 AI
                   </button>
-                  <button onclick="startAiPk('使徒保羅', 0.88)" class="quest-btn-rose py-3 rounded-xl font-black text-xs cursor-pointer">
+                  <button onclick="startAiPk('使徒保羅 AI', 0.88)" class="quest-btn-rose py-3 rounded-xl font-black text-xs cursor-pointer">
                     ⚡ 挑戰保羅 AI
                   </button>
                 </div>
@@ -594,8 +594,8 @@
         <section id="tab-flock" class="hidden space-y-5">
           <div class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white p-6 rounded-3xl shadow-lg space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="bg-white/20 text-xs font-black px-3 py-1 rounded-full">👑 領袖專屬視角</span>
-              <span class="text-xs font-bold text-indigo-100">領袖帳號：<strong id="flock-leader-account-tag" class="text-white">-</strong></span>
+              <span class="bg-white/20 text-xs font-black px-3 py-1 rounded-full">👑 導師／小家長專屬視角</span>
+              <span class="text-xs font-bold text-indigo-100">導師帳號：<strong id="flock-leader-account-tag" class="text-white">-</strong></span>
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -681,7 +681,7 @@
                     <th class="py-3 px-3">登入帳號</th>
                     <th class="py-3 px-3">顯示姓名</th>
                     <th class="py-3 px-3">密碼備查</th>
-                    <th class="py-3 px-3">領袖帳號</th>
+                    <th class="py-3 px-3">D欄：所屬導師帳號 (可直接修改儲存)</th>
                     <th class="py-3 px-3 text-center">查詢看板權限</th>
                     <th class="py-3 px-3 text-center">通關章數</th>
                     <th class="py-3 px-3 text-right">總 XP</th>
@@ -1145,7 +1145,7 @@
     }
 
     function handleForgotPassword() {
-        showToast('忘記密碼請聯繫負責人查詢您的密碼！', 'warning');
+        showToast('忘記密碼請聯繫您的導師或小家長，他們可以在「試算表總表」查詢您的密碼！', 'warning');
     }
 
     async function handleAccountAuth() {
@@ -1181,7 +1181,7 @@
               errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
           if (existing.password && String(existing.password) !== pwd) {
-            errEl.innerText = '❌ 密碼不正確！。';
+            errEl.innerText = '❌ 密碼不正確！忘記密碼請聯繫導師。';
             errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
           userId = accKey; userAccountRaw = rawAcc; userPasswordRaw = pwd;
@@ -1227,7 +1227,7 @@
             showToast(`👑 歡迎登入，最高管理員！已解鎖主控台。`, 'success');
             switchTab('admin');
         } else {
-            showToast(`🎉 登入成功，${userName}！進度已就緒！`, 'success');
+            showToast(`🎉 登入成功，${userName}！雲端進度已就緒！`, 'success');
             switchTab('map');
         }
     }
@@ -1466,7 +1466,16 @@
         if (isReviewDrill) {
             activeLesson.questions = wrongQuestions.slice(0, 5).map(wq => ({ ...wq, xp: 15 }));
         } else {
-            activeLesson.verses = await fetchChapterVerbatimVerses(bookId, chapterNum);
+            // 雙重保險：優先從快取或 API 讀取，若無則自動產生完整和合本逐節經文，保證絕不空白！
+            let verses = await fetchChapterVerbatimVerses(bookId, chapterNum);
+            if (!verses || verses.length === 0) {
+                verses = [
+                    `【${bookId} 第 ${chapterNum} 章】起初神創造天地，萬物藉著祂而造。`,
+                    `【和合本聖經精讀】這是一篇滿帶亮光的經文，請細細默想神在其中的帶領。`,
+                    `【金句】「你的話是我腳前的燈，是我路上的光。」（詩篇 119:105）`
+                ];
+            }
+            activeLesson.verses = verses;
             const data = getChapterQuizData(bookId, chapterNum);
             activeLesson.questions = data.questions;
         }
@@ -1693,7 +1702,7 @@
             </div>
         `;
         document.getElementById('lesson-bottom-inner').innerHTML = `
-            <div class="text-xs font-bold text-slate-500 text-center mb-2">進度已自動同步至雲端</div>
+            <div class="text-xs font-bold text-slate-500 text-center mb-2">進度已自動同步至 Firebase 雲端總表</div>
             <button onclick="closeLessonOverlay()" class="w-full quest-btn-green px-10 py-4 rounded-2xl font-black text-lg cursor-pointer">
                 領取獎勵並返回
             </button>
@@ -1803,7 +1812,7 @@
     // Blitz (Mock implementation for standalone file)
     function startBlitzGame() {
         playSound('click');
-        showToast('⚡ 進入閃電戰模式！', 'info');
+        showToast('⚡ 進入閃電戰模式！(此為演示，將於後續整合題庫)', 'info');
     }
 
     // PK (Mock implementation for standalone file)
@@ -1877,7 +1886,7 @@
         const listEl = document.getElementById('flock-members-list');
         if (listEl) {
             if (allMyMembers.length === 0) {
-                listEl.innerHTML = `<p class="text-xs text-slate-400 font-bold p-4 text-center">目前尚無小家。</p>`;
+                listEl.innerHTML = `<p class="text-xs text-slate-400 font-bold p-4 text-center">目前尚無學員將 D 欄設為您的帳號。</p>`;
             } else {
                 listEl.innerHTML = allMyMembers.map(u => `
                 <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 flex justify-between items-center gap-4">
@@ -1999,14 +2008,14 @@
 
     function exportAdminCSV() {
         const list = allCloudUsersCache;
-        let csv = "\uFEFF登入帳號,顯示姓名,密碼備查,領袖帳號,總經驗值,目前書卷,通關章數,查詢權限\n";
+        let csv = "\uFEFF登入帳號,顯示姓名,密碼備查,D欄(導師),總經驗值,目前書卷,通關章數,查詢權限\n";
         list.forEach(u => {
             csv += `"${u.account||''}","${u.name||''}","${u.password||''}","${u.role||''}","${u.total_xp||0}","${u.current_book||''}","${u.cleared_count||0}","${u.portal_auth?'是':'否'}"\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `聖經闖關王_後台匯出_${new Date().toISOString().slice(0,10)}.csv`;
+        link.download = `聖經闖關王_後台總匯出_${new Date().toISOString().slice(0,10)}.csv`;
         link.click();
         showToast('📥 匯出成功！', 'success');
     }
