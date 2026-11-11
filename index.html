@@ -216,7 +216,7 @@
           <div class="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl border border-emerald-200" title="通關章數">
             <span>📜</span><span id="stat-chapters">0</span><span class="hidden sm:inline">章</span>
           </div>
-          <div class="flex items-center gap-1 bg-orange-50 text-orange-600 px-2.5 py-1.5 rounded-xl border border-orange-200" title="連續天數">
+          <div class="flex items-center gap-1 bg-orange-50 text-orange-600 px-2.5 py-1.5 rounded-xl border border-orange-200" title="連續打卡天數">
             <span>🔥</span><span id="stat-streak">1</span>
           </div>
           <div class="flex items-center gap-1 bg-amber-50 text-amber-600 px-2.5 py-1.5 rounded-xl border border-amber-200" title="經驗值">
@@ -507,7 +507,7 @@
               <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2.5">
                 <h4 class="font-black text-emerald-950 text-sm">🔗 綁定 Google 試算表 GAS 網頁應用程式網址</h4>
                 <p class="text-xs font-bold text-emerald-700">貼上部署為「所有人」的 GAS 網址後，學員註冊、通關、改名或剔除皆自動同步至試算表。</p>
-                <input id="admin-gas-url-input" type="url" placeholder="https://script.google.com/macros/s/AKfycbyC8MZ-7rJOKC4puwi-NlTJL4NXLjx0kgiP_G3SE9Ktrr3O6px1PNBBPY0hy3oXsco/exec"
+                <input id="admin-gas-url-input" type="url" placeholder="https://script.google.com/macros/s/AKfycbw0V77Pv5Fc_nwLj_0jKVrpgeSmcE5a3FPqE1GnyO5HDSMP5mc_BYoRSQcjE9WDAqQ/exec"
                        class="w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white font-mono text-xs outline-none" />
                 <div class="flex flex-wrap gap-2">
                   <button onclick="saveGasWebhookUrl()" class="quest-btn-green px-5 py-2.5 rounded-xl font-black text-xs cursor-pointer">💾 儲存網址</button>
@@ -800,7 +800,7 @@
     function getUnlockedBadgeCount() { let c = countUnlockedBadgesRaw(); return c >= 8 ? c + 1 : c; }
 
     /**************************************************************
-     * 3. 系統狀態與 Firebase 雙向同步＋GAS 自動連動
+     * 3. 系統狀態與 Firebase 雙向同步＋連續打卡計算
      **************************************************************/
     let currentTab = 'map';
     let currentBookId = '創世記';
@@ -813,21 +813,94 @@
 
     let userXP = parseInt(localStorage.getItem('bq_xp')) || 0;
     let userStreak = parseInt(localStorage.getItem('bq_streak')) || 1;
+    let userLastLoginDate = localStorage.getItem('bq_last_login_date') || "";
     let userPKWins = parseInt(localStorage.getItem('bq_pkwins')) || 0;
     let blitzBestScore = parseInt(localStorage.getItem('bq_blitz_best')) || 0;
     let maxComboEver = parseInt(localStorage.getItem('bq_max_combo')) || 0;
     let masteredWrongCount = parseInt(localStorage.getItem('bq_mastered_wrong')) || 0;
 
-    let completedChapters = JSON.parse(localStorage.getItem('bq_completed')) || {};
-    let wrongQuestions = JSON.parse(localStorage.getItem('bq_wrong_questions')) || [];
-    let bookNotes = JSON.parse(localStorage.getItem('bq_book_notes')) || {};
+    let completedChapters = JSON.parse(localStorage.getItem('bq_completed') || "{}");
+    let wrongQuestions = JSON.parse(localStorage.getItem('bq_wrong_questions') || "[]");
+    let bookNotes = JSON.parse(localStorage.getItem('bq_book_notes') || "{}");
     let allCloudUsersCache = [];
     let gasWebhookUrl = localStorage.getItem('bq_gas_webhook_url') || "";
     let BUILTIN_FULL_VERSES = Object.assign({}, DEFAULT_BUILTIN_VERSES, JSON.parse(localStorage.getItem('bq_verses_cache') || "{}"));
+    let lastRewardedPkRoomId = "";
 
     const firebaseConfig = { databaseURL: "https://bible-challenge-game-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
+    // 【修復 Bug 1】根據本地日期計算連續打卡天數
+    function getLocalTodayStr() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function updateDailyStreakLogic() {
+      const todayStr = getLocalTodayStr();
+      if (!userLastLoginDate) {
+        userStreak = Math.max(1, userStreak);
+        userLastLoginDate = todayStr;
+        return;
+      }
+      if (userLastLoginDate === todayStr) return;
+
+      const lastDate = new Date(userLastLoginDate + "T00:00:00");
+      const currDate = new Date(todayStr + "T00:00:00");
+      const diffDays = Math.round((currDate - lastDate) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        userStreak = (userStreak || 1) + 1;
+        showToast(`🔥 連續靈修打卡第 ${userStreak} 天！`, 'success');
+      } else if (diffDays > 1) {
+        userStreak = 1;
+      }
+      userLastLoginDate = todayStr;
+    }
+
+    // 【修復 Bug 2】登出或切換帳號時徹底清空前一位玩家的記憶體與快取狀態
+    function resetLocalUserState() {
+      userXP = 0;
+      userStreak = 1;
+      userLastLoginDate = "";
+      userPKWins = 0;
+      blitzBestScore = 0;
+      maxComboEver = 0;
+      masteredWrongCount = 0;
+      userRole = "";
+      currentBookId = "創世記";
+      activeBookRangeOffset = 0;
+      completedChapters = {};
+      wrongQuestions = [];
+      bookNotes = {};
+
+      [
+        'bq_logged_account', 'bq_userid', 'bq_account_raw', 'bq_username', 'bq_userrole',
+        'bq_xp', 'bq_streak', 'bq_last_login_date', 'bq_pkwins', 'bq_blitz_best',
+        'bq_max_combo', 'bq_mastered_wrong', 'bq_completed', 'bq_wrong_questions', 'bq_book_notes'
+      ].forEach(k => localStorage.removeItem(k));
+    }
+
+    function applyCloudUserData(val, fallbackAcc) {
+      userAccountRaw = val.account || fallbackAcc;
+      userName = val.name || userAccountRaw;
+      userRole = val.role || "";
+      userXP = Number(val.total_xp || 0);
+      userStreak = Number(val.streak || 1);
+      userLastLoginDate = val.last_login_date || "";
+      userPKWins = Number(val.pk_wins || 0);
+      blitzBestScore = Number(val.blitz_best || 0);
+      maxComboEver = Number(val.max_combo || 0);
+      masteredWrongCount = Number(val.mastered_wrong || 0);
+      currentBookId = val.current_book || "創世記";
+      completedChapters = val.completed_chapters || {};
+      wrongQuestions = val.wrong_questions || [];
+      bookNotes = val.notes || {};
+    }
 
     function initFirebaseSync() {
       db.ref('bible_quest/config/gas_webhook_url').on('value', snap => {
@@ -888,10 +961,12 @@
       });
     }
 
+    // 【修復 Bug 3】完整同步錯題本、閃電戰最高分、連擊紀錄與打卡日期至 Firebase
     function saveStateAndSync(eventType = 'update') {
       if (!userId || userAccountRaw === 'guest' || userAccountRaw === 'admin') return;
       localStorage.setItem('bq_xp', userXP);
       localStorage.setItem('bq_streak', userStreak);
+      localStorage.setItem('bq_last_login_date', userLastLoginDate);
       localStorage.setItem('bq_pkwins', userPKWins);
       localStorage.setItem('bq_blitz_best', blitzBestScore);
       localStorage.setItem('bq_max_combo', maxComboEver);
@@ -915,9 +990,14 @@
         role: userRole,
         total_xp: userXP,
         streak: userStreak,
+        last_login_date: userLastLoginDate,
         pk_wins: userPKWins,
+        blitz_best: blitzBestScore,
+        max_combo: maxComboEver,
+        mastered_wrong: masteredWrongCount,
         current_book: currentBookId,
         completed_chapters: completedChapters,
+        wrong_questions: wrongQuestions,
         cleared_count: clearedCount,
         badges_count: getUnlockedBadgeCount(),
         notes: bookNotes
@@ -945,7 +1025,7 @@
             timestamp: new Date().toISOString()
           })
         });
-        if (action === 'manual_sync') showToast('🔄 已發送全體同步指令至試算表！', 'success');
+        if (action === 'manual_sync') showToast('🔄 已發送全體批次同步指令至試算表！', 'success');
       } catch (e) {}
     }
 
@@ -1007,6 +1087,7 @@
           errEl.innerText = '❌ 管理員密碼錯誤';
           errEl.classList.remove('hidden'); playSound('wrong'); return;
         }
+        resetLocalUserState();
         userAccountRaw = 'admin'; userName = '超級管理員'; userId = 'acc_admin';
         finalizeLogin(); return;
       }
@@ -1021,16 +1102,10 @@
             errEl.innerText = '⚠️ 此暱稱已註冊，已為您切換至直接進場！';
             switchAuthMode('login');
           }
+          resetLocalUserState();
           userId = accKey;
-          userAccountRaw = existing.account || rawAcc;
-          userName = existing.name || rawAcc;
-          userRole = existing.role || "";
-          userXP = existing.total_xp || 0;
-          userStreak = existing.streak || 1;
-          userPKWins = existing.pk_wins || 0;
-          completedChapters = existing.completed_chapters || {};
-          wrongQuestions = existing.wrong_questions || [];
-          bookNotes = existing.notes || {};
+          applyCloudUserData(existing, rawAcc);
+          updateDailyStreakLogic();
           finalizeLogin();
         } else {
           if (authMode === 'login') {
@@ -1043,14 +1118,11 @@
             errEl.innerText = '⚠️ 首次註冊請填寫「真實全名」';
             errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
+          resetLocalUserState();
           userId = accKey;
           userAccountRaw = rawAcc;
           userName = fullName;
-          userRole = "";
-          userXP = 0;
-          completedChapters = {};
-          wrongQuestions = [];
-          bookNotes = {};
+          userLastLoginDate = getLocalTodayStr();
           finalizeLogin('register');
         }
       } catch (e) {
@@ -1082,16 +1154,19 @@
 
     function logoutAccount() {
       playSound('click');
-      localStorage.removeItem('bq_logged_account');
-      localStorage.removeItem('bq_account_raw');
+      stopBlitzTimer();
+      leavePkRoom();
+      resetLocalUserState();
       userAccountRaw = "";
       userId = "";
+      userName = "";
       document.getElementById('auth-username').value = '';
       document.getElementById('auth-password').value = '';
       document.getElementById('auth-nickname').value = '';
       document.getElementById('auth-admin-pwd-wrapper').classList.add('hidden');
       document.getElementById('auth-modal').classList.remove('hidden');
       switchAuthMode('login');
+      updateTopBarStats();
     }
 
     function checkPersistentLoginOnLoad() {
@@ -1113,15 +1188,11 @@
           if (snap.exists()) {
             const val = snap.val();
             userId = savedKey;
-            userAccountRaw = val.account || savedKey.replace(/^acc_/, '');
-            userName = val.name || userName;
-            userRole = val.role || "";
-            userXP = val.total_xp || 0;
-            userPKWins = val.pk_wins || 0;
-            completedChapters = val.completed_chapters || {};
-            bookNotes = val.notes || {};
+            applyCloudUserData(val, savedKey.replace(/^acc_/, ''));
+            updateDailyStreakLogic();
             finalizeLogin();
           } else {
+            resetLocalUserState();
             document.getElementById('auth-modal').classList.remove('hidden');
           }
         });
@@ -1132,6 +1203,9 @@
      * 5. 導航與頂部資訊列
      **************************************************************/
     function switchTab(tabId) {
+      if (currentTab === 'daily' && tabId !== 'daily') {
+        stopBlitzTimer();
+      }
       currentTab = tabId;
       playSound('click');
       ['map', 'daily', 'pk', 'review', 'badges', 'flock', 'admin'].forEach(t => {
@@ -1166,7 +1240,7 @@
       document.getElementById('stat-xp').innerText = userXP;
       document.getElementById('stat-chapters').innerText = clearedCount;
       document.getElementById('stat-streak').innerText = userStreak;
-      document.getElementById('header-user-badge').innerText = `${userName} (${userAccountRaw || '未登入'})`;
+      document.getElementById('header-user-badge').innerText = userName ? `${userName} (${userAccountRaw || '未登入'})` : '未登入';
 
       const titleObj = getUserTitleObj(userXP, clearedCount);
       const titleEl = document.getElementById('header-title-badge');
@@ -1273,7 +1347,6 @@
       if (BUILTIN_FULL_VERSES[key] && BUILTIN_FULL_VERSES[key].length > 1) return BUILTIN_FULL_VERSES[key];
       const book = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
 
-      // 來源 1：Bolls CUV 繁體和合本 API
       try {
         const r1 = await fetch(`https://bolls.life/get-chapter/CUV/${book.num}/${chapterNum}/`);
         if (r1.ok) {
@@ -1287,7 +1360,6 @@
         }
       } catch (e) {}
 
-      // 來源 2：getBible 繁體和合本 (cut) CDN
       try {
         const r2 = await fetch(`https://api.getbible.net/v2/cut/${book.num}/${chapterNum}.json`);
         if (r2.ok) {
@@ -1329,7 +1401,7 @@
       document.getElementById('lesson-overlay').classList.remove('hidden');
 
       if (isReviewDrill) {
-        activeLesson.questions = wrongQuestions.slice(0, 5).map(wq => ({ ...wq, xp: 15 }));
+        activeLesson.questions = shuffleQuestionOptions(wrongQuestions.slice(0, 5).map(wq => ({ ...wq, xp: 15 })));
         renderLessonStage();
       } else {
         document.getElementById('scripture-scroll-box').innerHTML = `<p class="text-center text-slate-400 py-8 font-bold">📖 正在載入《${bookId}》第 ${chapterNum} 章經文...</p>`;
@@ -1541,9 +1613,10 @@
       const book = BIBLE_BOOKS.find(b => b.id === activeLesson.bookId) || BIBLE_BOOKS[0];
       if (activeLesson.isReviewDrill) {
         wrongQuestions = wrongQuestions.filter(w => !activeLesson.clearedWrongIds.includes(w.id));
+        masteredWrongCount += activeLesson.clearedWrongIds.length;
         userXP += activeLesson.score;
       } else {
-        completedChapters[`${activeLesson.bookId}_${activeLesson.chapterNum}`] = new Date().toISOString().slice(0, 10);
+        completedChapters[`${activeLesson.bookId}_${activeLesson.chapterNum}`] = getLocalTodayStr();
         userXP += activeLesson.score + 50;
         broadcastMilestone(`通關【${activeLesson.bookId} 第 ${activeLesson.chapterNum} 章】！`);
       }
@@ -1565,7 +1638,7 @@
     }
 
     /**************************************************************
-     * 7. 4人即時連線 PK 擂台（保留綠紅作答提示不閃退）
+     * 7. 4人即時連線 PK 擂台（防重複領獎＋防房主斷線卡關）
      **************************************************************/
     let activePkRoomId = null;
     let activePkRef = null;
@@ -1630,7 +1703,7 @@
         qIdx: 0,
         questions: generatePkQuestionsByScope(scope),
         players: {
-          [myKey]: { id: myKey, name: userName || '玩家', title: myTitle, score: 0, answeredQ: -1, lastSelected: -1 }
+          [myKey]: { id: myKey, name: userName || '玩家', title: myTitle, score: 0, answeredQ: -1, lastSelected: -1, rewarded: false }
         }
       };
 
@@ -1654,7 +1727,7 @@
           showToast('房間已滿 (最多4人)', 'warning'); return;
         }
         db.ref(`bible_quest/pk_rooms/${code}/players/${myKey}`).set({
-          id: myKey, name: userName || '玩家', title: myTitle, score: 0, answeredQ: -1, lastSelected: -1
+          id: myKey, name: userName || '玩家', title: myTitle, score: 0, answeredQ: -1, lastSelected: -1, rewarded: false
         }).then(() => {
           subscribePkRoom(code);
         });
@@ -1715,8 +1788,9 @@
       if (room.status === 'playing') {
         const qIdx = room.qIdx || 0;
         const qList = room.questions || [];
+        // 【修復 Bug 4】任何在線玩家發現題目已答完皆可觸發結算，不怕房主斷線
         if (qIdx >= qList.length) {
-          if (isHost) activePkRef.update({ status: 'finished' });
+          activePkRef.update({ status: 'finished' });
           return;
         }
         const q = qList[qIdx];
@@ -1766,11 +1840,15 @@
 
       if (room.status === 'finished') {
         const winner = players[0];
-        if (winner && winner.id === myKey && !room._rewarded) {
-          room._rewarded = true;
+        const me = room.players && room.players[myKey];
+        // 【修復 Bug 4】雙重檢查雲端 rewarded 標記與本地房間 ID，確保冠軍只領一次獎
+        if (winner && winner.id === myKey && me && !me.rewarded && lastRewardedPkRoomId !== room.roomId) {
+          lastRewardedPkRoomId = room.roomId;
+          activePkRef.child('players/' + myKey).update({ rewarded: true });
           userPKWins++;
           userXP += 50;
           saveStateAndSync('pk_win');
+          showToast('🥇 恭喜奪得 PK 冠軍！獲得 +50 XP', 'success');
         }
         const medals = ['🥇 冠軍', '🥈 亞軍', '🥉 季軍', '🏅 殿軍'];
         stage.innerHTML = `
@@ -1836,14 +1914,26 @@
       if (activePkRef) activePkRef.off();
       activePkRef = null;
       activePkRoomId = null;
-      document.getElementById('pk-room-stage').classList.add('hidden');
-      document.getElementById('pk-lobby-panel').classList.remove('hidden');
+      const stage = document.getElementById('pk-room-stage');
+      const lobby = document.getElementById('pk-lobby-panel');
+      if (stage) stage.classList.add('hidden');
+      if (lobby) lobby.classList.remove('hidden');
     }
 
     /**************************************************************
-     * 8. 60秒閃電戰、錯題本、排行榜、小家、Admin主控台
+     * 8. 60秒閃電戰（含切換分頁安全清除計時器）、錯題本、排行榜、小家、主控台
      **************************************************************/
     let blitzState = { timer: 60, interval: null, score: 0, combo: 0, currentQ: null };
+
+    // 【修復 Bug 5】離開分頁或登出時安全停止閃電戰計時器
+    function stopBlitzTimer() {
+      if (blitzState.interval) {
+        clearInterval(blitzState.interval);
+        blitzState.interval = null;
+      }
+      const box = document.getElementById('blitz-arena-box');
+      if (box) box.classList.add('hidden');
+    }
 
     function renderDailyQuests() {
       document.getElementById('blitz-best-label').innerText = blitzBestScore;
@@ -1865,22 +1955,22 @@
 
     function startBlitzGame() {
       playSound('click');
+      stopBlitzTimer();
       blitzState.timer = 60;
       blitzState.score = 0;
       blitzState.combo = 0;
+      document.getElementById('blitz-timer-badge').innerText = `⏱️ 60秒`;
       document.getElementById('blitz-arena-box').classList.remove('hidden');
       nextBlitzQuestion();
-      if (blitzState.interval) clearInterval(blitzState.interval);
       blitzState.interval = setInterval(() => {
         blitzState.timer--;
         document.getElementById('blitz-timer-badge').innerText = `⏱️ ${blitzState.timer}秒`;
         if (blitzState.timer <= 0) {
-          clearInterval(blitzState.interval);
+          stopBlitzTimer();
           if (blitzState.score > blitzBestScore) blitzBestScore = blitzState.score;
           userXP += Math.round(blitzState.score / 5);
           saveStateAndSync('blitz_finish');
           renderDailyQuests();
-          document.getElementById('blitz-arena-box').classList.add('hidden');
           showToast(`⚡ 閃電戰結束！得分：${blitzState.score}`, 'success');
         }
       }, 1000);
@@ -1901,11 +1991,13 @@
     function answerBlitzQuestion(idx) {
       if (idx === blitzState.currentQ.answer) {
         blitzState.combo++;
+        if (blitzState.combo > maxComboEver) maxComboEver = blitzState.combo;
         blitzState.score += 20 + blitzState.combo * 5;
         if (blitzState.combo % 3 === 0) blitzState.timer = Math.min(60, blitzState.timer + 3);
         playSound('correct');
       } else {
         blitzState.combo = 0;
+        recordWrongQuestion("閃電戰", 1, blitzState.currentQ);
         playSound('wrong');
       }
       nextBlitzQuestion();
@@ -1915,7 +2007,7 @@
       if (!wrongQuestions.some(w => w.q === qObj.q)) {
         wrongQuestions.unshift({
           id: "wq_" + Date.now(), bookId: bookId || currentBookId, chapter: chapter || 1,
-          type: qObj.type || "基礎", q: qObj.q, options: qObj.options, answer: qObj.answer, exp: qObj.exp
+          type: qObj.type || "基礎", q: qObj.q, options: qObj.options, answer: qObj.answer, exp: qObj.exp || ""
         });
         saveStateAndSync();
       }
