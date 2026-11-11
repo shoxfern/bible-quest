@@ -2274,19 +2274,150 @@
       });
     }
 
-    function adminUploadQuestionBank() {
-      const txt = document.getElementById('admin-qbank-json').value.trim();
-      if (!txt) { showToast('請貼上 JSON', 'warning'); return; }
-      try {
-        const parsed = JSON.parse(txt);
-        db.ref('bible_quest/question_bank').update(parsed).then(() => {
-          showToast('🚀 題庫上傳成功！', 'success');
-          document.getElementById('admin-qbank-json').value = '';
+// 1. 升級主控台題庫上傳：清除舊題庫並寫入新題庫
+function adminUploadQuestionBank() {
+  const txt = document.getElementById('admin-qbank-json').value.trim();
+  if (!txt) { showToast('請貼上 JSON', 'warning'); return; }
+  try {
+    const parsed = JSON.parse(txt);
+    // 使用 set() 清除舊有不良題庫並寫入最新故事題庫
+    db.ref('bible_quest/question_bank').set(parsed).then(() => {
+      window.CURATED_CHAPTER_DATA = parsed;
+      showToast('🚀 已清除舊題庫並載入最新 7 題故事題庫！', 'success');
+      document.getElementById('admin-qbank-json').value = '';
+    });
+  } catch (e) {
+    showToast('JSON 格式錯誤', 'error');
+  }
+}
+
+// 2. 紀錄玩家已答過的跨章題目，確保族譜往前抓題「絕不重複」
+let askedCrossChapterQuestions = new Set(JSON.parse(localStorage.getItem('bq_asked_q_hashes') || "[]"));
+
+function markQuestionAsked(qText) {
+  askedCrossChapterQuestions.add(qText);
+  try {
+    localStorage.setItem('bq_asked_q_hashes', JSON.stringify(Array.from(askedCrossChapterQuestions).slice(-200)));
+  } catch (e) {}
+}
+
+// 3. 判斷該章經文是否為「族譜 / 家譜 / 名單」章節
+function isGenealogyOrListChapter(verses = []) {
+  const joined = verses.join(" ");
+  const genCount = (joined.match(/生|後代|族譜|家譜|支派|宗族|兒子是/g) || []).length;
+  return genCount >= 8;
+}
+
+// 4. 從單節經文中自動萃取真實故事問答（當該章尚未手寫題庫時，直接考經文裡的真實人物對話與事件）
+function extractStoryQuestionsFromVerses(bookId, chapterNum, verses = []) {
+  const extracted = [];
+  const cleanVerses = verses.map(v => v.replace(/^\d+\.\s*/, '').trim()).filter(v => v.length >= 12);
+
+  // 優先挑出含有「對話（『…』）」、「神說 / 耶和華」、「因為 / 所以」、「就…」的關鍵故事經節
+  const narrativeVerses = cleanVerses.filter(v => /「|」|神|耶和華|耶穌|因為|於是|吩咐|回答/.test(v));
+  const pool = narrativeVerses.length >= 7 ? narrativeVerses : cleanVerses;
+
+  const wrongDistractors = [
+    "眾人就離開那地，往埃及的歌珊地去住下",
+    "大衛就拿石子用機弦甩去，打中非利士人的額頭",
+    "摩西向海伸杖，耶和華便用大東風使海水一夜退去",
+    "所羅門王在耶路撒冷動工建造耶和華的殿",
+    "彼得和約翰在申初禱告的時候上聖殿去",
+    "保羅和西拉在半夜禱告唱詩讚美神，地大震動",
+    "羅得的妻子在後邊回頭一看，就變成了一根鹽柱",
+    "以利亞在迦密山上求告耶和華，就有火降下來燒盡燔祭"
+  ];
+
+  pool.forEach((v, idx) => {
+    if (extracted.length >= 7) return;
+    // 若經節有前後因果或上下半句，切開前半句當題幹、後半句當答案
+    const clauses = v.split(/[，；：。！？]/).map(s => s.trim()).filter(s => s.length >= 4);
+    if (clauses.length >= 2) {
+      const mid = Math.ceil(clauses.length / 2);
+      const stem = clauses.slice(0, mid).join("，");
+      const ans = clauses.slice(mid).join("，");
+      const dists = wrongDistractors.filter(d => !v.includes(d.slice(0, 5))).sort(() => Math.random() - 0.5).slice(0, 3);
+      extracted.push({
+        type: idx < 4 ? "簡單" : "困難",
+        xp: idx < 4 ? 15 : 25,
+        q: `在《${bookId}》第 ${chapterNum} 章的故事中，經文記載「${stem}」之後，接著發生了什麼事或說了什麼話？`,
+        options: [ans, ...dists],
+        answer: 0,
+        exp: `經文原文：「${v}」`
+      });
+    }
+  });
+  return extracted;
+}
+
+// 5. 全新 7 題故事與族譜跨章出題核心引擎（徹底刪除舊版 10 題白癡模板）
+function getChapterQuizData(bookId, chapterNum, verses = []) {
+  const key = `${bookId}_${chapterNum}`;
+  const isGenealogy = isGenealogyOrListChapter(verses);
+
+  // A. 若雲端或內建已有該章精選故事題庫，且非純族譜章節，直接取 7 題
+  if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key] && !isGenealogy) {
+    const qArr = window.CURATED_CHAPTER_DATA[key].questions.slice(0, 7);
+    qArr.forEach(q => markQuestionAsked(q.q));
+    return {
+      title: window.CURATED_CHAPTER_DATA[key].title,
+      questions: shuffleQuestionOptions(qArr)
+    };
+  }
+
+  let finalQuestions = [];
+
+  // B. 先放入本章已有的精選題（若有）
+  if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key]) {
+    finalQuestions.push(...window.CURATED_CHAPTER_DATA[key].questions);
+  }
+
+  // C. 若本章是「族譜章節」或題目不足 7 題，自動往前抓取前幾章「尚未問過」的故事題！
+  if (isGenealogy || finalQuestions.length < 7) {
+    const prevPool = [];
+    for (let c = chapterNum - 1; c >= 1; c--) {
+      const prevKey = `${bookId}_${c}`;
+      if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[prevKey]) {
+        window.CURATED_CHAPTER_DATA[prevKey].questions.forEach(pq => {
+          if (!askedCrossChapterQuestions.has(pq.q) && !finalQuestions.some(fq => fq.q === pq.q)) {
+            prevPool.push({
+              ...pq,
+              q: `【前章故事回顧・${bookId}${c}章】${pq.q}`
+            });
+          }
         });
-      } catch (e) {
-        showToast('JSON 格式錯誤', 'error');
       }
     }
+    // 若本章是族譜，保留本章最多 3 題亮點題，其餘從前幾章未問過的故事題補滿 7 題
+    if (isGenealogy && prevPool.length > 0) {
+      finalQuestions = finalQuestions.slice(0, 3);
+      const needed = 7 - finalQuestions.length;
+      finalQuestions.push(...prevPool.sort(() => Math.random() - 0.5).slice(0, needed));
+    } else if (finalQuestions.length < 7 && prevPool.length > 0) {
+      const needed = 7 - finalQuestions.length;
+      finalQuestions.push(...prevPool.sort(() => Math.random() - 0.5).slice(0, needed));
+    }
+  }
+
+  // D. 若仍不足 7 題，直接從本章真實經文對話與情節萃取故事題補滿 7 題
+  if (finalQuestions.length < 7) {
+    const verseQs = extractStoryQuestionsFromVerses(bookId, chapterNum, verses);
+    for (const vq of verseQs) {
+      if (finalQuestions.length >= 7) break;
+      if (!finalQuestions.some(fq => fq.q === vq.q)) {
+        finalQuestions.push(vq);
+      }
+    }
+  }
+
+  finalQuestions = finalQuestions.slice(0, 7);
+  finalQuestions.forEach(q => markQuestionAsked(q.q));
+
+  return {
+    title: `${bookId} 第 ${chapterNum} 章（7題故事挑戰）`,
+    questions: shuffleQuestionOptions(finalQuestions)
+  };
+}
 
     function exportAdminCSV() {
       let csv = "\uFEFF進場暱稱,真實全名,頭銜稱號,領袖帳號(D欄),總經驗值,目前書卷,通關章數,看板權限\n";
