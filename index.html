@@ -498,24 +498,36 @@
 
             <div id="admin-panel-notes" class="hidden space-y-2.5"></div>
 
+            <!-- 3. 題庫上傳（含即時雲端題庫章節統計與覆蓋/擴充雙模式詢問） -->
             <div id="admin-panel-qbank" class="hidden space-y-3">
-              <textarea id="admin-qbank-json" rows="6" placeholder="貼上 7 題故事 JSON 題庫..."
-                        class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs bg-slate-50 outline-none"></textarea>
-              <div class="flex flex-wrap gap-2">
-                <button onclick="adminUploadQuestionBank(false)" class="quest-btn-blue px-5 py-2.5 rounded-xl font-black text-xs cursor-pointer">
-                  ➕ 合併擴充題庫
+              <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h4 class="font-black text-indigo-950 text-xs">📚 目前雲端已載入精選故事題庫：<span id="qbank-count-badge" class="text-indigo-600 text-sm">3</span> 章</h4>
+                  <p id="qbank-chapters-preview" class="text-[11px] font-bold text-slate-500 mt-0.5 max-h-16 overflow-y-auto">載入中...</p>
+                </div>
+              </div>
+
+              <textarea id="admin-qbank-json" rows="6" placeholder="在此貼上 7 題故事 JSON 題庫..."
+                        class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs bg-slate-50 outline-none focus:border-indigo-500"></textarea>
+
+              <div class="flex flex-wrap gap-2.5">
+                <button onclick="adminUploadQuestionBank('merge')" class="quest-btn-blue px-5 py-3 rounded-xl font-black text-xs cursor-pointer">
+                  ➕ 合併擴充題庫（保留舊章節＋新增本次章節）
                 </button>
-                <button onclick="adminUploadQuestionBank(true)" class="quest-btn-rose px-5 py-2.5 rounded-xl font-black text-xs cursor-pointer">
-                  🧹 清空舊題庫並覆蓋為新題庫
+                <button onclick="adminUploadQuestionBank('overwrite')" class="quest-btn-rose px-5 py-3 rounded-xl font-black text-xs cursor-pointer">
+                  🧹 清空舊題庫並覆蓋（刪除舊題庫，只留本次上傳）
                 </button>
               </div>
             </div>
 
+            <!-- 4. 試算表 GAS 連動（已直接內建您的部署網址） -->
             <div id="admin-panel-gas" class="hidden space-y-3">
               <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2.5">
                 <h4 class="font-black text-emerald-950 text-sm">🔗 綁定 Google 試算表 GAS 網頁應用程式網址</h4>
-                <p class="text-xs font-bold text-emerald-700">貼上部署為「所有人」的 GAS 網址後，學員註冊、通關、改名或剔除皆自動同步至試算表。</p>
-                <input id="admin-gas-url-input" type="url" placeholder="https://script.google.com/macros/s/AKfycbzhnsb7cL7wzlhY2UW89TLc1hKSMKad5y5nMgrrprMaJP_krb-P5fSWEVGaYyvF9Sg/exec"
+                <p class="text-xs font-bold text-emerald-700">已預先填入您的 GAS 部署網址，學員註冊、通關、改名或剔除皆自動同步至試算表。</p>
+                <input id="admin-gas-url-input" type="url"
+                       value="https://script.google.com/macros/s/AKfycbzhnsb7cL7wzlhY2UW89TLc1hKSMKad5y5nMgrrprMaJP_krb-P5fSWEVGaYyvF9Sg/exec"
+                       placeholder="https://script.google.com/macros/s/.../exec"
                        class="w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white font-mono text-xs outline-none" />
                 <div class="flex flex-wrap gap-2">
                   <button onclick="saveGasWebhookUrl()" class="quest-btn-green px-5 py-2.5 rounded-xl font-black text-xs cursor-pointer">💾 儲存網址</button>
@@ -875,7 +887,7 @@
       ]
     };
 
-    window.CURATED_CHAPTER_DATA = {
+    const BUILTIN_DEFAULT_QBANK = {
       "創世記_1": {
         title: "創世記 第 1 章：神六日創造天地與造人",
         questions: [
@@ -914,6 +926,8 @@
       }
     };
 
+    window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK);
+
     const BADGES_CATALOG = [
       { id: "b1", icon: "🕯️", title: "起初之光", desc: "完成 1 章經文", check: () => Object.keys(completedChapters).length >= 1 },
       { id: "b2", icon: "📜", title: "真理行者", desc: "完成 5 章經文", check: () => Object.keys(completedChapters).length >= 5 },
@@ -933,8 +947,10 @@
     function getUnlockedBadgeCount() { let c = countUnlockedBadgesRaw(); return c >= 8 ? c + 1 : c; }
 
     /**************************************************************
-     * 3. 系統狀態與 Firebase 雙向同步＋連續打卡計算
+     * 3. 系統狀態與 Firebase 雙向同步＋預設綁定您的 GAS 網址
      **************************************************************/
+    const DEFAULT_GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzhnsb7cL7wzlhY2UW89TLc1hKSMKad5y5nMgrrprMaJP_krb-P5fSWEVGaYyvF9Sg/exec";
+
     let currentTab = 'map';
     let currentBookId = '創世記';
     let activeBookRangeOffset = 0;
@@ -956,7 +972,7 @@
     let wrongQuestions = JSON.parse(localStorage.getItem('bq_wrong_questions') || "[]");
     let bookNotes = JSON.parse(localStorage.getItem('bq_book_notes') || "{}");
     let allCloudUsersCache = [];
-    let gasWebhookUrl = localStorage.getItem('bq_gas_webhook_url') || "";
+    let gasWebhookUrl = localStorage.getItem('bq_gas_webhook_url') || DEFAULT_GAS_WEBHOOK_URL;
 
     localStorage.removeItem('bq_verses_cache');
     localStorage.removeItem('bq_full_verses_v4');
@@ -1041,7 +1057,6 @@
       autoJumpToCurrentChapterPage(currentBookId);
     }
 
-    // 【自動定位章節分頁】找尋該卷書第一個未完成的章節並自動切換至對應的 15 章頁籤
     function autoJumpToCurrentChapterPage(bookId) {
       const book = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
       if (book.chapters <= 15) {
@@ -1058,14 +1073,27 @@
       activeBookRangeOffset = Math.floor((targetCh - 1) / 15);
     }
 
+    function updateQbankStatusBadge() {
+      const keys = Object.keys(window.CURATED_CHAPTER_DATA || {});
+      const countEl = document.getElementById('qbank-count-badge');
+      const previewEl = document.getElementById('qbank-chapters-preview');
+      if (countEl) countEl.innerText = keys.length;
+      if (previewEl) {
+        previewEl.innerText = keys.length > 0 ? `包含章節：${keys.join('、')}` : '目前尚無手寫題庫';
+      }
+    }
+
     function initFirebaseSync() {
       db.ref('bible_quest/config/gas_webhook_url').on('value', snap => {
         if (snap.val()) {
           gasWebhookUrl = snap.val();
-          localStorage.setItem('bq_gas_webhook_url', gasWebhookUrl);
-          const inp = document.getElementById('admin-gas-url-input');
-          if (inp) inp.value = gasWebhookUrl;
+        } else {
+          gasWebhookUrl = DEFAULT_GAS_WEBHOOK_URL;
+          db.ref('bible_quest/config/gas_webhook_url').set(DEFAULT_GAS_WEBHOOK_URL);
         }
+        localStorage.setItem('bq_gas_webhook_url', gasWebhookUrl);
+        const inp = document.getElementById('admin-gas-url-input');
+        if (inp) inp.value = gasWebhookUrl;
       });
 
       db.ref('bible_quest/users').on('value', snap => {
@@ -1097,8 +1125,11 @@
       db.ref('bible_quest/question_bank').on('value', snap => {
         const cloudBank = snap.val();
         if (cloudBank && typeof cloudBank === 'object') {
-          window.CURATED_CHAPTER_DATA = Object.assign(window.CURATED_CHAPTER_DATA || {}, cloudBank);
+          window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK, cloudBank);
+        } else {
+          window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK);
         }
+        updateQbankStatusBadge();
       });
 
       db.ref('bible_quest/milestones').limitToLast(12).on('value', snap => {
@@ -1164,12 +1195,13 @@
     }
 
     function triggerGasWebhookSync(action = 'sync', userData = null, oldAccount = '') {
-      if (!gasWebhookUrl) {
+      const targetUrl = gasWebhookUrl || DEFAULT_GAS_WEBHOOK_URL;
+      if (!targetUrl) {
         if (action === 'manual_sync') showToast('請先輸入並儲存 GAS 網址', 'warning');
         return;
       }
       try {
-        fetch(gasWebhookUrl, {
+        fetch(targetUrl, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1384,7 +1416,7 @@
       if (tabId === 'map') renderLearningPath();
       if (tabId === 'review') renderWrongQuestionsVault();
       if (tabId === 'flock') renderMyGroupDashboard();
-      if (tabId === 'admin') renderAdminConsole(true);
+      if (tabId === 'admin') { renderAdminConsole(true); updateQbankStatusBadge(); }
       if (tabId === 'badges') { renderBadgesWall(); renderLeaderboardSection(); renderMyBookNotesList(); }
       if (tabId === 'daily') renderDailyQuests();
       if (tabId === 'pk') populatePkBookScopeDropdown();
@@ -1506,7 +1538,6 @@
       }
     }
 
-    // 【新增】經文純淨化處理器：徹底濾除 Strong's Number (<S>1234</S>)、註腳 (<sup>...</sup>) 與多餘 HTML 標籤
     function cleanScriptureText(raw) {
       if (!raw) return "";
       return String(raw)
@@ -1526,7 +1557,6 @@
       }
       const book = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
 
-      // 來源 1：getBible 繁體和合本 (cut) 全章 CDN
       try {
         const r1 = await fetch(`https://api.getbible.net/v2/cut/${book.num}/${chapterNum}.json`);
         if (r1.ok) {
@@ -1540,7 +1570,6 @@
         }
       } catch (e) {}
 
-      // 來源 2：Bolls CUV 繁體和合本 API
       try {
         const r2 = await fetch(`https://bolls.life/get-chapter/CUV/${book.num}/${chapterNum}/`);
         if (r2.ok) {
@@ -1554,7 +1583,6 @@
         }
       } catch (e) {}
 
-      // 來源 3：Bolls CUNP 新標點和合本 API
       try {
         const r3 = await fetch(`https://bolls.life/get-chapter/CUNP/${book.num}/${chapterNum}/`);
         if (r3.ok) {
@@ -1713,7 +1741,6 @@
       return genCount >= 8;
     }
 
-    // 【智慧同章干擾選項引擎】直接從本章其他節經文抽取後半句作為誘答選項，需要真正讀過本章才能分辨！
     function extractStoryQuestionsFromVerses(bookId, chapterNum, verses = []) {
       const extracted = [];
       const cleanVerses = verses.map(v => ({
@@ -1721,7 +1748,6 @@
         text: v.replace(/^\d+\.\s*/, '').trim()
       })).filter(v => v.text.length >= 10);
 
-      // 拆解每一節的前半句(stem)與後半句(tail)
       const parsedPairs = [];
       cleanVerses.forEach(item => {
         const clauses = item.text.split(/[，；：。！？]/).map(s => s.trim()).filter(s => s.length >= 3);
@@ -1749,11 +1775,9 @@
 
       for (let i = 0; i < targetPool.length && extracted.length < 7; i++) {
         const cur = targetPool[i];
-        // 從同一章的其他經節後半句抽取 3 個干擾項
         let sameChapterTails = parsedPairs
           .filter(p => p.num !== cur.num && p.tail !== cur.tail && p.tail.length >= 4)
           .map(p => p.tail);
-        // 去重並洗牌
         sameChapterTails = Array.from(new Set(sameChapterTails)).sort(() => Math.random() - 0.5).slice(0, 3);
         while (sameChapterTails.length < 3) {
           const b = backupDistractors[sameChapterTails.length % backupDistractors.length];
@@ -1826,9 +1850,8 @@
         }
       }
 
-      // 若遇極短章節（例如詩篇 117 篇僅 2 節），補入創世記核心故事回顧題保底，確保永不為空
       if (finalQuestions.length === 0) {
-        finalQuestions.push(...window.CURATED_CHAPTER_DATA["創世記_1"].questions.slice(0, 5));
+        finalQuestions.push(...BUILTIN_DEFAULT_QBANK["創世記_1"].questions.slice(0, 5));
       }
 
       finalQuestions = finalQuestions.slice(0, 7);
@@ -1924,7 +1947,6 @@
       }
     }
 
-    // 【防刷分機制】首次通關領取完整題目分＋50 XP；重玩已通關章節僅領取 +15 XP 溫習獎勵
     function finishLessonSuccess() {
       const book = BIBLE_BOOKS.find(b => b.id === activeLesson.bookId) || BIBLE_BOOKS[0];
       const chKey = `${activeLesson.bookId}_${activeLesson.chapterNum}`;
@@ -1965,7 +1987,7 @@
     }
 
     /**************************************************************
-     * 7. 4人即時連線 PK 擂台（含離開釋放座位與房主自動移交）
+     * 7. 4人即時連線 PK 擂台
      **************************************************************/
     let activePkRoomId = null;
     let activePkRef = null;
@@ -2066,7 +2088,6 @@
           leavePkRoom(true);
           return;
         }
-        // 若原房主離開，自動將房主移交給第一位在線玩家
         if (!room.players[room.hostId]) {
           const remainingIds = Object.keys(room.players);
           if (remainingIds.length > 0) {
@@ -2254,7 +2275,7 @@
     }
 
     /**************************************************************
-     * 8. 60秒閃電戰、錯題本、排行榜、小家、Admin主控台(含輸入焦點保護)
+     * 8. 60秒閃電戰、錯題本、排行榜、小家、Admin主控台(含覆蓋/擴充詢問視窗)
      **************************************************************/
     let blitzState = { timer: 60, interval: null, score: 0, combo: 0, currentQ: null };
 
@@ -2497,9 +2518,9 @@
         }
       });
       renderAdminConsole(true);
+      if (sub === 'qbank') updateQbankStatusBadge();
     }
 
-    // 【焦點保護】當管理員正在表格內的 input 打字修改學員資料時，背景雲端同步不強制刷新 tbody，避免打字中斷
     function renderAdminConsole(forceRender = false) {
       if (userAccountRaw !== 'admin') return;
       const tbody = document.getElementById('admin-users-tbody');
@@ -2619,21 +2640,46 @@
       });
     }
 
-    function adminUploadQuestionBank(overwriteAll = false) {
+    // 【新增彈出詢問與完成回報視窗】明確讓管理員確認是「合併擴充」還是「清空覆蓋」
+    function adminUploadQuestionBank(mode = 'merge') {
       const txt = document.getElementById('admin-qbank-json').value.trim();
-      if (!txt) { showToast('請貼上 JSON', 'warning'); return; }
+      if (!txt) {
+        alert('⚠️ 請先在輸入框貼上 JSON 題庫內容！');
+        return;
+      }
       try {
         const parsed = JSON.parse(txt);
+        const newKeys = Object.keys(parsed);
+        if (newKeys.length === 0) {
+          alert('⚠️ JSON 內容中沒有偵測到任何章節！');
+          return;
+        }
+
+        let isOverwrite = (mode === 'overwrite' || mode === true);
+        const confirmMsg = isOverwrite
+          ? `🧹 【清空覆蓋確認】\n您即將上傳 ${newKeys.length} 個章節（${newKeys.slice(0, 5).join('、')}...）。\n\n這將會「清空雲端舊有題庫」並完全覆蓋為本次題庫，確定執行嗎？`
+          : `➕ 【合併擴充確認】\n您即將把 ${newKeys.length} 個章節（${newKeys.slice(0, 5).join('、')}...）合併擴充至雲端題庫（保留原有的其他章節）。\n\n確定執行嗎？`;
+
+        if (!confirm(confirmMsg)) return;
+
         const ref = db.ref('bible_quest/question_bank');
-        const promise = overwriteAll ? ref.set(parsed) : ref.update(parsed);
+        const promise = isOverwrite ? ref.set(parsed) : ref.update(parsed);
         promise.then(() => {
-          if (overwriteAll) window.CURATED_CHAPTER_DATA = parsed;
-          else window.CURATED_CHAPTER_DATA = Object.assign(window.CURATED_CHAPTER_DATA || {}, parsed);
-          showToast(overwriteAll ? '🧹 已清空舊題庫並覆蓋為新題庫！' : '🚀 題庫合併擴充成功！', 'success');
+          if (isOverwrite) {
+            window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK, parsed);
+          } else {
+            window.CURATED_CHAPTER_DATA = Object.assign(window.CURATED_CHAPTER_DATA || {}, parsed);
+          }
+          updateQbankStatusBadge();
+          const totalNow = Object.keys(window.CURATED_CHAPTER_DATA).length;
           document.getElementById('admin-qbank-json').value = '';
+          playSound('fanfare');
+          alert(`🎉 上傳成功！\n模式：${isOverwrite ? '🧹 清空覆蓋' : '➕ 合併擴充'}\n本次處理：${newKeys.length} 章\n目前雲端總計可用題庫：共 ${totalNow} 章！`);
+        }).catch(err => {
+          alert('❌ 上傳失敗，請檢查 Firebase 權限或網路連線：' + err.message);
         });
       } catch (e) {
-        showToast('JSON 格式錯誤', 'error');
+        alert('❌ JSON 格式錯誤，請確認複製了完整的 { ... } 區塊！');
       }
     }
 
@@ -2822,6 +2868,7 @@
       updateTopBarStats();
       renderLearningPath();
       renderDailyQuests();
+      updateQbankStatusBadge();
       initFirebaseSync();
       checkPersistentLoginOnLoad();
     };
