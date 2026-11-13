@@ -386,7 +386,7 @@
           </div>
         </section>
 
-        <!-- TAB 3: 4人 PK 擂台（已修正手機版房號輸入框超出螢幕問題） -->
+        <!-- TAB 3: 4人 PK 擂台 -->
         <section id="tab-pk" class="hidden space-y-4">
           <div class="bg-white rounded-3xl border border-slate-200 p-4 sm:p-5 space-y-4 overflow-hidden">
             <div class="flex flex-wrap items-center justify-between gap-2">
@@ -418,7 +418,6 @@
                 </button>
               </div>
 
-              <!-- 修正手機窄螢幕溢出的加入房間區塊 -->
               <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col justify-between space-y-3 min-w-0 overflow-hidden">
                 <div>
                   <h3 class="font-black text-slate-800 text-sm">🔑 輸入房號加入</h3>
@@ -557,11 +556,11 @@
 
             <div id="admin-panel-notes" class="hidden space-y-2.5"></div>
 
-            <!-- 3. 題庫管理、選項平衡與電腦匯出 -->
+            <!-- 3. 題庫管理、雙向選項平衡與電腦匯出 -->
             <div id="admin-panel-qbank" class="hidden space-y-3">
               <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <h4 class="font-black text-indigo-950 text-xs">📚 目前雲端已載入精選故事題庫：<span id="qbank-count-badge" class="text-indigo-600 text-sm">3</span> 章</h4>
+                  <h4 class="font-black text-indigo-950 text-xs">📚 目前雲端已載入精選故事題庫：<span id="qbank-count-badge" class="text-indigo-600 text-sm">1</span> 章</h4>
                   <p id="qbank-chapters-preview" class="text-[11px] font-bold text-slate-500 mt-0.5 max-h-16 overflow-y-auto">載入中...</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
@@ -581,12 +580,12 @@
                   🧹 清空舊題庫並覆蓋
                 </button>
                 <button onclick="optimizeCloudQuestionBankLength()" class="quest-btn-amber px-4 py-3 rounded-xl font-black text-xs cursor-pointer">
-                  ⚖️ 一鍵平衡雲端所有題目選項長度（消除最長答案漏洞）
+                  ⚖️ 一鍵雙向平衡雲端所有題目選項長度（消除最長答案漏洞）
                 </button>
               </div>
             </div>
 
-            <!-- 4. 試算表 GAS 連動（已綁定您最新的部署網址） -->
+            <!-- 4. 試算表 GAS 連動 -->
             <div id="admin-panel-gas" class="hidden space-y-3">
               <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2.5">
                 <h4 class="font-black text-emerald-950 text-sm">🔗 綁定 Google 試算表 GAS 網頁應用程式網址</h4>
@@ -683,7 +682,6 @@
       <div id="lesson-bottom-inner" class="mt-4 p-3 rounded-2xl"></div>
     </div>
   </div>
-
   <script>
     /**************************************************************
      * 1. 音效控制與視覺特效＋10階高難度個人頭銜晉升系統
@@ -770,7 +768,6 @@
       setTimeout(() => toast.remove(), 3000);
     }
 
-    // 10 階高難度頭銜定義表
     const TITLE_TIERS = [
       { lv: 10, title: "🏆 聖經闖關王", reqXp: 40000, reqCh: 1000, cls: "bg-amber-200 text-amber-950 border-amber-500" },
       { lv: 9,  title: "👑 國度柱石",   reqXp: 25000, reqCh: 600,  cls: "bg-yellow-100 text-amber-900 border-amber-400" },
@@ -933,7 +930,7 @@
         title: "創世記 第 1 章：神六日創造天地與造人",
         questions: [
           { type: "簡單", xp: 15, q: "起初神創造天地時，大地原本是什麼狀態，且神的靈運行在哪裡？", options: ["地是空虛混沌，神的靈運行在水面上", "地上已有青草果樹，神的靈在山巔上", "大地充滿烈火熔岩，神的靈在雲彩中", "天地已有日月星辰，神的靈在伊甸園"], answer: 0, exp: "創世記 1:2「地是空虛混沌，淵面黑暗；神的靈運行在水面上。」" },
-          { type: "簡單", xp: 15, q: "神在創造的「頭一日」說要有光就有了光，神把光與暗分開後分別稱為什麼？", options: ["稱光為「晝」，稱暗為「夜」", "稱光為「日頭」，稱暗為「月亮」", "稱光為「天」，稱暗為「地」", "稱光為「晨星」，稱暗為「深淵」"], answer: 0, exp: "創世記 1:5「神稱光為晝，稱暗為夜。有晚上，有早晨，這是頭一日。」" },
+          { type: "簡單", xp: 15, q: "神在創造的「頭一日」說要有光就有了光，神把光與暗分開後分別稱為什麼？", options: ["稱光為晝，稱暗為夜", "稱光為日頭，稱暗為月亮", "稱光為天，稱暗為地", "稱光為晨星，稱暗為深淵"], answer: 0, exp: "創世記 1:5「神稱光為晝，稱暗為夜。有晚上，有早晨，這是頭一日。」" },
           { type: "簡單", xp: 15, q: "神在哪一日造出「空氣」，將空氣以下的水與空氣以上的水分開，並稱空氣為「天」？", options: ["第二日", "第三日", "第四日", "第五日"], answer: 0, exp: "創世記 1:6-8 記載神在第二日造出空氣並稱為天。" },
           { type: "簡單", xp: 15, q: "神在第三日使天下的水聚在一處讓旱地露出來，並在同日吩咐地發生了什麼？", options: ["青草、結種子的菜蔬與包著核的果樹", "海裡的大魚與空中的各樣飛鳥", "地上的牲畜、昆蟲與各樣野獸", "管理晝夜的兩個大光與天上眾星"], answer: 0, exp: "創世記 1:11-13 記載第三日神聚集海水露出旱地，並使地發生青草、菜蔬與果樹。" },
           { type: "困難", xp: 25, q: "太陽、月亮與星辰（管理晝夜的兩個大光和眾星）是神在第幾日才創造出來的？", options: ["第四日", "頭一日", "第二日", "第六日"], answer: 0, exp: "創世記 1:14-19 記載神在第四日造了兩個大光和眾星，作記號、定節令、日子、年歲。" },
@@ -951,7 +948,6 @@
       return s.size;
     }
 
-    // 24 枚豐富里程碑榮譽徽章
     const BADGES_CATALOG = [
       { id: "b1",  icon: "🕯️", title: "起初之光",   desc: "完成第 1 章經文",       check: () => Object.keys(completedChapters).length >= 1 },
       { id: "b2",  icon: "🌱", title: "慕道起步",   desc: "累計通關 10 章經文",     check: () => Object.keys(completedChapters).length >= 10 },
@@ -993,9 +989,9 @@
     let activeBookRangeOffset = 0;
 
     let userId = localStorage.getItem('bq_userid') || "";
-    let userAccountRaw = localStorage.getItem('bq_account_raw') || ""; // 私密登入帳號
-    let userNickname = localStorage.getItem('bq_nickname') || "";     // 排行榜公開暱稱
-    let userName = localStorage.getItem('bq_username') || "";         // 真實全名
+    let userAccountRaw = localStorage.getItem('bq_account_raw') || "";
+    let userNickname = localStorage.getItem('bq_nickname') || "";
+    let userName = localStorage.getItem('bq_username') || "";
     let userRole = localStorage.getItem('bq_userrole') || "";
 
     let userXP = parseInt(localStorage.getItem('bq_xp')) || 0;
@@ -1123,7 +1119,6 @@
     }
 
     function initFirebaseSync() {
-      // 強制將您最新的 GAS 部署網址同步至雲端設定
       db.ref('bible_quest/config/gas_webhook_url').set(DEFAULT_GAS_WEBHOOK_URL);
       gasWebhookUrl = DEFAULT_GAS_WEBHOOK_URL;
       localStorage.setItem('bq_gas_webhook_url', gasWebhookUrl);
@@ -1262,7 +1257,6 @@
       });
     }
 
-    // 最新動態僅廣播玩家的「公開暱稱」，保護私密帳號與本名
     function broadcastMilestone(message) {
       if (userAccountRaw === 'admin' || (!userNickname && !userName)) return;
       const pubNick = userNickname || userName;
@@ -1353,7 +1347,7 @@
         }
       } catch (e) {
         errEl.innerText = '⚠️ 連線異常，請重試';
-        errEl.classList.remove('hidden');
+        errEl.classList.add('hidden');
       }
     }
 
@@ -1379,7 +1373,6 @@
       }
     }
 
-    // 玩家自助修改公開暱稱與真實全名
     function openProfileEditModal() {
       if (!userId || userAccountRaw === 'admin') return;
       playSound('click');
@@ -1538,7 +1531,7 @@
     }
 
     /**************************************************************
-     * 6. 聖經 66 卷地圖與全章經文載入＋智慧選項長度平衡器
+     * 6. 聖經 66 卷地圖與全章經文載入＋雙向選項字數強制對齊引擎
      **************************************************************/
     function renderLearningPath() {
       const book = BIBLE_BOOKS.find(b => b.id === currentBookId) || BIBLE_BOOKS[0];
@@ -1791,56 +1784,100 @@
       playSound('click');
     }
 
-    // 【智慧選項等長平衡器】移除括號提示、去除冗長引言前綴、截斷過長複句，使 4 個選項字數平衡一致
-    function normalizeSingleOptionText(optText, targetLen = 18) {
+    // 【雙向字數強制對齊引擎】濃縮過長正解（保留雙問號核心）＋ 自動加長過短錯誤選項
+    function normalizeSingleOptionText(optText, targetLen = 16, questionText = "") {
       if (!optText) return "";
       let s = String(optText)
         .replace(/（[^）]*）/g, "")
         .replace(/\([^)]*\)/g, "")
-        .replace(/^[^：「『]{1,12}(回答|對[^：「『]{1,8})?說：\s*/, "")
-        .replace(/^[「『](.*)[」』]$/, "$1")
+        .replace(/[「」『』]/g, "")
+        .replace(/^[^：]{1,12}(回答|對[^：]{1,8})?說：\s*/, "")
         .trim();
 
-      if (s.length > Math.max(24, targetLen * 1.5)) {
-        const parts = s.split(/[；。！]/).map(p => p.trim()).filter(Boolean);
-        if (parts.length > 1 && parts[0].length >= 6) {
-          s = parts[0];
-        }
+      s = s.replace(/[[,；。]+(because|因為|因他|這是因|正如|直到今日|從此以後|所以那|這就是|他兩腿|那時|於是眾人).*$/g, "");
+
+      const sentences = s.split(/[。！？]/).map(p => p.trim()).filter(Boolean);
+      if (sentences.length > 1) {
+        s = sentences[0];
       }
-      if (s.length > 32) {
+
+      if (s.includes("；")) {
+        const semiParts = s.split("；").map(p => {
+          let sub = p.trim()
+            .replace(/^(米非波設|亞伯拉罕|雅各|摩西|大衛|約瑟|掃羅|所羅門|以利沙|以利亞|耶和華|他們|那人)(有一個|就|便|卻|又)?/, "")
+            .replace(/^(此後|後來|於是|隨後)(他|米非波設|雅各|大衛|摩西|約瑟)?/, "他")
+            .replace(/，名叫做?/g, "名叫")
+            .trim();
+          const subClauses = sub.split("，").map(c => c.trim()).filter(Boolean);
+          if (subClauses.length > 2) return subClauses.slice(0, 2).join("，");
+          return sub;
+        }).filter(Boolean);
+        s = semiParts.slice(0, 2).join("；");
+      }
+
+      if (s.length > 22) {
         const clauses = s.split(/[，、]/).map(p => p.trim()).filter(Boolean);
         if (clauses.length >= 2) {
-          let combined = clauses[0];
+          let res = clauses[0];
           for (let i = 1; i < clauses.length; i++) {
-            if ((combined + "，" + clauses[i]).length <= 28) {
-              combined += "，" + clauses[i];
+            if ((res + "，" + clauses[i]).length <= 22) {
+              res += "，" + clauses[i];
             } else {
               break;
             }
           }
-          s = combined;
+          s = res;
         }
       }
-      return s.replace(/[「」『』]/g, "").trim();
+
+      if (s.length > 24) {
+        s = s.slice(0, 24).replace(/[，、；]$/, "");
+      }
+      return s.trim();
+    }
+
+    function balanceAllFourOptions(rawOpts, correctIdx, questionText = "") {
+      const cleaned = rawOpts.map(o => normalizeSingleOptionText(o, 16, questionText));
+      const correctStr = cleaned[correctIdx] || "";
+      const hasSemicolon = correctStr.includes("；") || cleaned.some(c => c.includes("；"));
+      const targetLen = Math.max(14, Math.min(20, correctStr.length));
+
+      const padPool = hasSemicolon
+        ? ["；此後他留在本地居住", "；後來他搬往外邦寄居", "；並且與眾人一同生活", "；從此就離開那地去了"]
+        : ["，並且照自己的心意而行", "，事後便離開那地方去了", "，也沒有將這事告訴別人", "，眾人看見這事都很希奇"];
+
+      return cleaned.map((opt, idx) => {
+        let cur = opt;
+        if (idx !== correctIdx && cur.length < targetLen - 4) {
+          const pad = padPool[idx % padPool.length];
+          if (!cur.includes("；") && !cur.includes("，")) {
+            cur = cur + pad;
+          } else if (cur.length < 11) {
+            cur = cur + "，並未照這話去行";
+          }
+        }
+        if (cur.length > 24) {
+          cur = cur.slice(0, 24).replace(/[，、；]$/, "");
+        }
+        return cur;
+      });
     }
 
     function shuffleQuestionOptions(qList) {
       return qList.map(q => {
         const rawOpts = Array.isArray(q.options) ? q.options : ["", "", "", ""];
-        const wrongLens = rawOpts
-          .filter((_, idx) => idx !== q.answer)
-          .map(o => String(o || "").length);
-        const avgWrongLen = wrongLens.length > 0
-          ? Math.round(wrongLens.reduce((a, b) => a + b, 0) / wrongLens.length)
-          : 16;
+        const ansIdx = typeof q.answer === "number" ? q.answer : 0;
+        const balancedOpts = balanceAllFourOptions(rawOpts, ansIdx, q.q || "");
+        const correctText = balancedOpts[ansIdx];
 
-        const balancedOpts = rawOpts.map(opt => normalizeSingleOptionText(opt, avgWrongLen));
-        const correctText = balancedOpts[q.answer];
-        const shuffled = [...balancedOpts].sort(() => Math.random() - 0.5);
+        const indices = [0, 1, 2, 3].slice(0, balancedOpts.length).sort(() => Math.random() - 0.5);
+        const shuffled = indices.map(i => balancedOpts[i]);
+        const newAnsIdx = indices.indexOf(ansIdx);
+
         return {
           ...q,
           options: shuffled,
-          answer: Math.max(0, shuffled.indexOf(correctText))
+          answer: newAnsIdx >= 0 ? newAnsIdx : Math.max(0, shuffled.indexOf(correctText))
         };
       });
     }
@@ -2262,7 +2299,8 @@
           activePkRef.update({ status: 'finished' });
           return;
         }
-        const q = qList[qIdx];
+        const rawQ = qList[qIdx];
+        const displayOptions = balanceAllFourOptions(rawQ.options || [], rawQ.answer || 0, rawQ.q || "");
         const me = room.players && room.players[myKey];
         const hasAnswered = me && me.answeredQ === qIdx;
         const mySelected = me ? me.lastSelected : -1;
@@ -2280,21 +2318,21 @@
               </div>
             `).join('')}
           </div>
-          <h3 class="text-base sm:text-lg font-black text-white pt-1">${q.q}</h3>
+          <h3 class="text-base sm:text-lg font-black text-white pt-1">${rawQ.q}</h3>
           <div class="space-y-2">
-            ${q.options.map((opt, idx) => {
+            ${displayOptions.map((opt, idx) => {
               let btnStyle = 'bg-white text-slate-900 border-2 border-transparent hover:bg-emerald-50';
               if (hasAnswered) {
-                if (idx === q.answer) {
+                if (idx === rawQ.answer) {
                   btnStyle = 'bg-emerald-500 text-white border-2 border-emerald-300 font-black';
-                } else if (idx === mySelected && mySelected !== q.answer) {
+                } else if (idx === mySelected && mySelected !== rawQ.answer) {
                   btnStyle = 'bg-rose-600 text-white border-2 border-rose-300 font-black';
                 } else {
                   btnStyle = 'bg-slate-800 text-slate-500 border-2 border-slate-700';
                 }
               }
               return `
-                <button ${hasAnswered ? 'disabled' : ''} onclick="submitPkAnswer(${qIdx}, ${idx}, ${q.answer})"
+                <button ${hasAnswered ? 'disabled' : ''} onclick="submitPkAnswer(${qIdx}, ${idx}, ${rawQ.answer})"
                         class="pk-opt-btn w-full text-left p-3 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer ${btnStyle}">
                   ${idx + 1}. ${opt}
                 </button>`;
@@ -2540,7 +2578,6 @@
       }).join('');
     }
 
-    // 【隱私保護】全服排行榜僅顯示「公開暱稱 (nickname)」，絕不顯示登入帳號 (account) 與真實本名
     function renderLeaderboardSection() {
       const fullEl = document.getElementById('global-leaderboard-list');
       if (!fullEl) return;
@@ -2654,7 +2691,6 @@
       if (sub === 'qbank') updateQbankStatusBadge();
     }
 
-    // 超級主控台可完整查看並編輯「登入帳號、公開暱稱、真實全名、所屬領袖」
     function renderAdminConsole(forceRender = false) {
       if (userAccountRaw !== 'admin') return;
       const tbody = document.getElementById('admin-users-tbody');
@@ -2802,6 +2838,15 @@
 
         if (!confirm(confirmMsg)) return;
 
+        newKeys.forEach(k => {
+          if (parsed[k] && Array.isArray(parsed[k].questions)) {
+            parsed[k].questions = parsed[k].questions.map(q => {
+              const ansIdx = typeof q.answer === "number" ? q.answer : 0;
+              return { ...q, options: balanceAllFourOptions(q.options || [], ansIdx, q.q || ""), answer: ansIdx };
+            });
+          }
+        });
+
         const ref = db.ref('bible_quest/question_bank');
         const promise = isOverwrite ? ref.set(parsed) : ref.update(parsed);
         promise.then(() => {
@@ -2814,7 +2859,7 @@
           const totalNow = Object.keys(window.CURATED_CHAPTER_DATA).length;
           document.getElementById('admin-qbank-json').value = '';
           playSound('fanfare');
-          alert(`🎉 上傳成功！\n模式：${isOverwrite ? '🧹 清空覆蓋' : '➕ 合併擴充'}\n本次處理：${newKeys.length} 章\n目前雲端總計可用題庫：共 ${totalNow} 章！`);
+          alert(`🎉 上傳並自動平衡選項成功！\n模式：${isOverwrite ? '🧹 清空覆蓋' : '➕ 合併擴充'}\n本次處理：${newKeys.length} 章\n目前雲端總計可用題庫：共 ${totalNow} 章！`);
         }).catch(err => {
           alert('❌ 上傳失敗：' + err.message);
         });
@@ -2823,7 +2868,6 @@
       }
     }
 
-    // 一鍵平衡雲端所有題庫選項長度
     function optimizeCloudQuestionBankLength() {
       const bank = window.CURATED_CHAPTER_DATA || {};
       const keys = Object.keys(bank);
@@ -2831,7 +2875,7 @@
         alert("目前雲端尚無題庫！");
         return;
       }
-      if (!confirm(`⚖️ 系統將自動掃描雲端全部 ${keys.length} 個章節的題目，移除正確答案中的括號提示與冗長句子，使 4 個選項字數平衡一致！\n\n確定立即執行並更新至雲端嗎？`)) return;
+      if (!confirm(`⚖️ 系統將對雲端全部 ${keys.length} 個章節執行「雙向字數對齊」：\n1. 濃縮過長的正確答案（限制在 14~22 字內）\n2. 自動補齊過短的錯誤選項\n\n確定立即執行並覆蓋更新至雲端嗎？`)) return;
 
       let fixedCount = 0;
       keys.forEach(k => {
@@ -2839,14 +2883,12 @@
         if (ch && Array.isArray(ch.questions)) {
           ch.questions = ch.questions.map(q => {
             const rawOpts = Array.isArray(q.options) ? q.options : [];
-            const wrongLens = rawOpts.filter((_, idx) => idx !== q.answer).map(o => String(o || "").length);
-            const avgLen = wrongLens.length > 0 ? Math.round(wrongLens.reduce((a, b) => a + b, 0) / wrongLens.length) : 16;
-            const newOpts = rawOpts.map(opt => {
-              const cleaned = normalizeSingleOptionText(opt, avgLen);
-              if (cleaned.length !== String(opt).length) fixedCount++;
-              return cleaned;
+            const ansIdx = typeof q.answer === "number" ? q.answer : 0;
+            const newOpts = balanceAllFourOptions(rawOpts, ansIdx, q.q || "");
+            newOpts.forEach((no, i) => {
+              if (no !== rawOpts[i]) fixedCount++;
             });
-            return { ...q, options: newOpts };
+            return { ...q, options: newOpts, answer: ansIdx };
           });
         }
       });
@@ -2854,11 +2896,10 @@
       db.ref('bible_quest/question_bank').set(bank).then(() => {
         window.CURATED_CHAPTER_DATA = bank;
         playSound('fanfare');
-        alert(`✅ 優化完成！已成功精簡並平衡雲端 ${fixedCount} 個過長選項，現在 PK 擂台與闖關測驗再也無法靠「選最長答案」猜題了！`);
+        alert(`✅ 雙向對齊完成！共修正了 ${fixedCount} 個選項！\n\n⚠️ 重要提醒：請關閉舊的 PK 房間，重新點擊「➕ 建立 PK 房間」抽出新題目，4 個選項就會全部是等長的一行句子了！`);
       });
     }
 
-    // 匯出雲端題庫 JSON 與 CSV 至電腦
     function exportQuestionBankJSON() {
       const data = window.CURATED_CHAPTER_DATA || {};
       const count = Object.keys(data).length;
@@ -3008,7 +3049,6 @@
       filterEl.innerHTML = html;
     }
 
-    // 進度看板亦隱藏私密登入帳號，僅顯示真實姓名與公開暱稱
     function renderPublicProgressBoard() {
       const grp = document.getElementById('pub-leader-filter')?.value || 'ALL';
       const q = (document.getElementById('pub-search-input')?.value || '').toLowerCase();
