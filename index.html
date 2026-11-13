@@ -70,10 +70,10 @@
         <div class="text-center space-y-1">
           <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 text-2xl">🔒</div>
           <h2 class="text-xl font-black text-slate-800">進度看板驗證</h2>
-          <p class="text-xs font-bold text-slate-500">請輸入已授權之暱稱（或 admin 帳密）</p>
+          <p class="text-xs font-bold text-slate-500">請輸入已授權之登入帳號（或 admin 帳密）</p>
         </div>
         <form onsubmit="event.preventDefault(); verifyPortalAccess();" class="space-y-3">
-          <input id="portal-acc-input" type="text" placeholder="輸入已開通權限之暱稱"
+          <input id="portal-acc-input" type="text" placeholder="輸入已開通權限之登入帳號"
                  class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-slate-800 bg-slate-50" />
           <input id="portal-pwd-input" type="password" placeholder="管理員請填密碼（一般同工免填）"
                  class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-slate-800 bg-slate-50" />
@@ -128,7 +128,7 @@
             <thead>
               <tr class="bg-slate-100 text-slate-600 font-black border-b border-slate-200">
                 <th class="py-2.5 px-3">#</th>
-                <th class="py-2.5 px-3">姓名 / 暱稱 / 頭銜</th>
+                <th class="py-2.5 px-3">姓名 / 公開暱稱 / 頭銜</th>
                 <th class="py-2.5 px-3">領袖</th>
                 <th class="py-2.5 px-3">目前書卷</th>
                 <th class="py-2.5 px-3 text-center">章數</th>
@@ -148,18 +148,18 @@
     </div>
   </div>
 
-  <!-- 1. 進場 / 註冊彈窗 -->
+  <!-- 1. 進場 / 註冊彈窗（私密帳號登入＋公開暱稱＋真實全名） -->
   <div id="auth-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-2 border-slate-100 space-y-4">
       <div class="text-center space-y-1">
         <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 text-3xl mb-0.5">📖</div>
         <h2 class="text-2xl font-black text-slate-800">聖經闖關王</h2>
-        <p id="auth-subtitle-text" class="text-xs font-bold text-slate-400">輸入暱稱即可進場</p>
+        <p id="auth-subtitle-text" class="text-xs font-bold text-slate-400">輸入專屬登入帳號即可進場（排行榜僅顯示暱稱）</p>
       </div>
 
       <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-2xl font-black text-xs">
         <button type="button" id="tab-mode-login" onclick="switchAuthMode('login')" class="py-2.5 rounded-xl bg-white text-emerald-600 shadow-xs transition cursor-pointer">
-          🚀 暱稱進場
+          🚀 帳號登入
         </button>
         <button type="button" id="tab-mode-register" onclick="switchAuthMode('register')" class="py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition cursor-pointer">
           ✨ 首次註冊
@@ -168,8 +168,8 @@
 
       <form onsubmit="event.preventDefault(); handleAccountAuth();" class="space-y-3">
         <div>
-          <label class="text-xs font-extrabold text-slate-600 block mb-1">專屬暱稱 <span class="text-rose-500">*</span></label>
-          <input id="auth-username" type="text" oninput="checkAdminInput(this.value)" placeholder="輸入您的暱稱" autocomplete="username"
+          <label class="text-xs font-extrabold text-slate-600 block mb-1">登入帳號（私密登入用，不公開） <span class="text-rose-500">*</span></label>
+          <input id="auth-username" type="text" oninput="checkAdminInput(this.value)" placeholder="請設定或輸入您的私密登入帳號" autocomplete="username"
                  class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-800 bg-slate-50 focus:bg-white transition" />
         </div>
 
@@ -179,10 +179,17 @@
                  class="w-full px-4 py-3 rounded-xl border-2 border-amber-300 focus:border-amber-500 outline-none font-bold text-slate-800 bg-amber-50/40" />
         </div>
 
-        <div id="auth-nickname-wrapper" class="hidden">
-          <label class="text-xs font-extrabold text-slate-600 block mb-1">真實全名 <span class="text-rose-500">*首次註冊必填</span></label>
-          <input id="auth-nickname" type="text" placeholder="輸入您的真實全名"
-                 class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-800 bg-slate-50 focus:bg-white transition" />
+        <div id="auth-register-fields" class="hidden space-y-3">
+          <div>
+            <label class="text-xs font-extrabold text-emerald-700 block mb-1">遊戲暱稱（排行榜公開顯示） <span class="text-rose-500">*必填</span></label>
+            <input id="auth-display-nickname" type="text" placeholder="大家在排行榜上看到的暱稱"
+                   class="w-full px-4 py-3 rounded-xl border-2 border-emerald-200 focus:border-emerald-500 outline-none font-bold text-slate-800 bg-emerald-50/30 focus:bg-white transition" />
+          </div>
+          <div>
+            <label class="text-xs font-extrabold text-slate-600 block mb-1">真實全名（僅供領袖與管理員牧養識別） <span class="text-rose-500">*必填</span></label>
+            <input id="auth-realname" type="text" placeholder="輸入您的真實全名"
+                   class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-800 bg-slate-50 focus:bg-white transition" />
+          </div>
         </div>
 
         <div id="auth-error" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-600"></div>
@@ -191,6 +198,49 @@
           🚀 立即進場
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- 1B. 玩家自助修改暱稱與真實姓名彈窗 -->
+  <div id="profile-edit-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4 border-2 border-slate-100">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <h3 class="text-base font-black text-slate-800">✏️ 修改個人顯示資料</h3>
+        <button onclick="closeProfileEditModal()" class="text-slate-400 hover:text-slate-700 text-lg font-black px-2 cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div class="p-2.5 rounded-xl bg-slate-100 text-slate-500 font-bold">
+          🔐 您的私密登入帳號：<strong id="profile-edit-account-readonly" class="text-slate-800 font-mono">-</strong>（僅自己與管理員可見）
+        </div>
+        <div>
+          <label class="font-black text-emerald-700 block mb-1">🌟 遊戲公開暱稱（排行榜＆PK擂台顯示）：</label>
+          <input id="profile-edit-nickname" type="text" placeholder="輸入公開暱稱"
+                 class="w-full px-3.5 py-2.5 rounded-xl border-2 border-emerald-300 focus:border-emerald-600 outline-none font-black text-slate-800" />
+        </div>
+        <div>
+          <label class="font-black text-slate-600 block mb-1">👤 真實全名（僅供牧養紀錄，排行榜不公開）：</label>
+          <input id="profile-edit-realname" type="text" placeholder="輸入真實全名"
+                 class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-slate-800" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button onclick="closeProfileEditModal()" class="quest-btn-gray px-4 py-2.5 rounded-xl font-black text-xs cursor-pointer">取消</button>
+        <button onclick="saveMyProfileChanges()" class="quest-btn-green px-5 py-2.5 rounded-xl font-black text-xs cursor-pointer">💾 儲存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1C. 10 階頭銜晉升一覽彈窗 -->
+  <div id="titles-guide-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-900 text-white">
+        <div>
+          <h3 class="text-base font-black">👑 屬靈頭銜晉升階梯 (共10階)</h3>
+          <p class="text-[11px] text-amber-300 font-bold">達成指定「經驗值 XP」或「通關章數」其一即可晉升！</p>
+        </div>
+        <button onclick="document.getElementById('titles-guide-modal').classList.add('hidden')" class="text-slate-300 hover:text-white text-xl font-black px-2 cursor-pointer">✕</button>
+      </div>
+      <div id="titles-ladder-list" class="p-4 overflow-y-auto space-y-2 text-xs"></div>
     </div>
   </div>
 
@@ -205,9 +255,10 @@
               <h1 class="font-black text-sm md:text-base text-slate-800 truncate">聖經闖關王</h1>
               <span id="firebase-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="已連線"></span>
             </div>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <span id="header-user-badge" class="text-xs font-black text-slate-700 truncate">未登入</span>
-              <span id="header-title-badge" class="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-300 shrink-0">🌱 初信新手</span>
+            <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              <span id="header-user-badge" class="text-xs font-black text-slate-700 truncate max-w-[110px] sm:max-w-[180px]">未登入</span>
+              <button onclick="openProfileEditModal()" id="header-edit-profile-btn" class="text-[10px] bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-700 font-black px-1.5 py-0.5 rounded border border-slate-200 cursor-pointer shrink-0" title="修改暱稱與真實姓名">✏️ 改名</button>
+              <button onclick="openTitlesGuideModal()" id="header-title-badge" class="bg-slate-100 text-slate-700 text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-300 shrink-0 cursor-pointer" title="點擊查看 10 階頭銜晉升表">🌱 初信新手</button>
             </div>
           </div>
         </div>
@@ -248,7 +299,7 @@
           <span id="sidebar-wrong-badge" class="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">0</span>
         </button>
         <button onclick="switchTab('badges')" id="nav-btn-badges" class="nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-100 border-2 border-transparent transition cursor-pointer">
-          <span class="text-lg">🏅</span><span>排行榜＆筆記</span>
+          <span class="text-lg">🏅</span><span>排行榜＆徽章</span>
         </button>
         <button onclick="switchTab('flock')" id="nav-btn-flock" class="hidden nav-tab-btn flex items-center justify-between px-4 py-3 rounded-2xl font-black text-sm text-indigo-700 bg-indigo-50/70 border-2 border-indigo-200 transition cursor-pointer">
           <div class="flex items-center gap-3"><span class="text-lg">🏠</span><span>小家進度</span></div>
@@ -301,7 +352,7 @@
             <div id="chapter-range-buttons" class="flex flex-wrap gap-1.5"></div>
           </div>
 
-          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs">
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs overflow-hidden">
             <div id="chapter-path-container" class="flex flex-col items-center space-y-5 py-3"></div>
           </div>
         </section>
@@ -330,14 +381,14 @@
           </div>
 
           <div class="bg-white rounded-3xl border border-slate-200 p-5 space-y-3">
-            <h2 class="text-base font-black text-slate-800">🎯 每日目標</h2>
-            <div id="daily-quests-list" class="space-y-2.5"></div>
+            <h2 class="text-base font-black text-slate-800">🎯 每日與進階挑戰目標 (共6項)</h2>
+            <div id="daily-quests-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
           </div>
         </section>
 
-        <!-- TAB 3: 4人 PK 擂台 -->
+        <!-- TAB 3: 4人 PK 擂台（已修正手機版房號輸入框超出螢幕問題） -->
         <section id="tab-pk" class="hidden space-y-4">
-          <div class="bg-white rounded-3xl border border-slate-200 p-5 space-y-4">
+          <div class="bg-white rounded-3xl border border-slate-200 p-4 sm:p-5 space-y-4 overflow-hidden">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 class="text-xl font-black text-slate-800">⚔️ 4人即時 PK 擂台</h2>
@@ -354,7 +405,7 @@
             </div>
 
             <div id="pk-lobby-panel" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-              <div class="p-4 rounded-2xl bg-emerald-50/60 border-2 border-emerald-200 space-y-3">
+              <div class="p-4 rounded-2xl bg-emerald-50/60 border-2 border-emerald-200 space-y-3 min-w-0">
                 <h3 class="font-black text-emerald-950 text-sm">👑 建立新房間（可指定範圍）</h3>
                 <div>
                   <label class="text-[11px] font-black text-emerald-800 block mb-1">📚 選擇出題書卷範圍：</label>
@@ -367,16 +418,17 @@
                 </button>
               </div>
 
-              <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col justify-between space-y-3">
+              <!-- 修正手機窄螢幕溢出的加入房間區塊 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col justify-between space-y-3 min-w-0 overflow-hidden">
                 <div>
                   <h3 class="font-black text-slate-800 text-sm">🔑 輸入房號加入</h3>
                   <p class="text-[11px] font-bold text-slate-400 mt-0.5">輸入房主提供的 4 位數房號</p>
                 </div>
-                <div class="flex gap-2">
-                  <input id="pk-room-input" type="text" maxlength="4" placeholder="4位數房號"
-                         class="flex-1 px-3 py-2.5 rounded-xl border-2 border-slate-200 font-black text-center text-base tracking-widest bg-white outline-none focus:border-blue-500" />
-                  <button onclick="joinPkRoom()" class="quest-btn-blue px-5 py-2.5 rounded-xl font-black text-xs cursor-pointer">
-                    加入
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+                  <input id="pk-room-input" type="text" inputmode="numeric" maxlength="4" placeholder="輸入 4 位房號"
+                         class="w-full sm:flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 border-slate-200 font-black text-center text-base tracking-widest bg-white outline-none focus:border-blue-500" />
+                  <button onclick="joinPkRoom()" class="w-full sm:w-auto shrink-0 quest-btn-blue px-6 py-3 sm:py-2.5 rounded-xl font-black text-xs cursor-pointer">
+                    🚀 加入房間
                   </button>
                 </div>
               </div>
@@ -402,7 +454,7 @@
           </div>
         </section>
 
-        <!-- TAB 5: 排行榜、筆記與徽章 -->
+        <!-- TAB 5: 排行榜（僅顯示公開暱稱）、筆記與 24 枚里程碑徽章 -->
         <section id="tab-badges" class="hidden space-y-4">
           <div class="bg-white rounded-3xl border border-indigo-200 p-5 space-y-3">
             <div class="flex items-center justify-between">
@@ -415,15 +467,21 @@
           </div>
 
           <div class="bg-white rounded-3xl border border-slate-200 p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg font-black text-slate-800">🏆 全服排行榜</h2>
-              <span class="text-xs font-bold text-emerald-600">即時排名</span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 class="text-lg font-black text-slate-800">🏆 全服榮耀排行榜</h2>
+                <p class="text-[11px] font-bold text-slate-400">僅顯示玩家公開暱稱與頭銜（私密登入帳號已隱藏保護）</p>
+              </div>
+              <button onclick="openTitlesGuideModal()" class="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-200 cursor-pointer">👑 查看頭銜階梯</button>
             </div>
             <div id="global-leaderboard-list" class="space-y-2"></div>
           </div>
 
           <div class="bg-white rounded-3xl border border-slate-200 p-5 space-y-3">
-            <h2 class="text-lg font-black text-slate-800">🏅 榮譽徽章 (12枚)</h2>
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-black text-slate-800">🏅 里程碑榮譽徽章 (24枚)</h2>
+              <span id="badges-unlocked-counter" class="text-xs font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">已解鎖 0 / 24</span>
+            </div>
             <div id="badges-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5"></div>
           </div>
         </section>
@@ -459,11 +517,11 @@
           <div class="bg-slate-900 text-white p-5 rounded-3xl border-2 border-amber-400 flex flex-wrap items-center justify-between gap-3">
             <div>
               <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full">ADMIN</span>
-              <h2 class="text-xl font-black mt-1">⚙️ 超級主控台</h2>
+              <h2 class="text-xl font-black mt-1">⚙️ 超級主控台（可檢視全體私密帳號）</h2>
             </div>
             <div class="flex flex-wrap gap-2">
               <a href="?view=progress" target="_blank" class="quest-btn-amber px-3 py-2 rounded-xl font-black text-xs">📊 進度看板</a>
-              <button onclick="exportAdminCSV()" class="quest-btn-green px-3 py-2 rounded-xl font-black text-xs cursor-pointer">📥 匯出 CSV</button>
+              <button onclick="exportAdminCSV()" class="quest-btn-green px-3 py-2 rounded-xl font-black text-xs cursor-pointer">📥 匯出學員總表 CSV</button>
             </div>
           </div>
 
@@ -472,10 +530,10 @@
               <div class="flex flex-wrap gap-1.5">
                 <button onclick="switchAdminSubTab('users')" id="adm-sub-users" class="px-3.5 py-2 rounded-xl font-black text-xs bg-slate-900 text-white cursor-pointer">👥 1. 學員管理</button>
                 <button onclick="switchAdminSubTab('notes')" id="adm-sub-notes" class="px-3.5 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">✍️ 2. 筆記總覽</button>
-                <button onclick="switchAdminSubTab('qbank')" id="adm-sub-qbank" class="px-3.5 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">🤖 3. 題庫上傳</button>
+                <button onclick="switchAdminSubTab('qbank')" id="adm-sub-qbank" class="px-3.5 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">🤖 3. 題庫管理＆匯出</button>
                 <button onclick="switchAdminSubTab('gas')" id="adm-sub-gas" class="px-3.5 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-600 cursor-pointer">🔗 4. 試算表連動</button>
               </div>
-              <input id="admin-user-search" type="text" oninput="renderAdminConsole(true)" placeholder="🔍 搜尋暱稱、姓名或領袖..."
+              <input id="admin-user-search" type="text" oninput="renderAdminConsole(true)" placeholder="🔍 搜尋帳號、暱稱、姓名或領袖..."
                      class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none" />
             </div>
 
@@ -483,10 +541,11 @@
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr class="bg-slate-100 text-slate-700 font-black border-b border-slate-200">
-                    <th class="py-2.5 px-2">進場暱稱 (可修改)</th>
-                    <th class="py-2.5 px-2">真實全名 (可修改)</th>
+                    <th class="py-2.5 px-2">登入帳號 (私密Key)</th>
+                    <th class="py-2.5 px-2">遊戲暱稱 (公開)</th>
+                    <th class="py-2.5 px-2">真實全名</th>
                     <th class="py-2.5 px-2">頭銜</th>
-                    <th class="py-2.5 px-2">領袖帳號 (D欄)</th>
+                    <th class="py-2.5 px-2">領袖 (E欄)</th>
                     <th class="py-2.5 px-2 text-center">看板權限</th>
                     <th class="py-2.5 px-2 text-center">章數 / XP</th>
                     <th class="py-2.5 px-2 text-center">操作</th>
@@ -498,12 +557,16 @@
 
             <div id="admin-panel-notes" class="hidden space-y-2.5"></div>
 
-            <!-- 3. 題庫上傳（含即時雲端題庫章節統計與覆蓋/擴充雙模式詢問） -->
+            <!-- 3. 題庫管理、選項平衡與電腦匯出 -->
             <div id="admin-panel-qbank" class="hidden space-y-3">
               <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h4 class="font-black text-indigo-950 text-xs">📚 目前雲端已載入精選故事題庫：<span id="qbank-count-badge" class="text-indigo-600 text-sm">3</span> 章</h4>
                   <p id="qbank-chapters-preview" class="text-[11px] font-bold text-slate-500 mt-0.5 max-h-16 overflow-y-auto">載入中...</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button onclick="exportQuestionBankJSON()" class="quest-btn-green px-3 py-2 rounded-xl font-black text-xs cursor-pointer">📥 備份題庫 (.json)</button>
+                  <button onclick="exportQuestionBankCSV()" class="quest-btn-purple px-3 py-2 rounded-xl font-black text-xs cursor-pointer">📊 匯出題庫 (.csv)</button>
                 </div>
               </div>
 
@@ -511,22 +574,25 @@
                         class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs bg-slate-50 outline-none focus:border-indigo-500"></textarea>
 
               <div class="flex flex-wrap gap-2.5">
-                <button onclick="adminUploadQuestionBank('merge')" class="quest-btn-blue px-5 py-3 rounded-xl font-black text-xs cursor-pointer">
+                <button onclick="adminUploadQuestionBank('merge')" class="quest-btn-blue px-4 py-3 rounded-xl font-black text-xs cursor-pointer">
                   ➕ 合併擴充題庫（保留舊章節＋新增本次章節）
                 </button>
-                <button onclick="adminUploadQuestionBank('overwrite')" class="quest-btn-rose px-5 py-3 rounded-xl font-black text-xs cursor-pointer">
-                  🧹 清空舊題庫並覆蓋（刪除舊題庫，只留本次上傳）
+                <button onclick="adminUploadQuestionBank('overwrite')" class="quest-btn-rose px-4 py-3 rounded-xl font-black text-xs cursor-pointer">
+                  🧹 清空舊題庫並覆蓋
+                </button>
+                <button onclick="optimizeCloudQuestionBankLength()" class="quest-btn-amber px-4 py-3 rounded-xl font-black text-xs cursor-pointer">
+                  ⚖️ 一鍵平衡雲端所有題目選項長度（消除最長答案漏洞）
                 </button>
               </div>
             </div>
 
-            <!-- 4. 試算表 GAS 連動（已直接內建您的部署網址） -->
+            <!-- 4. 試算表 GAS 連動（已綁定您最新的部署網址） -->
             <div id="admin-panel-gas" class="hidden space-y-3">
               <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2.5">
                 <h4 class="font-black text-emerald-950 text-sm">🔗 綁定 Google 試算表 GAS 網頁應用程式網址</h4>
-                <p class="text-xs font-bold text-emerald-700">已預先填入您的 GAS 部署網址，學員註冊、通關、改名或剔除皆自動同步至試算表。</p>
+                <p class="text-xs font-bold text-emerald-700">已直接內建您最新的 GAS 部署網址，學員註冊、通關、改名或剔除皆自動同步至試算表。</p>
                 <input id="admin-gas-url-input" type="url"
-                       value="https://script.google.com/macros/s/AKfycbzhnsb7cL7wzlhY2UW89TLc1hKSMKad5y5nMgrrprMaJP_krb-P5fSWEVGaYyvF9Sg/exec"
+                       value="https://script.google.com/macros/s/AKfycbxhKBbOJCVQVhdxOtyHeNn8xsp1RM_R8NEqw5qYBX289FMGtT6H-Iv7HuRGJrzyrqQ/exec"
                        placeholder="https://script.google.com/macros/s/.../exec"
                        class="w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white font-mono text-xs outline-none" />
                 <div class="flex flex-wrap gap-2">
@@ -620,7 +686,7 @@
 
   <script>
     /**************************************************************
-     * 1. 音效控制與視覺特效＋個人頭銜稱號系統
+     * 1. 音效控制與視覺特效＋10階高難度個人頭銜晉升系統
      **************************************************************/
     let soundEnabled = localStorage.getItem('bq_sound_muted') !== '1';
     let audioCtx = null;
@@ -704,22 +770,58 @@
       setTimeout(() => toast.remove(), 3000);
     }
 
+    // 10 階高難度頭銜定義表
+    const TITLE_TIERS = [
+      { lv: 10, title: "🏆 聖經闖關王", reqXp: 40000, reqCh: 1000, cls: "bg-amber-200 text-amber-950 border-amber-500" },
+      { lv: 9,  title: "👑 國度柱石",   reqXp: 25000, reqCh: 600,  cls: "bg-yellow-100 text-amber-900 border-amber-400" },
+      { lv: 8,  title: "🦅 屬靈領袖",   reqXp: 16000, reqCh: 350,  cls: "bg-purple-100 text-purple-800 border-purple-300" },
+      { lv: 7,  title: "🔥 話語急先鋒", reqXp: 10000, reqCh: 200,  cls: "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-300" },
+      { lv: 6,  title: "🛡️ 信心勇士",   reqXp: 6000,  reqCh: 120,  cls: "bg-rose-100 text-rose-800 border-rose-300" },
+      { lv: 5,  title: "⚔️ 聖經精兵",   reqXp: 3500,  reqCh: 70,   cls: "bg-orange-100 text-orange-800 border-orange-300" },
+      { lv: 4,  title: "🏃 真理行者",   reqXp: 1800,  reqCh: 35,   cls: "bg-indigo-100 text-indigo-800 border-indigo-300" },
+      { lv: 3,  title: "📖 讀經門徒",   reqXp: 800,   reqCh: 15,   cls: "bg-sky-100 text-sky-800 border-sky-300" },
+      { lv: 2,  title: "💧 慕道學徒",   reqXp: 300,   reqCh: 5,    cls: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+      { lv: 1,  title: "🌱 初信新手",   reqXp: 0,     reqCh: 0,    cls: "bg-slate-100 text-slate-600 border-slate-300" }
+    ];
+
     function getUserTitleObj(xp = 0, cleared = 0) {
-      if (xp >= 3000 || cleared >= 100) return { title: "🏆 聖經闖關王", cls: "bg-amber-100 text-amber-800 border-amber-300" };
-      if (xp >= 1500 || cleared >= 50)  return { title: "👑 屬靈領袖", cls: "bg-purple-100 text-purple-800 border-purple-300" };
-      if (xp >= 800  || cleared >= 25)  return { title: "⚔️ 聖經精兵", cls: "bg-rose-100 text-rose-800 border-rose-300" };
-      if (xp >= 350  || cleared >= 10)  return { title: "🛡️ 真理行者", cls: "bg-indigo-100 text-indigo-800 border-indigo-300" };
-      if (xp >= 100  || cleared >= 3)   return { title: "📖 讀經門徒", cls: "bg-emerald-100 text-emerald-800 border-emerald-300" };
-      return { title: "🌱 初信新手", cls: "bg-slate-100 text-slate-600 border-slate-300" };
+      for (const t of TITLE_TIERS) {
+        if (xp >= t.reqXp || cleared >= t.reqCh) return t;
+      }
+      return TITLE_TIERS[TITLE_TIERS.length - 1];
     }
 
     function renderTitleBadgeHTML(xp = 0, cleared = 0) {
       const t = getUserTitleObj(xp, cleared);
-      return `<span class="inline-block text-[10px] font-black px-2 py-0.5 rounded-full border ${t.cls}">${t.title}</span>`;
+      return `<span class="inline-block text-[10px] font-black px-2 py-0.5 rounded-full border ${t.cls}">Lv.${t.lv} ${t.title}</span>`;
+    }
+
+    function openTitlesGuideModal() {
+      playSound('click');
+      const clearedCount = Object.keys(completedChapters).length;
+      const curTitle = getUserTitleObj(userXP, clearedCount);
+      const listEl = document.getElementById('titles-ladder-list');
+      if (listEl) {
+        listEl.innerHTML = [...TITLE_TIERS].reverse().map(t => {
+          const isCurrent = t.lv === curTitle.lv;
+          const isUnlocked = userXP >= t.reqXp || clearedCount >= t.reqCh;
+          return `
+            <div class="p-3 rounded-2xl border ${isCurrent ? 'border-amber-400 bg-amber-50/70 shadow-xs' : isUnlocked ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50 opacity-65'} flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-black border ${t.cls}">Lv.${t.lv} ${t.title}</span>
+                ${isCurrent ? '<span class="text-[10px] font-black text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded">目前稱號</span>' : ''}
+              </div>
+              <div class="text-right font-bold text-[11px] text-slate-600">
+                ${t.reqXp === 0 ? '初始獲得' : `需 <strong>${t.reqXp.toLocaleString()} XP</strong> 或 <strong>${t.reqCh} 章</strong>`}
+              </div>
+            </div>`;
+        }).join('');
+      }
+      document.getElementById('titles-guide-modal').classList.remove('hidden');
     }
 
     /**************************************************************
-     * 2. 全本聖經 66 卷書設定與一字不漏完整內建經文庫
+     * 2. 全本聖經 66 卷書設定與預設經文、24枚豐富里程碑徽章
      **************************************************************/
     const BIBLE_BOOKS = [
       { id: "創世記", num: 1, eng: "Genesis", testament: "OT", cat: "摩西五經", chapters: 50, icon: "🌍", color: "#059669", border: "#047857", desc: "創造天地與列祖之約" },
@@ -823,67 +925,6 @@
         "29. 神說：「看哪，我將遍地上一切結種子的菜蔬和一切樹上所結有核的果子全賜給你們作食物。",
         "30. 至於地上的走獸和空中的飛鳥，並各樣爬在地上有生命的物，我將青草賜給牠們作食物。」事就這樣成了。",
         "31. 神看著一切所造的都甚好。有晚上，有早晨，是第六日。"
-      ],
-      "創世記_2": [
-        "1. 天地萬物都造齊了。",
-        "2. 到第七日，神造物的工已經完畢，就在第七日歇了他一切的工，安息了。",
-        "3. 神賜福給第七日，定為聖日；因為在這日，神歇了他一切創造的工，就安息了。",
-        "4. 創造天地的來歷，在耶和華神造天地的日子，乃是這樣，",
-        "5. 野地還沒有草木，田間的菜蔬還沒有長起來；因為耶和華神還沒有降雨在地上，也沒有人耕地，",
-        "6. 但有霧氣從地上騰，滋潤遍地。",
-        "7. 耶和華神用地上的塵土造人，將生氣吹在他鼻孔裡，他就成了有靈的活人，名叫亞當。",
-        "8. 耶和華神在東方的伊甸立了一個園子，把所造的人安置在那裡。",
-        "9. 耶和華神使各樣的樹從地裡長出來，可以悅人的眼目，其上的果子好作食物。園子當中又有生命樹和分別善惡的樹。",
-        "10. 有河從伊甸流出來，滋潤那園子，從那裡分為四道：",
-        "11. 第一道名叫比遜，就是環繞哈腓拉全地的。在那裡有金子，",
-        "12. 並且那地的金子是好的；在那裡又有珍珠和紅瑪瑙。",
-        "13. 第二道河名叫基訓，就是環繞古實全地的。",
-        "14. 第三道河名叫底格里斯，流在亞述的東邊。第四道河就是伯拉河。",
-        "15. 耶和華神將那人安置在伊甸園，使他修理，看守。",
-        "16. 耶和華神吩咐他說：「園中各樣樹上的果子，你可以隨意吃，",
-        "17. 只是分別善惡樹上的果子，你不可吃，因為你吃的日子必定死！」",
-        "18. 耶和華神說：「那人獨居不好，我要為他造一個配偶幫助他。」",
-        "19. 耶和華神用土所造成的野地各樣走獸和空中各樣飛鳥都帶到那人面前，看他叫甚麼。那人怎樣叫各樣的活物，那就是牠的名字。",
-        "20. 那人便給一切牲畜和空中飛鳥、野地走獸都起了名；只是那人沒有遇見配偶幫助他。",
-        "21. 耶和華神使他沉睡，他就睡了；於是取下他的一條肋骨，又把肉合起來。",
-        "22. 耶和華神就用那人身上所取的肋骨造成一個女人，領她到那人跟前。",
-        "23. 那人說：「這是我骨中的骨，肉中的肉，可以稱她為『女人』，因為她是從『男人』身上取出來的。」",
-        "24. 因此，人要離開父母，與妻子連合，二人成為一體。",
-        "25. 當時夫妻二人赤身露體，並不羞恥。"
-      ],
-      "創世記_3": [
-        "1. 耶和華神所造的，惟有蛇比田野一切的活物更狡猾。蛇對女人說：「神豈是真說不許你們吃園中所有樹上的果子嗎？」",
-        "2. 女人對蛇說：「園中樹上的果子，我們可以吃，",
-        "3. 惟有園當中那棵樹上的果子，神曾說：『你們不可吃，也不可摸，免得你們死。』」",
-        "4. 蛇對女人說：「你們不一定死；",
-        "5. 因為神知道，你們吃的日子眼睛就明亮了，你們便如神能知道善惡。」",
-        "6. 於是以女人見那棵樹的果子好作食物，也悅人的眼目，且是可喜愛的，能使人有智慧，就摘下果子來吃了，又給她丈夫，她丈夫也吃了。",
-        "7. 他們二人的眼睛就明亮了，才知道自己是赤身露體，便拿無花果樹的葉子為自己編作裙子。",
-        "8. 天起了涼風，耶和華神在園中行走。那人和他妻子聽見神的聲音，就藏在園裡的樹木中，躲避耶和華神的面。",
-        "9. 耶和華神呼喚那人，對他說：「你在哪裡？」",
-        "10. 他說：「我在園中聽見你的聲音，我就害怕；因為我赤身露體，我便藏了。」",
-        "11. 耶和華說：「誰告訴你赤身露體呢？莫非你吃了我吩咐你不可吃的那樹上的果子嗎？」",
-        "12. 那人說：「你所賜給我、與我同居的女人，她把那樹上的果子給我，我就吃了。」",
-        "13. 耶和華神對女人說：「你做的是甚麼事呢？」女人說：「那蛇引誘我，我就吃了。」",
-        "14. 耶和華神對蛇說：「你既做了這事，就必受咒詛，比一切的牲畜野獸更甚；你必用肚子行走，終身吃土。",
-        "15. 我又要叫你和女人彼此為仇；你的後裔和女人的後裔也彼此為仇。女人的後裔要傷你的頭；你要傷他的腳跟。」",
-        "16. 又對女人說：「我必多多加增你懷胎的苦楚；你生產兒女必多受苦楚。你必戀慕你丈夫；你丈夫必管轄你。」",
-        "17. 又對亞當說：「你既聽從妻子的話，吃了我所吩咐你不可吃的那樹上的果子，地必為你的緣故受咒詛；你必終身勞苦才能從地裡得吃的。",
-        "18. 地必給你長出荊棘和蒺藜來；你也要吃田間的菜蔬。",
-        "19. 你必汗流滿面才得糊口，直到你歸了土，因為你是從土而出的。你本是塵土，仍要歸於塵土。」",
-        "20. 亞當給他妻子起名叫夏娃，因為她是眾生之母。",
-        "21. 耶和華神為亞當和他妻子用皮子做衣服給他們穿。",
-        "22. 耶和華神說：「那人已經與我們相似，能知道善惡；現在恐怕他伸手又摘生命樹的果子吃，就永遠活著。」",
-        "23. 耶和華神便打發他出伊甸園去，耕種他所自出之土。",
-        "24. 於是把他趕出去了；又在伊甸園的東邊安設基路伯和四面轉動發火焰的劍，要把守生命樹的道路。"
-      ],
-      "詩篇_23": [
-        "1. 耶和華是我的牧者，我必不致缺乏。",
-        "2. 他使我躺臥在青草地上，領我在可安歇的水邊。",
-        "3. 他使我的靈魂甦醒，為自己的名引導我走義路。",
-        "4. 我雖然行過死蔭的幽谷，也不怕遭害，因為你與我同在；你的杖，你的竿，都安慰我。",
-        "5. 在我敵人面前，你為我擺設筵席；你用油膏了我的頭，使我的福杯滿溢。",
-        "6. 我一生一世必有恩惠慈愛隨著我；我且要住在耶和華的殿中，直到永遠。"
       ]
     };
 
@@ -891,73 +932,70 @@
       "創世記_1": {
         title: "創世記 第 1 章：神六日創造天地與造人",
         questions: [
-          { type: "簡單", xp: 15, q: "起初神創造天地時，大地原本是什麼狀態，且神的靈運行在哪裡？", options: ["地是空虛混沌，淵面黑暗；神的靈運行在水面上", "地上已經有青草與果樹；神的靈在山巔上", "大地充滿烈火與熔岩；神的靈在雲彩中", "天地已經有日月星辰；神的靈在伊甸園裡"], answer: 0, exp: "創世記 1:2「地是空虛混沌，淵面黑暗；神的靈運行在水面上。」" },
+          { type: "簡單", xp: 15, q: "起初神創造天地時，大地原本是什麼狀態，且神的靈運行在哪裡？", options: ["地是空虛混沌，神的靈運行在水面上", "地上已有青草果樹，神的靈在山巔上", "大地充滿烈火熔岩，神的靈在雲彩中", "天地已有日月星辰，神的靈在伊甸園"], answer: 0, exp: "創世記 1:2「地是空虛混沌，淵面黑暗；神的靈運行在水面上。」" },
           { type: "簡單", xp: 15, q: "神在創造的「頭一日」說要有光就有了光，神把光與暗分開後分別稱為什麼？", options: ["稱光為「晝」，稱暗為「夜」", "稱光為「日頭」，稱暗為「月亮」", "稱光為「天」，稱暗為「地」", "稱光為「晨星」，稱暗為「深淵」"], answer: 0, exp: "創世記 1:5「神稱光為晝，稱暗為夜。有晚上，有早晨，這是頭一日。」" },
           { type: "簡單", xp: 15, q: "神在哪一日造出「空氣」，將空氣以下的水與空氣以上的水分開，並稱空氣為「天」？", options: ["第二日", "第三日", "第四日", "第五日"], answer: 0, exp: "創世記 1:6-8 記載神在第二日造出空氣並稱為天。" },
-          { type: "簡單", xp: 15, q: "神在第三日使天下的水聚在一處讓旱地露出來，並在同日吩咐地發生了什麼？", options: ["青草、結種子的菜蔬，並結果子包著核的果樹", "海裡的大魚與空中的飛鳥", "地上的牲畜、昆蟲與野獸", "管理晝夜的兩個大光與眾星"], answer: 0, exp: "創世記 1:11-13 記載第三日神聚集海水露出旱地，並使地發生青草、菜蔬與果樹。" },
+          { type: "簡單", xp: 15, q: "神在第三日使天下的水聚在一處讓旱地露出來，並在同日吩咐地發生了什麼？", options: ["青草、結種子的菜蔬與包著核的果樹", "海裡的大魚與空中的各樣飛鳥", "地上的牲畜、昆蟲與各樣野獸", "管理晝夜的兩個大光與天上眾星"], answer: 0, exp: "創世記 1:11-13 記載第三日神聚集海水露出旱地，並使地發生青草、菜蔬與果樹。" },
           { type: "困難", xp: 25, q: "太陽、月亮與星辰（管理晝夜的兩個大光和眾星）是神在第幾日才創造出來的？", options: ["第四日", "頭一日", "第二日", "第六日"], answer: 0, exp: "創世記 1:14-19 記載神在第四日造了兩個大光和眾星，作記號、定節令、日子、年歲。" },
-          { type: "困難", xp: 25, q: "神在第五日創造了哪兩類生物，並賜福給牠們使牠們滋生繁多？", options: ["海裡的大魚和水中各樣活物，以及空中各樣有翅膀的飛鳥", "地上的牲畜與田野的走獸", "昆蟲與爬行動物", "人類與伊甸園的走獸"], answer: 0, exp: "創世記 1:20-23 記載第五日神創造大魚、水中萬物與空中飛鳥。" },
-          { type: "困難", xp: 25, q: "神在第幾日按著自己的形像造男造女，並將地面上結種子的菜蔬和樹上的果子賜給人作食物？", options: ["第六日", "第五日", "第七日", "第三日"], answer: 0, exp: "創世記 1:26-31 記載神在第六日造出地上的走獸與人類，看著一切所造的都甚好。" }
-        ]
-      },
-      "創世記_2": {
-        title: "創世記 第 2 章：伊甸園、塵土造人與肋骨造女人",
-        questions: [
-          { type: "簡單", xp: 15, q: "天地萬物都造齊後，神在第七日做了什麼事，並賜福給第七日定為聖日？", options: ["歇了祂一切創造的工，安息了", "繼續創造海裡的魚和飛鳥", "開始降下四十晝夜的大雨", "差遣天使建造巴別塔"], answer: 0, exp: "創世記 2:2-3「到第七日，神造物的工已經完畢，就在第七日歇了他一切的工，安息了。」" },
-          { type: "簡單", xp: 15, q: "耶和華神是用什麼材料造出第一個人（亞當），並怎樣使他成為有靈的活人？", options: ["用地上的塵土造人，將生氣吹在他鼻孔裡", "用海中的泥沙造人，用河水洗淨他", "用天上的光造人，賜給他翅膀", "用伊甸園的樹木雕刻成人"], answer: 0, exp: "創世記 2:7「耶和華神用地上的塵土造人，將生氣吹在他鼻孔裡，他就成了有靈的活人，名叫亞當。」" },
-          { type: "簡單", xp: 15, q: "神在東方的伊甸立了一個園子，園子當中除了「生命樹」之外，還有哪一棵特別的樹？", options: ["分別善惡的樹", "無花果樹", "香柏樹", "橄欖樹"], answer: 0, exp: "創世記 2:9「園子當中又有生命樹和分別善惡的樹。」" },
-          { type: "簡單", xp: 15, q: "神將那人安置在伊甸園使他修理看守，並給了他什麼禁令？", options: ["分別善惡樹上的果子不可吃，因為吃的日子必定死", "生命樹上的果子不可吃，否則會失去記憶", "不可觸碰園中的四道河水", "不可給園中的飛鳥和走獸命名"], answer: 0, exp: "創世記 2:17「只是分別善惡樹上的果子，你不可吃，因為你吃的日子必定死！」" },
-          { type: "困難", xp: 25, q: "伊甸園裡各樣野地的走獸和空中的飛鳥，牠們的名字是誰取的？", options: ["神把牠們帶到那人（亞當）面前，亞當叫牠們什麼就是牠們的名字", "天使長米迦勒一一為牠們取名", "夏娃吃了果子後為牠們取名", "挪亞進入方舟時才為牠們取名"], answer: 0, exp: "創世記 2:19「耶和華神把牠們都帶到那人面前，看他叫甚麼。那人怎樣叫各樣的活物，那就是牠的名字。」" },
-          { type: "困難", xp: 25, q: "耶和華神見那人獨居不好，是用什麼方式為亞當造出一個配偶幫助他？", options: ["使亞當沉睡，取下他的一條肋骨，把肉合起來，造成一個女人", "再次用伊甸園的紅土捏造一個女人", "吩咐河水變出一個女人", "從生命樹的枝子造出一個女人"], answer: 0, exp: "創世記 2:21-22 記載神使那人沉睡，取下他的一條肋骨造成一個女人。" },
-          { type: "困難", xp: 25, q: "亞當看見神領到他跟前的女人時，說出哪句名言說明她與自己的關係？", options: ["這是我骨中的骨，肉中的肉，可以稱她為「女人」", "她是眾生之母，要管理全地", "我們要建造高塔頂通於天", "她要作我的僕人替我耕種田地"], answer: 0, exp: "創世記 2:23「那人說：這是我骨中的骨，肉中的肉，可以稱她為女人，因為她是從男人身上取出來的。」" }
-        ]
-      },
-      "創世記_3": {
-        title: "創世記 第 3 章：蛇的引誘、偷吃禁果與逐出伊甸園",
-        questions: [
-          { type: "簡單", xp: 15, q: "蛇在伊甸園裡用什麼謊言引誘女人去吃那棵樹上的果子？", options: ["你們不一定死；吃的日子眼睛就明亮了，便如神能知道善惡", "吃了這果子就能在水面上行走並長生不老", "神其實忘記這棵樹了，吃掉也不會被發現", "吃了這果子就不用再修理看守伊甸園"], answer: 0, exp: "創世記 3:4-5 蛇對女人說：「你們不一定死；因為神知道，你們吃的日子眼睛就明亮了，你們便如神能知道善惡。」" },
-          { type: "簡單", xp: 15, q: "亞當和夏娃吃了禁果後眼睛就明亮了，知道自己赤身露體，便拿什麼植物為自己編作裙子？", options: ["無花果樹的葉子", "葡萄樹的藤蔓", "橄欖樹的枝葉", "羊毛與獸皮"], answer: 0, exp: "創世記 3:7「他們二人的眼睛就明亮了，才知道自己是赤身露體，便拿無花果樹的葉子為自己編作裙子。」" },
-          { type: "簡單", xp: 15, q: "天起了涼風，耶和華神在園中行走並呼喚亞當，當神問他「莫非你吃了那樹上的果子」時，亞當如何回答？", options: ["推卸責任說：「你所賜給我、與我同居的女人，她把那樹上的果子給我，我就吃了」", "立刻認罪悔改求神饒恕他跟妻子", "說是蛇直接塞進他嘴裡的", "保持沉默一句話都不肯說"], answer: 0, exp: "創世記 3:12 亞當把責任推給神與妻子：「你所賜給我、與我同居的女人，她把那樹上的果子給我，我就吃了。」" },
-          { type: "困難", xp: 25, q: "神對蛇宣告審判時，除了罰牠終身吃土外，還預言「女人的後裔」將與蛇的後裔發生什麼事？", options: ["女人的後裔要傷蛇的頭，蛇要傷他的腳跟", "女人的後裔要與蛇立約和平共處", "女人的後裔要把蛇趕進大海裡", "蛇要永遠服事女人的後裔"], answer: 0, exp: "創世記 3:15「女人的後裔要傷你的頭；你要傷他的腳跟。」" },
-          { type: "困難", xp: 25, q: "亞當犯罪後，地因為他的緣故受到什麼咒詛？", options: ["地必給人長出荊棘和蒺藜來，人必汗流滿面才得糊口", "地面從此不再降雨，所有河流都乾涸", "地上所有的果樹都枯死不能再結果子", "大地每天都會發生震動與黑暗"], answer: 0, exp: "創世記 3:17-19「地必為你的緣故受咒詛…地必給你長出荊棘和蒺藜來…你必汗流滿面才得糊口。」" },
-          { type: "困難", xp: 25, q: "在將亞當和夏娃趕出伊甸園前，耶和華神用什麼為他們做衣服穿？", options: ["用皮子做衣服給他們穿", "用細麻布做衣服給他們穿", "用駱駝毛做衣服給他們穿", "用樹皮與葉子做衣服給他們穿"], answer: 0, exp: "創世記 3:21「耶和華神為亞當和他妻子用皮子做衣服給他們穿。」" },
-          { type: "困難", xp: 25, q: "神把亞當趕出伊甸園後，為了防止他伸手又摘生命樹的果子吃，在伊甸園東邊安設了什麼把守道路？", options: ["基路伯，和四面轉動發火焰的劍", "高聳入雲的石牆與護城河", "兩隻巨大的獅子與老鷹", "濃密不散的黑霧與雷電"], answer: 0, exp: "創世記 3:24「又在伊甸園的東邊安設基路伯和四面轉動發火焰的劍，要把守生命樹的道路。」" }
+          { type: "困難", xp: 25, q: "神在第五日創造了哪兩類生物，並賜福給牠們使牠們滋生繁多？", options: ["海裡的大魚和水中活物，以及空中飛鳥", "地上的牲畜與田野裡的各樣走獸", "地上的昆蟲與一切爬行動物", "人類與伊甸園裡的各樣走獸"], answer: 0, exp: "創世記 1:20-23 記載第五日神創造大魚、水中萬物與空中飛鳥。" },
+          { type: "困難", xp: 25, q: "神在第幾日按著自己的形像造男造女，並將菜蔬和果子賜給人作食物？", options: ["第六日", "第五日", "第七日", "第三日"], answer: 0, exp: "創世記 1:26-31 記載神在第六日造出地上的走獸與人類，看著一切所造的都甚好。" }
         ]
       }
     };
 
     window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK);
 
+    function getDistinctBooksReadCount() {
+      const s = new Set();
+      Object.keys(completedChapters).forEach(k => s.add(k.split('_')[0]));
+      return s.size;
+    }
+
+    // 24 枚豐富里程碑榮譽徽章
     const BADGES_CATALOG = [
-      { id: "b1", icon: "🕯️", title: "起初之光", desc: "完成 1 章經文", check: () => Object.keys(completedChapters).length >= 1 },
-      { id: "b2", icon: "📜", title: "真理行者", desc: "完成 5 章經文", check: () => Object.keys(completedChapters).length >= 5 },
-      { id: "b3", icon: "⚡", title: "百XP門徒", desc: "累積 100 XP", check: () => userXP >= 100 },
-      { id: "b4", icon: "🌩️", title: "閃電快手", desc: "閃電戰破 150 分", check: () => blitzBestScore >= 150 },
-      { id: "b5", icon: "🔥", title: "連擊達人", desc: "達成 5 連擊", check: () => maxComboEver >= 5 },
-      { id: "b6", icon: "👑", title: "PK 常勝軍", desc: "PK 贏得 1 勝", check: () => userPKWins >= 1 },
-      { id: "b7", icon: "🛡️", title: "錯題終結", desc: "消滅 3 道錯題", check: () => masteredWrongCount >= 3 },
-      { id: "b8", icon: "🌅", title: "穩定靈修", desc: "連續打卡 3 天", check: () => userStreak >= 3 },
-      { id: "b9", icon: "✍️", title: "靈修筆記", desc: "寫下 1 篇書卷筆記", check: () => Object.keys(bookNotes).length >= 1 },
-      { id: "b10", icon: "🕊️", title: "新約使者", desc: "通關新約任一章", check: () => Object.keys(completedChapters).some(k => { const b = BIBLE_BOOKS.find(x => x.id === k.split('_')[0]); return b && b.testament === 'NT'; }) },
-      { id: "b11", icon: "🏛️", title: "千分先鋒", desc: "累積 1,000 XP", check: () => userXP >= 1000 },
-      { id: "b12", icon: "🌈", title: "大滿貫王", desc: "解鎖 8 枚徽章", check: () => countUnlockedBadgesRaw() >= 8 }
+      { id: "b1",  icon: "🕯️", title: "起初之光",   desc: "完成第 1 章經文",       check: () => Object.keys(completedChapters).length >= 1 },
+      { id: "b2",  icon: "🌱", title: "慕道起步",   desc: "累計通關 10 章經文",     check: () => Object.keys(completedChapters).length >= 10 },
+      { id: "b3",  icon: "📜", title: "話語行者",   desc: "累計通關 30 章經文",     check: () => Object.keys(completedChapters).length >= 30 },
+      { id: "b4",  icon: "⚔️", title: "真理精兵",   desc: "累計通關 60 章經文",     check: () => Object.keys(completedChapters).length >= 60 },
+      { id: "b5",  icon: "🛡️", title: "百章勇士",   desc: "累計通關 100 章經文",    check: () => Object.keys(completedChapters).length >= 100 },
+      { id: "b6",  icon: "🦅", title: "展翅上騰",   desc: "累計通關 200 章經文",    check: () => Object.keys(completedChapters).length >= 200 },
+      { id: "b7",  icon: "👑", title: "全年無休",   desc: "累計通關 365 章經文",    check: () => Object.keys(completedChapters).length >= 365 },
+      { id: "b8",  icon: "⭐", title: "五百門徒",   desc: "累積達 500 XP",          check: () => userXP >= 500 },
+      { id: "b9",  icon: "🌟", title: "二千先鋒",   desc: "累積達 2,000 XP",        check: () => userXP >= 2000 },
+      { id: "b10", icon: "💎", title: "五千精兵",   desc: "累積達 5,000 XP",        check: () => userXP >= 5000 },
+      { id: "b11", icon: "🏛️", title: "萬分領袖",   desc: "累積達 10,000 XP",       check: () => userXP >= 10000 },
+      { id: "b12", icon: "🏆", title: "兩萬傳奇",   desc: "累積達 20,000 XP",       check: () => userXP >= 20000 },
+      { id: "b13", icon: "🕊️", title: "新約使者",   desc: "通關新約任一章經文",     check: () => Object.keys(completedChapters).some(k => { const b = BIBLE_BOOKS.find(x => x.id === k.split('_')[0]); return b && b.testament === 'NT'; }) },
+      { id: "b14", icon: "🧭", title: "五卷探索",   desc: "涉獵 5 卷不同聖經書卷",  check: () => getDistinctBooksReadCount() >= 5 },
+      { id: "b15", icon: "🗺️", title: "博覽群書",   desc: "涉獵 15 卷不同聖經書卷", check: () => getDistinctBooksReadCount() >= 15 },
+      { id: "b16", icon: "⚡", title: "閃電快手",   desc: "閃電戰單局破 200 分",    check: () => blitzBestScore >= 200 },
+      { id: "b17", icon: "🌩️", title: "極速雷霆",   desc: "閃電戰單局破 400 分",    check: () => blitzBestScore >= 400 },
+      { id: "b18", icon: "🔥", title: "十連擊王",   desc: "達成 10 題連續答對",     check: () => maxComboEver >= 10 },
+      { id: "b19", icon: "🤺", title: "PK 初勝",    desc: "4人 PK 擂台奪得 1 勝",   check: () => userPKWins >= 1 },
+      { id: "b20", icon: "🎖️", title: "擂台霸主",   desc: "4人 PK 擂台奪得 10 勝",  check: () => userPKWins >= 10 },
+      { id: "b21", icon: "📕", title: "錯題終結",   desc: "累計消滅 10 道錯題",     check: () => masteredWrongCount >= 10 },
+      { id: "b22", icon: "🌅", title: "七日晨更",   desc: "連續靈修打卡達 7 天",    check: () => userStreak >= 7 },
+      { id: "b23", icon: "✍️", title: "靈修作家",   desc: "撰寫 5 篇書卷收穫筆記",  check: () => Object.keys(bookNotes).length >= 5 },
+      { id: "b24", icon: "🌈", title: "榮耀大滿貫", desc: "解鎖滿 18 枚榮譽徽章",   check: () => countUnlockedBadgesRaw() >= 18 }
     ];
 
-    function countUnlockedBadgesRaw() { return BADGES_CATALOG.filter(b => b.id !== 'b12' && b.check()).length; }
-    function getUnlockedBadgeCount() { let c = countUnlockedBadgesRaw(); return c >= 8 ? c + 1 : c; }
+    function countUnlockedBadgesRaw() { return BADGES_CATALOG.filter(b => b.id !== 'b24' && b.check()).length; }
+    function getUnlockedBadgeCount() { let c = countUnlockedBadgesRaw(); return c >= 18 ? c + 1 : c; }
 
     /**************************************************************
-     * 3. 系統狀態與 Firebase 雙向同步＋預設綁定您的 GAS 網址
+     * 3. 系統狀態與 Firebase 雙向同步＋預設綁定您最新的 GAS 網址
      **************************************************************/
-    const DEFAULT_GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzhnsb7cL7wzlhY2UW89TLc1hKSMKad5y5nMgrrprMaJP_krb-P5fSWEVGaYyvF9Sg/exec";
+    const DEFAULT_GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxhKBbOJCVQVhdxOtyHeNn8xsp1RM_R8NEqw5qYBX289FMGtT6H-Iv7HuRGJrzyrqQ/exec";
+    const ADMIN_PASSWORD_SECRET = "jesusmylord";
 
     let currentTab = 'map';
     let currentBookId = '創世記';
     let activeBookRangeOffset = 0;
 
     let userId = localStorage.getItem('bq_userid') || "";
-    let userAccountRaw = localStorage.getItem('bq_account_raw') || "";
-    let userName = localStorage.getItem('bq_username') || "";
+    let userAccountRaw = localStorage.getItem('bq_account_raw') || ""; // 私密登入帳號
+    let userNickname = localStorage.getItem('bq_nickname') || "";     // 排行榜公開暱稱
+    let userName = localStorage.getItem('bq_username') || "";         // 真實全名
     let userRole = localStorage.getItem('bq_userrole') || "";
 
     let userXP = parseInt(localStorage.getItem('bq_xp')) || 0;
@@ -972,10 +1010,8 @@
     let wrongQuestions = JSON.parse(localStorage.getItem('bq_wrong_questions') || "[]");
     let bookNotes = JSON.parse(localStorage.getItem('bq_book_notes') || "{}");
     let allCloudUsersCache = [];
-    let gasWebhookUrl = localStorage.getItem('bq_gas_webhook_url') || DEFAULT_GAS_WEBHOOK_URL;
+    let gasWebhookUrl = DEFAULT_GAS_WEBHOOK_URL;
 
-    localStorage.removeItem('bq_verses_cache');
-    localStorage.removeItem('bq_full_verses_v4');
     let BUILTIN_FULL_VERSES = Object.assign(
       {},
       JSON.parse(localStorage.getItem('bq_full_verses_v5') || "{}"),
@@ -1026,6 +1062,8 @@
       maxComboEver = 0;
       masteredWrongCount = 0;
       userRole = "";
+      userNickname = "";
+      userName = "";
       currentBookId = "創世記";
       activeBookRangeOffset = 0;
       completedChapters = {};
@@ -1033,7 +1071,7 @@
       bookNotes = {};
 
       [
-        'bq_logged_account', 'bq_userid', 'bq_account_raw', 'bq_username', 'bq_userrole',
+        'bq_logged_account', 'bq_userid', 'bq_account_raw', 'bq_nickname', 'bq_username', 'bq_userrole',
         'bq_xp', 'bq_streak', 'bq_last_login_date', 'bq_pkwins', 'bq_blitz_best',
         'bq_max_combo', 'bq_mastered_wrong', 'bq_completed', 'bq_wrong_questions', 'bq_book_notes'
       ].forEach(k => localStorage.removeItem(k));
@@ -1041,7 +1079,8 @@
 
     function applyCloudUserData(val, fallbackAcc) {
       userAccountRaw = val.account || fallbackAcc;
-      userName = val.name || userAccountRaw;
+      userNickname = val.nickname || val.name || userAccountRaw;
+      userName = val.name || userNickname;
       userRole = val.role || "";
       userXP = Number(val.total_xp || 0);
       userStreak = Number(val.streak || 1);
@@ -1084,17 +1123,12 @@
     }
 
     function initFirebaseSync() {
-      db.ref('bible_quest/config/gas_webhook_url').on('value', snap => {
-        if (snap.val()) {
-          gasWebhookUrl = snap.val();
-        } else {
-          gasWebhookUrl = DEFAULT_GAS_WEBHOOK_URL;
-          db.ref('bible_quest/config/gas_webhook_url').set(DEFAULT_GAS_WEBHOOK_URL);
-        }
-        localStorage.setItem('bq_gas_webhook_url', gasWebhookUrl);
-        const inp = document.getElementById('admin-gas-url-input');
-        if (inp) inp.value = gasWebhookUrl;
-      });
+      // 強制將您最新的 GAS 部署網址同步至雲端設定
+      db.ref('bible_quest/config/gas_webhook_url').set(DEFAULT_GAS_WEBHOOK_URL);
+      gasWebhookUrl = DEFAULT_GAS_WEBHOOK_URL;
+      localStorage.setItem('bq_gas_webhook_url', gasWebhookUrl);
+      const inp = document.getElementById('admin-gas-url-input');
+      if (inp) inp.value = gasWebhookUrl;
 
       db.ref('bible_quest/users').on('value', snap => {
         const val = snap.val() || {};
@@ -1103,13 +1137,15 @@
         if (userId && userAccountRaw !== 'admin' && userAccountRaw !== 'guest') {
           if (!val[userId]) {
             logoutAccount();
-            showToast('您的帳號已被管理員修改或剔除，請重新進場！', 'error');
+            showToast('您的帳號已被管理員修改或剔除，請重新登入！', 'error');
             return;
           } else {
             userRole = val[userId].role !== undefined ? val[userId].role : userRole;
+            userNickname = val[userId].nickname || val[userId].name || userNickname;
             userName = val[userId].name || userName;
             userAccountRaw = val[userId].account || userAccountRaw;
             localStorage.setItem('bq_userrole', userRole);
+            localStorage.setItem('bq_nickname', userNickname);
             localStorage.setItem('bq_username', userName);
             localStorage.setItem('bq_account_raw', userAccountRaw);
           }
@@ -1157,6 +1193,7 @@
       localStorage.setItem('bq_blitz_best', blitzBestScore);
       localStorage.setItem('bq_max_combo', maxComboEver);
       localStorage.setItem('bq_mastered_wrong', masteredWrongCount);
+      localStorage.setItem('bq_nickname', userNickname);
       localStorage.setItem('bq_username', userName);
       localStorage.setItem('bq_userrole', userRole);
       localStorage.setItem('bq_completed', JSON.stringify(completedChapters));
@@ -1171,7 +1208,8 @@
       const updatePayload = {
         id: userId,
         account: userAccountRaw,
-        name: userName,
+        nickname: userNickname || userName || userAccountRaw,
+        name: userName || userNickname || userAccountRaw,
         title: titleObj.title,
         role: userRole,
         total_xp: userXP,
@@ -1196,10 +1234,7 @@
 
     function triggerGasWebhookSync(action = 'sync', userData = null, oldAccount = '') {
       const targetUrl = gasWebhookUrl || DEFAULT_GAS_WEBHOOK_URL;
-      if (!targetUrl) {
-        if (action === 'manual_sync') showToast('請先輸入並儲存 GAS 網址', 'warning');
-        return;
-      }
+      if (!targetUrl) return;
       try {
         fetch(targetUrl, {
           method: 'POST',
@@ -1227,18 +1262,20 @@
       });
     }
 
+    // 最新動態僅廣播玩家的「公開暱稱」，保護私密帳號與本名
     function broadcastMilestone(message) {
-      if (userAccountRaw === 'admin' || !userName) return;
+      if (userAccountRaw === 'admin' || (!userNickname && !userName)) return;
+      const pubNick = userNickname || userName;
       const t = getUserTitleObj(userXP, Object.keys(completedChapters).length);
       db.ref('bible_quest/milestones').push({
-        userName: `[${t.title}] ${userName}`,
+        userName: `[${t.title}] ${pubNick}`,
         message: message,
         timestamp: new Date().toISOString()
       });
     }
 
     /**************************************************************
-     * 4. 暱稱秒進場與首次註冊
+     * 4. 私密帳號登入、首次註冊與玩家自助修改暱稱/真實姓名
      **************************************************************/
     let authMode = 'login';
 
@@ -1253,29 +1290,30 @@
       document.getElementById('tab-mode-login').className = mode === 'login' ? "py-2.5 rounded-xl bg-white text-emerald-600 shadow-xs transition cursor-pointer" : "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition cursor-pointer";
       document.getElementById('tab-mode-register').className = mode === 'register' ? "py-2.5 rounded-xl bg-white text-emerald-600 shadow-xs transition cursor-pointer" : "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 transition cursor-pointer";
       document.getElementById('auth-submit-btn').innerText = mode === 'login' ? "🚀 立即進場" : "✨ 註冊並進場";
-      document.getElementById('auth-subtitle-text').innerText = mode === 'login' ? "輸入暱稱即可進場" : "首次註冊請填寫暱稱與真實全名";
-      document.getElementById('auth-nickname-wrapper').classList.toggle('hidden', mode !== 'register');
+      document.getElementById('auth-subtitle-text').innerText = mode === 'login' ? "輸入專屬登入帳號即可進場（排行榜僅顯示暱稱）" : "首次註冊請設定私密登入帳號、公開暱稱與真實全名";
+      document.getElementById('auth-register-fields').classList.toggle('hidden', mode !== 'register');
       document.getElementById('auth-error').classList.add('hidden');
     }
 
     async function handleAccountAuth() {
       const rawAcc = document.getElementById('auth-username').value.trim().replace(/[.#$\[\]\s\/]/g, '');
       const pwd = document.getElementById('auth-password').value.trim();
-      const fullName = document.getElementById('auth-nickname').value.trim();
+      const dispNick = document.getElementById('auth-display-nickname').value.trim();
+      const fullName = document.getElementById('auth-realname').value.trim();
       const errEl = document.getElementById('auth-error');
 
       if (!rawAcc) {
-        errEl.innerText = '⚠️ 請輸入您的暱稱';
+        errEl.innerText = '⚠️ 請輸入您的私密登入帳號';
         errEl.classList.remove('hidden'); playSound('wrong'); return;
       }
 
       if (rawAcc.toLowerCase() === 'admin') {
-        if (pwd !== 'admin') {
+        if (pwd !== ADMIN_PASSWORD_SECRET) {
           errEl.innerText = '❌ 管理員密碼錯誤';
           errEl.classList.remove('hidden'); playSound('wrong'); return;
         }
         resetLocalUserState();
-        userAccountRaw = 'admin'; userName = '超級管理員'; userId = 'acc_admin';
+        userAccountRaw = 'admin'; userNickname = '超級管理員'; userName = '超級管理員'; userId = 'acc_admin';
         finalizeLogin(); return;
       }
 
@@ -1286,7 +1324,7 @@
 
         if (existing) {
           if (authMode === 'register') {
-            errEl.innerText = '⚠️ 此暱稱已註冊，已為您切換至直接進場！';
+            errEl.innerText = '⚠️ 此登入帳號已被使用，若這是您的帳號請直接登入！';
             switchAuthMode('login');
           }
           resetLocalUserState();
@@ -1297,17 +1335,18 @@
         } else {
           if (authMode === 'login') {
             switchAuthMode('register');
-            errEl.innerText = '✨ 找不到此暱稱，請補填「真實全名」完成首次註冊！';
+            errEl.innerText = '✨ 找不到此登入帳號，請填寫「遊戲暱稱」與「真實全名」完成首次註冊！';
             errEl.classList.remove('hidden');
             return;
           }
-          if (!fullName) {
-            errEl.innerText = '⚠️ 首次註冊請填寫「真實全名」';
+          if (!dispNick || !fullName) {
+            errEl.innerText = '⚠️ 首次註冊請完整填寫「遊戲暱稱」與「真實全名」';
             errEl.classList.remove('hidden'); playSound('wrong'); return;
           }
           resetLocalUserState();
           userId = accKey;
           userAccountRaw = rawAcc;
+          userNickname = dispNick;
           userName = fullName;
           userLastLoginDate = getLocalTodayStr();
           finalizeLogin('register');
@@ -1322,6 +1361,7 @@
       localStorage.setItem('bq_logged_account', userId);
       localStorage.setItem('bq_userid', userId);
       localStorage.setItem('bq_account_raw', userAccountRaw);
+      localStorage.setItem('bq_nickname', userNickname);
       localStorage.setItem('bq_username', userName);
 
       document.getElementById('auth-modal').classList.add('hidden');
@@ -1331,12 +1371,42 @@
       playSound('fanfare');
 
       if (userAccountRaw === 'admin') {
-        showToast('👑 已進入主控台', 'success');
+        showToast('👑 已進入超級主控台', 'success');
         switchTab('admin');
       } else {
-        showToast(`歡迎，${userName}！`, 'success');
+        showToast(`歡迎進場，${userNickname || userName}！`, 'success');
         switchTab('map');
       }
+    }
+
+    // 玩家自助修改公開暱稱與真實全名
+    function openProfileEditModal() {
+      if (!userId || userAccountRaw === 'admin') return;
+      playSound('click');
+      document.getElementById('profile-edit-account-readonly').innerText = userAccountRaw;
+      document.getElementById('profile-edit-nickname').value = userNickname || userName || '';
+      document.getElementById('profile-edit-realname').value = userName || '';
+      document.getElementById('profile-edit-modal').classList.remove('hidden');
+    }
+
+    function closeProfileEditModal() {
+      document.getElementById('profile-edit-modal').classList.add('hidden');
+    }
+
+    function saveMyProfileChanges() {
+      const newNick = document.getElementById('profile-edit-nickname').value.trim();
+      const newReal = document.getElementById('profile-edit-realname').value.trim();
+      if (!newNick || !newReal) {
+        showToast('⚠️ 遊戲暱稱與真實全名不可空白！', 'warning');
+        return;
+      }
+      userNickname = newNick;
+      userName = newReal;
+      saveStateAndSync('user_edit_profile');
+      closeProfileEditModal();
+      if (currentTab === 'badges') renderLeaderboardSection();
+      playSound('correct');
+      showToast('✅ 個人暱稱與真實姓名已更新！', 'success');
     }
 
     function logoutAccount() {
@@ -1346,10 +1416,10 @@
       resetLocalUserState();
       userAccountRaw = "";
       userId = "";
-      userName = "";
       document.getElementById('auth-username').value = '';
       document.getElementById('auth-password').value = '';
-      document.getElementById('auth-nickname').value = '';
+      document.getElementById('auth-display-nickname').value = '';
+      document.getElementById('auth-realname').value = '';
       document.getElementById('auth-admin-pwd-wrapper').classList.add('hidden');
       document.getElementById('auth-modal').classList.remove('hidden');
       switchAuthMode('login');
@@ -1368,7 +1438,7 @@
       if (!savedKey) {
         document.getElementById('auth-modal').classList.remove('hidden');
       } else if (savedKey === 'acc_admin') {
-        userAccountRaw = 'admin'; userName = '超級管理員'; userId = savedKey;
+        userAccountRaw = 'admin'; userNickname = '超級管理員'; userName = '超級管理員'; userId = savedKey;
         finalizeLogin();
       } else {
         db.ref('bible_quest/users/' + savedKey).once('value').then(snap => {
@@ -1427,7 +1497,12 @@
       document.getElementById('stat-xp').innerText = userXP;
       document.getElementById('stat-chapters').innerText = clearedCount;
       document.getElementById('stat-streak').innerText = userStreak;
-      document.getElementById('header-user-badge').innerText = userName ? `${userName} (${userAccountRaw || '未登入'})` : '未登入';
+
+      const pubDisp = userNickname || userName || '未登入';
+      document.getElementById('header-user-badge').innerText = pubDisp;
+
+      const editBtn = document.getElementById('header-edit-profile-btn');
+      if (editBtn) editBtn.classList.toggle('hidden', !userId || userAccountRaw === 'admin');
 
       const soundBtn = document.getElementById('sound-toggle-btn');
       if (soundBtn) soundBtn.innerText = soundEnabled ? '🔊' : '🔇';
@@ -1435,8 +1510,8 @@
       const titleObj = getUserTitleObj(userXP, clearedCount);
       const titleEl = document.getElementById('header-title-badge');
       if (titleEl) {
-        titleEl.innerText = titleObj.title;
-        titleEl.className = `text-[10px] font-black px-2 py-0.5 rounded-full border shrink-0 ${titleObj.cls}`;
+        titleEl.innerText = `Lv.${titleObj.lv} ${titleObj.title}`;
+        titleEl.className = `text-[10px] font-black px-2 py-0.5 rounded-full border shrink-0 cursor-pointer ${titleObj.cls}`;
       }
 
       const pkWinsEl = document.getElementById('pk-wins-badge');
@@ -1446,9 +1521,11 @@
       if (deskWrong) deskWrong.innerText = wrongQuestions.length;
 
       const myAccClean = (userAccountRaw || "").trim().toLowerCase();
+      const myNickClean = (userNickname || "").trim().toLowerCase();
       const myFlockMembers = allCloudUsersCache.filter(u => {
         const r = String(u.role || "").trim().toLowerCase();
-        return myAccClean && (r === myAccClean || r.startsWith(myAccClean + ":"));
+        return (myAccClean && (r === myAccClean || r.startsWith(myAccClean + ":"))) ||
+               (myNickClean && (r === myNickClean || r.startsWith(myNickClean + ":")));
       });
       const isMentor = myFlockMembers.length > 0;
       const flockBadge = document.getElementById('sidebar-flock-badge');
@@ -1461,7 +1538,7 @@
     }
 
     /**************************************************************
-     * 6. 聖經 66 卷地圖與全章經文淨化載入＋7題同章干擾故事題引擎
+     * 6. 聖經 66 卷地圖與全章經文載入＋智慧選項長度平衡器
      **************************************************************/
     function renderLearningPath() {
       const book = BIBLE_BOOKS.find(b => b.id === currentBookId) || BIBLE_BOOKS[0];
@@ -1494,7 +1571,7 @@
 
       const startCh = book.chapters > 15 ? activeBookRangeOffset * 15 + 1 : 1;
       const endCh = book.chapters > 15 ? Math.min(activeBookRangeOffset * 15 + 15, book.chapters) : book.chapters;
-      const offsets = [0, 42, 70, 42, 0, -42, -70, -42];
+      const offsets = [0, 36, 60, 36, 0, -36, -60, -36];
       let html = '';
 
       for (let ch = startCh; ch <= endCh; ch++) {
@@ -1714,14 +1791,56 @@
       playSound('click');
     }
 
+    // 【智慧選項等長平衡器】移除括號提示、去除冗長引言前綴、截斷過長複句，使 4 個選項字數平衡一致
+    function normalizeSingleOptionText(optText, targetLen = 18) {
+      if (!optText) return "";
+      let s = String(optText)
+        .replace(/（[^）]*）/g, "")
+        .replace(/\([^)]*\)/g, "")
+        .replace(/^[^：「『]{1,12}(回答|對[^：「『]{1,8})?說：\s*/, "")
+        .replace(/^[「『](.*)[」』]$/, "$1")
+        .trim();
+
+      if (s.length > Math.max(24, targetLen * 1.5)) {
+        const parts = s.split(/[；。！]/).map(p => p.trim()).filter(Boolean);
+        if (parts.length > 1 && parts[0].length >= 6) {
+          s = parts[0];
+        }
+      }
+      if (s.length > 32) {
+        const clauses = s.split(/[，、]/).map(p => p.trim()).filter(Boolean);
+        if (clauses.length >= 2) {
+          let combined = clauses[0];
+          for (let i = 1; i < clauses.length; i++) {
+            if ((combined + "，" + clauses[i]).length <= 28) {
+              combined += "，" + clauses[i];
+            } else {
+              break;
+            }
+          }
+          s = combined;
+        }
+      }
+      return s.replace(/[「」『』]/g, "").trim();
+    }
+
     function shuffleQuestionOptions(qList) {
       return qList.map(q => {
-        const correctText = q.options[q.answer];
-        const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+        const rawOpts = Array.isArray(q.options) ? q.options : ["", "", "", ""];
+        const wrongLens = rawOpts
+          .filter((_, idx) => idx !== q.answer)
+          .map(o => String(o || "").length);
+        const avgWrongLen = wrongLens.length > 0
+          ? Math.round(wrongLens.reduce((a, b) => a + b, 0) / wrongLens.length)
+          : 16;
+
+        const balancedOpts = rawOpts.map(opt => normalizeSingleOptionText(opt, avgWrongLen));
+        const correctText = balancedOpts[q.answer];
+        const shuffled = [...balancedOpts].sort(() => Math.random() - 0.5);
         return {
           ...q,
           options: shuffled,
-          answer: shuffled.indexOf(correctText)
+          answer: Math.max(0, shuffled.indexOf(correctText))
         };
       });
     }
@@ -1765,9 +1884,9 @@
 
       const backupDistractors = [
         "眾人就都驚奇，歸榮耀與神",
-        "這事成就，為要應驗主藉先知所說的話",
-        "他就在那裡為耶和華築了一座壇，求告耶和華的名",
-        "耶和華必為你們爭戰，你們只管靜默不要作聲"
+        "這事成就，應驗先知所說的話",
+        "他就在那裡築壇求告耶和華的名",
+        "耶和華必為你們爭戰，只管靜默"
       ];
 
       const narrativePairs = parsedPairs.filter(p => p.isNarrative);
@@ -1987,7 +2106,7 @@
     }
 
     /**************************************************************
-     * 7. 4人即時連線 PK 擂台
+     * 7. 4人即時連線 PK 擂台（僅顯示公開暱稱＋選項等長平衡）
      **************************************************************/
     let activePkRoomId = null;
     let activePkRef = null;
@@ -2034,6 +2153,7 @@
       const roomCode = String(Math.floor(1000 + Math.random() * 9000));
       myPkPlayerKey = userId || ('guest_' + Date.now());
       const myTitle = getUserTitleObj(userXP, Object.keys(completedChapters).length).title;
+      const pubNick = userNickname || userName || '玩家';
 
       const roomData = {
         roomId: roomCode,
@@ -2043,7 +2163,7 @@
         qIdx: 0,
         questions: generatePkQuestionsByScope(scope),
         players: {
-          [myPkPlayerKey]: { id: myPkPlayerKey, name: userName || '玩家', title: myTitle, score: 0, answeredQ: -1, lastSelected: -1, rewarded: false }
+          [myPkPlayerKey]: { id: myPkPlayerKey, name: pubNick, title: myTitle, score: 0, answeredQ: -1, lastSelected: -1, rewarded: false }
         }
       };
 
@@ -2058,6 +2178,7 @@
       if (code.length !== 4) { showToast('請輸入 4 位數房號', 'warning'); return; }
       myPkPlayerKey = userId || ('guest_' + Date.now());
       const myTitle = getUserTitleObj(userXP, Object.keys(completedChapters).length).title;
+      const pubNick = userNickname || userName || '玩家';
 
       db.ref('bible_quest/pk_rooms/' + code).once('value').then(snap => {
         const val = snap.val();
@@ -2067,7 +2188,7 @@
           showToast('房間已滿 (最多4人)', 'warning'); return;
         }
         db.ref(`bible_quest/pk_rooms/${code}/players/${myPkPlayerKey}`).set({
-          id: myPkPlayerKey, name: userName || '玩家', title: myTitle, score: 0, answeredQ: -1, lastSelected: -1, rewarded: false
+          id: myPkPlayerKey, name: pubNick, title: myTitle, score: 0, answeredQ: -1, lastSelected: -1, rewarded: false
         }).then(() => {
           subscribePkRoom(code);
         });
@@ -2112,7 +2233,7 @@
           slotsHtml += p
             ? `<div class="p-3 rounded-xl bg-emerald-900/50 border border-emerald-400 text-center">
                  <div class="text-[10px] text-amber-300 font-black">${p.title || ''}</div>
-                 <div class="font-black text-sm mt-0.5">👤 ${p.name} ${p.id === room.hostId ? '👑' : ''}</div>
+                 <div class="font-black text-sm mt-0.5 truncate">👤 ${p.name} ${p.id === room.hostId ? '👑' : ''}</div>
                </div>`
             : `<div class="p-3 rounded-xl bg-slate-800 border border-slate-700 text-center text-slate-500 text-xs font-bold">等待加入...</div>`;
         }
@@ -2275,7 +2396,7 @@
     }
 
     /**************************************************************
-     * 8. 60秒閃電戰、錯題本、排行榜、小家、Admin主控台(含覆蓋/擴充詢問視窗)
+     * 8. 60秒閃電戰、錯題本、排行榜(只顯示暱稱)、小家、Admin主控台
      **************************************************************/
     let blitzState = { timer: 60, interval: null, score: 0, combo: 0, currentQ: null };
 
@@ -2292,9 +2413,12 @@
       document.getElementById('blitz-best-label').innerText = blitzBestScore;
       const clearedCount = Object.keys(completedChapters).length;
       const quests = [
-        { t: "📖 今日讀經", d: "完成任意 1 章經文", done: clearedCount >= 1 },
-        { t: "⚡ 閃電挑戰", d: "60秒閃電戰達 100 分", done: blitzBestScore >= 100 },
-        { t: "✍️ 靈修筆記", d: "撰寫 1 篇書卷收穫筆記", done: Object.keys(bookNotes).length >= 1 }
+        { t: "📖 今日讀經初階", d: "累計完成 3 章經文", done: clearedCount >= 3 },
+        { t: "📜 穩定讀經進階", d: "累計完成 15 章經文", done: clearedCount >= 15 },
+        { t: "⚡ 閃電戰高手",   d: "60秒閃電戰達 200 分", done: blitzBestScore >= 200 },
+        { t: "⚔️ PK 擂台得勝", d: "贏得 1 場 4人 PK 冠軍", done: userPKWins >= 1 },
+        { t: "📕 錯題掃除者",   d: "消滅 5 道錯題複習", done: masteredWrongCount >= 5 },
+        { t: "✍️ 靈修筆記家",   d: "撰寫 2 篇書卷收穫筆記", done: Object.keys(bookNotes).length >= 2 }
       ];
       document.getElementById('daily-quests-list').innerHTML = quests.map(q => `
         <div class="p-3.5 rounded-2xl border ${q.done ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-200 bg-slate-50'} flex items-center justify-between">
@@ -2399,37 +2523,44 @@
     }
 
     function renderBadgesWall() {
+      const unlockedTotal = getUnlockedBadgeCount();
+      const counterEl = document.getElementById('badges-unlocked-counter');
+      if (counterEl) counterEl.innerText = `已解鎖 ${unlockedTotal} / ${BADGES_CATALOG.length}`;
+
       document.getElementById('badges-grid').innerHTML = BADGES_CATALOG.map(b => {
         const unlocked = b.check();
         return `
-          <div class="${unlocked ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200 opacity-50 grayscale'} p-3 rounded-2xl border flex items-center gap-2.5">
+          <div class="${unlocked ? 'bg-amber-50 border-amber-300 shadow-xs' : 'bg-slate-50 border-slate-200 opacity-50 grayscale'} p-3 rounded-2xl border flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-xl bg-white border border-amber-300 flex items-center justify-center text-xl shrink-0">${b.icon}</div>
-            <div>
-              <h4 class="font-black text-slate-800 text-xs">${b.title}</h4>
-              <p class="text-[10px] font-bold text-slate-500">${b.desc}</p>
+            <div class="min-w-0">
+              <h4 class="font-black text-slate-800 text-xs truncate">${b.title}</h4>
+              <p class="text-[10px] font-bold text-slate-500 leading-tight">${b.desc}</p>
             </div>
           </div>`;
       }).join('');
     }
 
+    // 【隱私保護】全服排行榜僅顯示「公開暱稱 (nickname)」，絕不顯示登入帳號 (account) 與真實本名
     function renderLeaderboardSection() {
       const fullEl = document.getElementById('global-leaderboard-list');
       if (!fullEl) return;
       fullEl.innerHTML = allCloudUsersCache.slice(0, 50).map((u, idx) => {
         const isMe = u.id === userId;
+        const pubNick = u.nickname || u.name || '神秘勇士';
         return `
           <div class="p-3 rounded-2xl border ${isMe ? 'border-emerald-400 bg-emerald-50/60' : 'border-slate-100 bg-slate-50'} flex items-center justify-between text-xs">
             <div class="flex items-center gap-2.5 min-w-0">
-              <span class="w-6 text-center font-black text-slate-400">#${idx + 1}</span>
+              <span class="w-6 text-center font-black ${idx < 3 ? 'text-amber-500 text-sm' : 'text-slate-400'}">#${idx + 1}</span>
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="font-black text-slate-800">${u.name || u.account}</span>
+                  <span class="font-black text-slate-800">${pubNick}</span>
+                  ${isMe ? '<span class="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded font-black">我</span>' : ''}
                   ${renderTitleBadgeHTML(u.total_xp || 0, u.cleared_count || 0)}
                 </div>
-                <div class="text-[10px] font-bold text-slate-400">暱稱：${u.account || ''} ・ 通關 ${u.cleared_count || 0} 章</div>
+                <div class="text-[10px] font-bold text-slate-400">正在讀：${u.current_book || '創世記'} ・ 已通關 ${u.cleared_count || 0} 章</div>
               </div>
             </div>
-            <span class="font-black text-amber-600 text-sm shrink-0">${u.total_xp || 0} XP</span>
+            <span class="font-black text-amber-600 text-sm shrink-0">${(u.total_xp || 0).toLocaleString()} XP</span>
           </div>`;
       }).join('');
     }
@@ -2458,11 +2589,13 @@
     function renderMyGroupDashboard() {
       if (!userAccountRaw) return;
       const leaderAcc = userAccountRaw.trim().toLowerCase();
-      document.getElementById('flock-leader-account-tag').innerText = userAccountRaw;
+      const leaderNick = (userNickname || "").trim().toLowerCase();
+      document.getElementById('flock-leader-account-tag').innerText = userNickname || userName || userAccountRaw;
 
       let members = allCloudUsersCache.filter(u => {
         const r = String(u.role || "").trim().toLowerCase();
-        return r === leaderAcc || r.startsWith(leaderAcc + ":");
+        return (leaderAcc && (r === leaderAcc || r.startsWith(leaderAcc + ":"))) ||
+               (leaderNick && (r === leaderNick || r.startsWith(leaderNick + ":")));
       });
 
       const selectEl = document.getElementById('flock-subgroup-select');
@@ -2494,8 +2627,8 @@
           : members.map(u => `
             <div class="p-3 rounded-2xl border border-slate-100 bg-slate-50 flex justify-between items-center">
               <div>
-                <div class="flex items-center gap-1.5">
-                  <span class="font-black text-slate-800 text-xs">${u.name} (${u.account})</span>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-black text-slate-800 text-xs">${u.name || ''} (${u.nickname || ''})</span>
                   ${renderTitleBadgeHTML(u.total_xp || 0, u.cleared_count || 0)}
                 </div>
                 <div class="text-[11px] font-bold text-slate-500 mt-0.5">目前：${u.current_book || '創世記'} ・ 已通關 ${u.cleared_count || 0} 章</div>
@@ -2521,6 +2654,7 @@
       if (sub === 'qbank') updateQbankStatusBadge();
     }
 
+    // 超級主控台可完整查看並編輯「登入帳號、公開暱稱、真實全名、所屬領袖」
     function renderAdminConsole(forceRender = false) {
       if (userAccountRaw !== 'admin') return;
       const tbody = document.getElementById('admin-users-tbody');
@@ -2532,6 +2666,7 @@
       const filtered = allCloudUsersCache.filter(u => {
         if (!query) return true;
         return (u.name || "").toLowerCase().includes(query) ||
+               (u.nickname || "").toLowerCase().includes(query) ||
                (u.account || "").toLowerCase().includes(query) ||
                (u.role || "").toLowerCase().includes(query);
       });
@@ -2539,18 +2674,21 @@
       if (tbody) {
         tbody.innerHTML = filtered.map(u => {
           const isAuth = u.portal_auth === true;
-          const safeName = String(u.name || u.account || '').replace(/'/g, "\\'");
+          const safeName = String(u.name || u.nickname || u.account || '').replace(/'/g, "\\'");
           return `
             <tr class="hover:bg-amber-50/40">
               <td class="py-2 px-2">
-                <input type="text" id="adm-acc-${u.id}" value="${u.account || ''}" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded font-mono">
+                <input type="text" id="adm-acc-${u.id}" value="${u.account || ''}" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded font-mono bg-slate-50">
+              </td>
+              <td class="py-2 px-2">
+                <input type="text" id="adm-nick-${u.id}" value="${u.nickname || u.name || ''}" class="w-24 px-2 py-1 text-xs border border-emerald-300 rounded font-black text-emerald-900">
               </td>
               <td class="py-2 px-2">
                 <input type="text" id="adm-name-${u.id}" value="${u.name || ''}" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded font-bold">
               </td>
               <td class="py-2 px-2">${renderTitleBadgeHTML(u.total_xp || 0, u.cleared_count || 0)}</td>
               <td class="py-2 px-2">
-                <input type="text" id="adm-role-${u.id}" value="${u.role || ''}" placeholder="領袖暱稱" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded">
+                <input type="text" id="adm-role-${u.id}" value="${u.role || ''}" placeholder="領袖帳號/暱稱" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded">
               </td>
               <td class="py-2 px-2 text-center">
                 <input type="checkbox" ${isAuth ? 'checked' : ''} onchange="adminTogglePortalAuth('${u.id}', this.checked)" class="w-4 h-4 accent-emerald-600 cursor-pointer">
@@ -2575,7 +2713,7 @@
               notesHtml += `
                 <div class="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200">
                   <div class="flex justify-between text-xs font-black text-indigo-900 mb-1">
-                    <span>👤 ${u.name} (${u.account})</span>
+                    <span>👤 ${u.name || ''} / 暱稱：${u.nickname || ''} (帳號：${u.account})</span>
                     <span class="bg-indigo-200 px-2 py-0.5 rounded">《${book}》</span>
                   </div>
                   <p class="text-xs font-bold text-slate-700 whitespace-pre-wrap">${u.notes[book]}</p>
@@ -2589,10 +2727,11 @@
 
     async function adminSaveUserRow(oldId) {
       const newAccRaw = document.getElementById(`adm-acc-${oldId}`).value.trim().replace(/[.#$\[\]\s\/]/g, '');
+      const newNick = document.getElementById(`adm-nick-${oldId}`).value.trim();
       const newName = document.getElementById(`adm-name-${oldId}`).value.trim();
       const newRole = document.getElementById(`adm-role-${oldId}`).value.trim();
 
-      if (!newAccRaw) { showToast('暱稱不可空白', 'warning'); return; }
+      if (!newAccRaw) { showToast('登入帳號不可空白', 'warning'); return; }
       const newId = 'acc_' + newAccRaw.toLowerCase();
 
       const snap = await db.ref('bible_quest/users/' + oldId).once('value');
@@ -2602,7 +2741,8 @@
       const oldAccountName = userData.account || oldId.replace(/^acc_/, '');
       userData.id = newId;
       userData.account = newAccRaw;
-      userData.name = newName || newAccRaw;
+      userData.nickname = newNick || newName || newAccRaw;
+      userData.name = newName || newNick || newAccRaw;
       userData.role = newRole;
 
       if (newId !== oldId) {
@@ -2611,7 +2751,8 @@
       } else {
         await db.ref('bible_quest/users/' + oldId).update({
           account: newAccRaw,
-          name: newName || newAccRaw,
+          nickname: userData.nickname,
+          name: userData.name,
           role: newRole
         });
       }
@@ -2640,7 +2781,6 @@
       });
     }
 
-    // 【新增彈出詢問與完成回報視窗】明確讓管理員確認是「合併擴充」還是「清空覆蓋」
     function adminUploadQuestionBank(mode = 'merge') {
       const txt = document.getElementById('admin-qbank-json').value.trim();
       if (!txt) {
@@ -2657,8 +2797,8 @@
 
         let isOverwrite = (mode === 'overwrite' || mode === true);
         const confirmMsg = isOverwrite
-          ? `🧹 【清空覆蓋確認】\n您即將上傳 ${newKeys.length} 個章節（${newKeys.slice(0, 5).join('、')}...）。\n\n這將會「清空雲端舊有題庫」並完全覆蓋為本次題庫，確定執行嗎？`
-          : `➕ 【合併擴充確認】\n您即將把 ${newKeys.length} 個章節（${newKeys.slice(0, 5).join('、')}...）合併擴充至雲端題庫（保留原有的其他章節）。\n\n確定執行嗎？`;
+          ? `🧹 【清空覆蓋確認】\n您即將上傳 ${newKeys.length} 個章節。\n\n這將會「清空雲端舊有題庫」並完全覆蓋為本次題庫，確定執行嗎？`
+          : `➕ 【合併擴充確認】\n您即將把 ${newKeys.length} 個章節合併擴充至雲端題庫（保留原有的其他章節）。\n\n確定執行嗎？`;
 
         if (!confirm(confirmMsg)) return;
 
@@ -2676,28 +2816,106 @@
           playSound('fanfare');
           alert(`🎉 上傳成功！\n模式：${isOverwrite ? '🧹 清空覆蓋' : '➕ 合併擴充'}\n本次處理：${newKeys.length} 章\n目前雲端總計可用題庫：共 ${totalNow} 章！`);
         }).catch(err => {
-          alert('❌ 上傳失敗，請檢查 Firebase 權限或網路連線：' + err.message);
+          alert('❌ 上傳失敗：' + err.message);
         });
       } catch (e) {
         alert('❌ JSON 格式錯誤，請確認複製了完整的 { ... } 區塊！');
       }
     }
 
+    // 一鍵平衡雲端所有題庫選項長度
+    function optimizeCloudQuestionBankLength() {
+      const bank = window.CURATED_CHAPTER_DATA || {};
+      const keys = Object.keys(bank);
+      if (keys.length === 0) {
+        alert("目前雲端尚無題庫！");
+        return;
+      }
+      if (!confirm(`⚖️ 系統將自動掃描雲端全部 ${keys.length} 個章節的題目，移除正確答案中的括號提示與冗長句子，使 4 個選項字數平衡一致！\n\n確定立即執行並更新至雲端嗎？`)) return;
+
+      let fixedCount = 0;
+      keys.forEach(k => {
+        const ch = bank[k];
+        if (ch && Array.isArray(ch.questions)) {
+          ch.questions = ch.questions.map(q => {
+            const rawOpts = Array.isArray(q.options) ? q.options : [];
+            const wrongLens = rawOpts.filter((_, idx) => idx !== q.answer).map(o => String(o || "").length);
+            const avgLen = wrongLens.length > 0 ? Math.round(wrongLens.reduce((a, b) => a + b, 0) / wrongLens.length) : 16;
+            const newOpts = rawOpts.map(opt => {
+              const cleaned = normalizeSingleOptionText(opt, avgLen);
+              if (cleaned.length !== String(opt).length) fixedCount++;
+              return cleaned;
+            });
+            return { ...q, options: newOpts };
+          });
+        }
+      });
+
+      db.ref('bible_quest/question_bank').set(bank).then(() => {
+        window.CURATED_CHAPTER_DATA = bank;
+        playSound('fanfare');
+        alert(`✅ 優化完成！已成功精簡並平衡雲端 ${fixedCount} 個過長選項，現在 PK 擂台與闖關測驗再也無法靠「選最長答案」猜題了！`);
+      });
+    }
+
+    // 匯出雲端題庫 JSON 與 CSV 至電腦
+    function exportQuestionBankJSON() {
+      const data = window.CURATED_CHAPTER_DATA || {};
+      const count = Object.keys(data).length;
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `聖經闖關王_雲端題庫備份_${count}章_${new Date().toISOString().slice(0,10)}.json`;
+      link.click();
+      showToast(`📥 已下載 ${count} 章完整 JSON 題庫！`, 'success');
+    }
+
+    function exportQuestionBankCSV() {
+      const data = window.CURATED_CHAPTER_DATA || {};
+      const keys = Object.keys(data);
+      let csv = "\uFEFF章節代碼,章節標題,題號,難度,XP,題目內容,正確答案(選項1),誘答選項2,誘答選項3,誘答選項4,經文解析\n";
+      let qCount = 0;
+
+      keys.forEach(k => {
+        const ch = data[k] || {};
+        const title = (ch.title || k).replace(/"/g, '""');
+        (ch.questions || []).forEach((q, idx) => {
+          const opts = q.options || [];
+          const qText = String(q.q || '').replace(/"/g, '""');
+          const o0 = String(opts[0] || '').replace(/"/g, '""');
+          const o1 = String(opts[1] || '').replace(/"/g, '""');
+          const o2 = String(opts[2] || '').replace(/"/g, '""');
+          const o3 = String(opts[3] || '').replace(/"/g, '""');
+          const exp = String(q.exp || '').replace(/"/g, '""');
+          csv += `"${k}","${title}","${idx + 1}","${q.type || '故事'}","${q.xp || 15}","${qText}","${o0}","${o1}","${o2}","${o3}","${exp}"\n`;
+          qCount++;
+        });
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `聖經闖關王_題庫總表_${keys.length}章_${qCount}題_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+      showToast(`📊 已匯出 ${keys.length} 章（共 ${qCount} 題）CSV 表格！`, 'success');
+    }
+
     function exportAdminCSV() {
-      let csv = "\uFEFF進場暱稱,真實全名,頭銜稱號,領袖帳號(D欄),總經驗值,目前書卷,通關章數,看板權限\n";
+      let csv = "\uFEFF登入帳號(私密),遊戲暱稱(公開),真實全名,頭銜稱號,領袖帳號(E欄),總經驗值,目前書卷,通關章數,看板權限\n";
       allCloudUsersCache.forEach(u => {
         const t = getUserTitleObj(u.total_xp || 0, u.cleared_count || 0).title;
-        csv += `"${u.account||''}","${u.name||''}","${t}","${u.role||''}","${u.total_xp||0}","${u.current_book||''}","${u.cleared_count||0}","${u.portal_auth?'Y':'N'}"\n`;
+        csv += `"${u.account||''}","${u.nickname||u.name||''}","${u.name||''}","${t}","${u.role||''}","${u.total_xp||0}","${u.current_book||''}","${u.cleared_count||0}","${u.portal_auth?'Y':'N'}"\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `聖經闖關王_總表_${new Date().toISOString().slice(0,10)}.csv`;
+      link.download = `聖經闖關王_學員總表_${new Date().toISOString().slice(0,10)}.csv`;
       link.click();
     }
 
     /**************************************************************
-     * 9. 書卷收穫筆記與授權進度查詢看板
+     * 9. 書卷收穫筆記與授權進度查詢看板（管理員密碼 jesusmylord）
      **************************************************************/
     function openBookReflectionModal(defaultBookId = "創世記") {
       const selectEl = document.getElementById('reflection-book-select');
@@ -2754,15 +2972,15 @@
       const pwd = document.getElementById('portal-pwd-input').value.trim();
       const errEl = document.getElementById('portal-auth-error');
 
-      if (!acc) { errEl.innerText = "請輸入授權暱稱"; errEl.classList.remove('hidden'); return; }
-      if (acc === 'admin' && pwd === 'admin') { grantPortalAccess('管理員'); return; }
+      if (!acc) { errEl.innerText = "請輸入授權登入帳號"; errEl.classList.remove('hidden'); return; }
+      if (acc === 'admin' && pwd === ADMIN_PASSWORD_SECRET) { grantPortalAccess('超級管理員'); return; }
 
       const snap = await db.ref('bible_quest/users/acc_' + acc).once('value');
       const data = snap.val();
       if (data && data.portal_auth === true) {
-        grantPortalAccess(data.name || data.account);
+        grantPortalAccess(data.name || data.nickname || data.account);
       } else {
-        errEl.innerText = "⛔ 此暱稱尚未開通看板權限，請由主控台或試算表開通";
+        errEl.innerText = "⛔ 此帳號尚未開通看板權限（或管理員密碼錯誤）";
         errEl.classList.remove('hidden');
       }
     }
@@ -2790,13 +3008,14 @@
       filterEl.innerHTML = html;
     }
 
+    // 進度看板亦隱藏私密登入帳號，僅顯示真實姓名與公開暱稱
     function renderPublicProgressBoard() {
       const grp = document.getElementById('pub-leader-filter')?.value || 'ALL';
       const q = (document.getElementById('pub-search-input')?.value || '').toLowerCase();
 
       const filtered = allCloudUsersCache.filter(u => {
         if (grp !== 'ALL' && u.role !== grp) return false;
-        if (q) return (u.name || '').toLowerCase().includes(q) || (u.account || '').toLowerCase().includes(q);
+        if (q) return (u.name || '').toLowerCase().includes(q) || (u.nickname || '').toLowerCase().includes(q);
         return true;
       });
 
@@ -2824,7 +3043,7 @@
               <td class="py-2.5 px-3">
                 <div class="flex items-center gap-1.5 flex-wrap">
                   <span class="font-black text-slate-800">${u.name || ''}</span>
-                  <span class="text-[10px] text-slate-400">(${u.account || ''})</span>
+                  <span class="text-[10px] text-emerald-700 font-bold">(${u.nickname || u.name || ''})</span>
                   ${renderTitleBadgeHTML(u.total_xp || 0, u.cleared_count || 0)}
                 </div>
               </td>
@@ -2846,7 +3065,7 @@
               notesHtml += `
                 <div class="bg-indigo-50/70 border border-indigo-200 p-3.5 rounded-2xl space-y-1.5">
                   <div class="flex items-center justify-between border-b border-indigo-200 pb-1.5">
-                    <span class="font-black text-indigo-900 text-xs">👤 ${u.name} (${u.account})</span>
+                    <span class="font-black text-indigo-900 text-xs">👤 ${u.name || ''} (${u.nickname || ''})</span>
                     <span class="bg-indigo-200 text-indigo-800 text-[10px] font-black px-2 py-0.5 rounded">《${bk}》</span>
                   </div>
                   <p class="text-xs font-bold text-slate-700 whitespace-pre-wrap">${u.notes[bk]}</p>
