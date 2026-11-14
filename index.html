@@ -556,7 +556,7 @@
 
             <div id="admin-panel-notes" class="hidden space-y-2.5"></div>
 
-            <!-- 3. 題庫管理、雙向選項平衡與電腦匯出 -->
+            <!-- 3. 題庫管理與電腦匯出 -->
             <div id="admin-panel-qbank" class="hidden space-y-3">
               <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -578,9 +578,6 @@
                 </button>
                 <button onclick="adminUploadQuestionBank('overwrite')" class="quest-btn-rose px-4 py-3 rounded-xl font-black text-xs cursor-pointer">
                   🧹 清空舊題庫並覆蓋
-                </button>
-                <button onclick="optimizeCloudQuestionBankLength()" class="quest-btn-amber px-4 py-3 rounded-xl font-black text-xs cursor-pointer">
-                  ⚖️ 一鍵雙向平衡雲端所有題目選項長度（消除最長答案漏洞）
                 </button>
               </div>
             </div>
@@ -1114,7 +1111,7 @@
       const previewEl = document.getElementById('qbank-chapters-preview');
       if (countEl) countEl.innerText = keys.length;
       if (previewEl) {
-        previewEl.innerText = keys.length > 0 ? `包含章節：${keys.join('、')}` : '目前尚無手寫題庫';
+        previewEl.innerText = keys.length > 0 ? `包含章節：${keys.slice(0, 60).join('、')}${keys.length > 60 ? ' ...等共 ' + keys.length + ' 章' : ''}` : '目前尚無手寫題庫';
       }
     }
 
@@ -1347,7 +1344,7 @@
         }
       } catch (e) {
         errEl.innerText = '⚠️ 連線異常，請重試';
-        errEl.classList.add('hidden');
+        errEl.classList.remove('hidden');
       }
     }
 
@@ -1531,7 +1528,7 @@
     }
 
     /**************************************************************
-     * 6. 聖經 66 卷地圖與全章經文載入＋雙向選項字數強制對齊引擎
+     * 6. 聖經 66 卷地圖與全章經文載入＋保留 CSV 原文選項洗牌
      **************************************************************/
     function renderLearningPath() {
       const book = BIBLE_BOOKS.find(b => b.id === currentBookId) || BIBLE_BOOKS[0];
@@ -1784,8 +1781,7 @@
       playSound('click');
     }
 
-    // 【雙向字數強制對齊引擎】濃縮過長正解（保留雙問號核心）＋ 自動加長過短錯誤選項
-// 保留您 8323 題 CSV 的原始精煉選項，僅清除多餘空白
+    // 完整保留 CSV 原文選項，不做任何自動補字或截斷，僅清理首尾空白並隨機洗牌
     function normalizeSingleOptionText(optText) {
       if (!optText) return "";
       return String(optText).trim();
@@ -1812,6 +1808,9 @@
         };
       });
     }
+
+    let askedCrossChapterQuestions = new Set(JSON.parse(localStorage.getItem('bq_asked_q_hashes') || "[]"));
+
     function markQuestionAsked(qText) {
       askedCrossChapterQuestions.add(qText);
       try {
@@ -2071,7 +2070,7 @@
     }
 
     /**************************************************************
-     * 7. 4人即時連線 PK 擂台（僅顯示公開暱稱＋選項等長平衡）
+     * 7. 4人即時連線 PK 擂台（僅顯示公開暱稱＋保留 CSV 原文選項）
      **************************************************************/
     let activePkRoomId = null;
     let activePkRef = null;
@@ -2228,7 +2227,7 @@
           return;
         }
         const rawQ = qList[qIdx];
-        const displayOptions = balanceAllFourOptions(rawQ.options || [], rawQ.answer || 0, rawQ.q || "");
+        const displayOptions = (rawQ.options || []).map(o => String(o || "").trim());
         const me = room.players && room.players[myKey];
         const hasAnswered = me && me.answeredQ === qIdx;
         const mySelected = me ? me.lastSelected : -1;
@@ -2766,15 +2765,6 @@
 
         if (!confirm(confirmMsg)) return;
 
-        newKeys.forEach(k => {
-          if (parsed[k] && Array.isArray(parsed[k].questions)) {
-            parsed[k].questions = parsed[k].questions.map(q => {
-              const ansIdx = typeof q.answer === "number" ? q.answer : 0;
-              return { ...q, options: balanceAllFourOptions(q.options || [], ansIdx, q.q || ""), answer: ansIdx };
-            });
-          }
-        });
-
         const ref = db.ref('bible_quest/question_bank');
         const promise = isOverwrite ? ref.set(parsed) : ref.update(parsed);
         promise.then(() => {
@@ -2787,45 +2777,13 @@
           const totalNow = Object.keys(window.CURATED_CHAPTER_DATA).length;
           document.getElementById('admin-qbank-json').value = '';
           playSound('fanfare');
-          alert(`🎉 上傳並自動平衡選項成功！\n模式：${isOverwrite ? '🧹 清空覆蓋' : '➕ 合併擴充'}\n本次處理：${newKeys.length} 章\n目前雲端總計可用題庫：共 ${totalNow} 章！`);
+          alert(`🎉 上傳成功！\n模式：${isOverwrite ? '🧹 清空覆蓋' : '➕ 合併擴充'}\n本次處理：${newKeys.length} 章\n目前雲端總計可用題庫：共 ${totalNow} 章！`);
         }).catch(err => {
           alert('❌ 上傳失敗：' + err.message);
         });
       } catch (e) {
         alert('❌ JSON 格式錯誤，請確認複製了完整的 { ... } 區塊！');
       }
-    }
-
-    function optimizeCloudQuestionBankLength() {
-      const bank = window.CURATED_CHAPTER_DATA || {};
-      const keys = Object.keys(bank);
-      if (keys.length === 0) {
-        alert("目前雲端尚無題庫！");
-        return;
-      }
-      if (!confirm(`⚖️ 系統將對雲端全部 ${keys.length} 個章節執行「雙向字數對齊」：\n1. 濃縮過長的正確答案（限制在 14~22 字內）\n2. 自動補齊過短的錯誤選項\n\n確定立即執行並覆蓋更新至雲端嗎？`)) return;
-
-      let fixedCount = 0;
-      keys.forEach(k => {
-        const ch = bank[k];
-        if (ch && Array.isArray(ch.questions)) {
-          ch.questions = ch.questions.map(q => {
-            const rawOpts = Array.isArray(q.options) ? q.options : [];
-            const ansIdx = typeof q.answer === "number" ? q.answer : 0;
-            const newOpts = balanceAllFourOptions(rawOpts, ansIdx, q.q || "");
-            newOpts.forEach((no, i) => {
-              if (no !== rawOpts[i]) fixedCount++;
-            });
-            return { ...q, options: newOpts, answer: ansIdx };
-          });
-        }
-      });
-
-      db.ref('bible_quest/question_bank').set(bank).then(() => {
-        window.CURATED_CHAPTER_DATA = bank;
-        playSound('fanfare');
-        alert(`✅ 雙向對齊完成！共修正了 ${fixedCount} 個選項！\n\n⚠️ 重要提醒：請關閉舊的 PK 房間，重新點擊「➕ 建立 PK 房間」抽出新題目，4 個選項就會全部是等長的一行句子了！`);
-      });
     }
 
     function exportQuestionBankJSON() {
