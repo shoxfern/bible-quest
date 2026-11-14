@@ -1617,54 +1617,62 @@
         .trim();
     }
 
+// 支援 3.5 秒自動逾時切換的網路請求，避免外部聖經 API 卡住畫面
+    async function fetchWithTimeout(url, timeoutMs = 3500) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        return res;
+      } catch (err) {
+        clearTimeout(timer);
+        throw err;
+      }
+    }
+
     async function fetchChapterVerbatimVerses(bookId, chapterNum, forceReload = false) {
       const key = `${bookId}_${chapterNum}`;
-      if (!forceReload && BUILTIN_FULL_VERSES[key] && BUILTIN_FULL_VERSES[key].length >= 1) {
+      // 1. 優先使用內建與本機快取經文（0秒瞬間顯示）
+      if (!forceReload && DEFAULT_BUILTIN_VERSES[key] && DEFAULT_BUILTIN_VERSES[key].length >= 1) {
+        return DEFAULT_BUILTIN_VERSES[key];
+      }
+      if (!forceReload && BUILTIN_FULL_VERSES[key] && Array.isArray(BUILTIN_FULL_VERSES[key]) && BUILTIN_FULL_VERSES[key].length >= 2) {
         return BUILTIN_FULL_VERSES[key];
       }
+
       const book = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
 
-      try {
-        const r1 = await fetch(`https://api.getbible.net/v2/cut/${book.num}/${chapterNum}.json`);
-        if (r1.ok) {
-          const d1 = await r1.json();
-          if (d1 && Array.isArray(d1.verses) && d1.verses.length > 0) {
-            const vList = d1.verses.map(v => `${v.verse}. ${cleanScriptureText(v.text)}`);
-            BUILTIN_FULL_VERSES[key] = vList;
-            try { localStorage.setItem('bq_full_verses_v5', JSON.stringify(BUILTIN_FULL_VERSES)); } catch(e){}
-            return vList;
-          }
-        }
-      } catch (e) {}
+      // 2. 依序嘗試 3 個和合本經文雲端來源（超過 3.5 秒自動換下一個，絕不卡死）
+      const endpoints = [
+        { url: `https://bolls.life/get-chapter/CUV/${book.num}/${chapterNum}/`, type: 'bolls' },
+        { url: `https://bolls.life/get-chapter/CUNP/${book.num}/${chapterNum}/`, type: 'bolls' },
+        { url: `https://api.getbible.net/v2/cut/${book.num}/${chapterNum}.json`, type: 'getbible' }
+      ];
 
-      try {
-        const r2 = await fetch(`https://bolls.life/get-chapter/CUV/${book.num}/${chapterNum}/`);
-        if (r2.ok) {
-          const d2 = await r2.json();
-          if (Array.isArray(d2) && d2.length > 0) {
-            const vList = d2.map(v => `${v.verse}. ${cleanScriptureText(v.text)}`);
-            BUILTIN_FULL_VERSES[key] = vList;
-            try { localStorage.setItem('bq_full_verses_v5', JSON.stringify(BUILTIN_FULL_VERSES)); } catch(e){}
-            return vList;
+      for (const ep of endpoints) {
+        try {
+          const r = await fetchWithTimeout(ep.url, 3500);
+          if (r.ok) {
+            const d = await r.json();
+            if (ep.type === 'bolls' && Array.isArray(d) && d.length > 0) {
+              const vList = d.map(v => `${v.verse}. ${cleanScriptureText(v.text)}`);
+              BUILTIN_FULL_VERSES[key] = vList;
+              try { localStorage.setItem('bq_full_verses_v5', JSON.stringify(BUILTIN_FULL_VERSES)); } catch(e){}
+              return vList;
+            }
+            if (ep.type === 'getbible' && d && Array.isArray(d.verses) && d.verses.length > 0) {
+              const vList = d.verses.map(v => `${v.verse}. ${cleanScriptureText(v.text)}`);
+              BUILTIN_FULL_VERSES[key] = vList;
+              try { localStorage.setItem('bq_full_verses_v5', JSON.stringify(BUILTIN_FULL_VERSES)); } catch(e){}
+              return vList;
+            }
           }
-        }
-      } catch (e) {}
-
-      try {
-        const r3 = await fetch(`https://bolls.life/get-chapter/CUNP/${book.num}/${chapterNum}/`);
-        if (r3.ok) {
-          const d3 = await r3.json();
-          if (Array.isArray(d3) && d3.length > 0) {
-            const vList = d3.map(v => `${v.verse}. ${cleanScriptureText(v.text)}`);
-            BUILTIN_FULL_VERSES[key] = vList;
-            try { localStorage.setItem('bq_full_verses_v5', JSON.stringify(BUILTIN_FULL_VERSES)); } catch(e){}
-            return vList;
-          }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
 
       return [
-        `1. 【${book.id} 第 ${chapterNum} 章】目前網路連線異常，可點擊右上角「🔄 重載」重新抓取完整和合本經文。`,
+        `1. 【${book.id} 第 ${chapterNum} 章】目前外部經文伺服器回應較慢，請點擊右上角「🔄 重載」重新抓取完整和合本經文。`,
         `2. 本卷《${book.id}》核心信息：${book.desc}。`
       ];
     }
@@ -1675,7 +1683,9 @@
       document.getElementById('scripture-scroll-box').innerHTML = `<p class="text-center text-emerald-600 py-8 font-black">🔄 正在從雲端重新載入《${activeLesson.bookId}》第 ${activeLesson.chapterNum} 章完整經文...</p>`;
       const verses = await fetchChapterVerbatimVerses(activeLesson.bookId, activeLesson.chapterNum, true);
       activeLesson.verses = verses;
-      activeLesson.questions = getChapterQuizData(activeLesson.bookId, activeLesson.chapterNum, verses).questions;
+      try {
+        activeLesson.questions = getChapterQuizData(activeLesson.bookId, activeLesson.chapterNum, verses).questions;
+      } catch (e) {}
       renderLessonStage();
       showToast(`已載入完整經文（共 ${verses.length} 節）`, 'success');
     }
@@ -1705,22 +1715,35 @@
         renderLessonStage();
       } else {
         document.getElementById('scripture-scroll-box').innerHTML = `<p class="text-center text-slate-400 py-8 font-bold">📖 正在載入《${bookId}》第 ${chapterNum} 章完整經文...</p>`;
-        const verses = await fetchChapterVerbatimVerses(bookId, chapterNum, false);
-        activeLesson.verses = verses;
-        activeLesson.questions = getChapterQuizData(bookId, chapterNum, verses).questions;
         const chk = document.getElementById('read-confirm-checkbox');
         if (chk) { chk.checked = false; chk.disabled = true; }
-        renderLessonStage();
 
+        // 先啟動 8 秒閱讀計時器，確保絕對不會卡在 8 秒不動
         if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
         activeLesson.timerInterval = setInterval(() => {
           activeLesson.secondsElapsed++;
           updateReadingLockUI();
         }, 1000);
+
+        // 取得經文並立即渲染顯示到畫面上
+        const verses = await fetchChapterVerbatimVerses(bookId, chapterNum, false);
+        activeLesson.verses = Array.isArray(verses) && verses.length > 0 ? verses : DEFAULT_BUILTIN_VERSES["創世記_1"];
+
+        // 安全載入本章測驗題目（加上 try-catch 防止題庫異常導致經文不顯示）
+        try {
+          const quizData = getChapterQuizData(bookId, chapterNum, activeLesson.verses);
+          activeLesson.questions = (quizData && Array.isArray(quizData.questions) && quizData.questions.length > 0)
+            ? quizData.questions
+            : shuffleQuestionOptions(BUILTIN_DEFAULT_QBANK["創世記_1"].questions);
+        } catch (err) {
+          console.error("題庫讀取保護觸發：", err);
+          activeLesson.questions = shuffleQuestionOptions(BUILTIN_DEFAULT_QBANK["創世記_1"].questions);
+        }
+
+        renderLessonStage();
       }
       playSound('click');
     }
-
     function closeLessonOverlay() {
       if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
       document.getElementById('lesson-overlay').classList.add('hidden');
