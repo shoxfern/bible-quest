@@ -1785,93 +1785,24 @@
     }
 
     // 【雙向字數強制對齊引擎】濃縮過長正解（保留雙問號核心）＋ 自動加長過短錯誤選項
-    function normalizeSingleOptionText(optText, targetLen = 16, questionText = "") {
+// 保留您 8323 題 CSV 的原始精煉選項，僅清除多餘空白
+    function normalizeSingleOptionText(optText) {
       if (!optText) return "";
-      let s = String(optText)
-        .replace(/（[^）]*）/g, "")
-        .replace(/\([^)]*\)/g, "")
-        .replace(/[「」『』]/g, "")
-        .replace(/^[^：]{1,12}(回答|對[^：]{1,8})?說：\s*/, "")
-        .trim();
-
-      s = s.replace(/[[,；。]+(because|因為|因他|這是因|正如|直到今日|從此以後|所以那|這就是|他兩腿|那時|於是眾人).*$/g, "");
-
-      const sentences = s.split(/[。！？]/).map(p => p.trim()).filter(Boolean);
-      if (sentences.length > 1) {
-        s = sentences[0];
-      }
-
-      if (s.includes("；")) {
-        const semiParts = s.split("；").map(p => {
-          let sub = p.trim()
-            .replace(/^(米非波設|亞伯拉罕|雅各|摩西|大衛|約瑟|掃羅|所羅門|以利沙|以利亞|耶和華|他們|那人)(有一個|就|便|卻|又)?/, "")
-            .replace(/^(此後|後來|於是|隨後)(他|米非波設|雅各|大衛|摩西|約瑟)?/, "他")
-            .replace(/，名叫做?/g, "名叫")
-            .trim();
-          const subClauses = sub.split("，").map(c => c.trim()).filter(Boolean);
-          if (subClauses.length > 2) return subClauses.slice(0, 2).join("，");
-          return sub;
-        }).filter(Boolean);
-        s = semiParts.slice(0, 2).join("；");
-      }
-
-      if (s.length > 22) {
-        const clauses = s.split(/[，、]/).map(p => p.trim()).filter(Boolean);
-        if (clauses.length >= 2) {
-          let res = clauses[0];
-          for (let i = 1; i < clauses.length; i++) {
-            if ((res + "，" + clauses[i]).length <= 22) {
-              res += "，" + clauses[i];
-            } else {
-              break;
-            }
-          }
-          s = res;
-        }
-      }
-
-      if (s.length > 24) {
-        s = s.slice(0, 24).replace(/[，、；]$/, "");
-      }
-      return s.trim();
+      return String(optText).trim();
     }
 
-    function balanceAllFourOptions(rawOpts, correctIdx, questionText = "") {
-      const cleaned = rawOpts.map(o => normalizeSingleOptionText(o, 16, questionText));
-      const correctStr = cleaned[correctIdx] || "";
-      const hasSemicolon = correctStr.includes("；") || cleaned.some(c => c.includes("；"));
-      const targetLen = Math.max(14, Math.min(20, correctStr.length));
-
-      const padPool = hasSemicolon
-        ? ["；此後他留在本地居住", "；後來他搬往外邦寄居", "；並且與眾人一同生活", "；從此就離開那地去了"]
-        : ["，並且照自己的心意而行", "，事後便離開那地方去了", "，也沒有將這事告訴別人", "，眾人看見這事都很希奇"];
-
-      return cleaned.map((opt, idx) => {
-        let cur = opt;
-        if (idx !== correctIdx && cur.length < targetLen - 4) {
-          const pad = padPool[idx % padPool.length];
-          if (!cur.includes("；") && !cur.includes("，")) {
-            cur = cur + pad;
-          } else if (cur.length < 11) {
-            cur = cur + "，並未照這話去行";
-          }
-        }
-        if (cur.length > 24) {
-          cur = cur.slice(0, 24).replace(/[，、；]$/, "");
-        }
-        return cur;
-      });
+    function balanceAllFourOptions(rawOpts) {
+      return (rawOpts || []).map(o => normalizeSingleOptionText(o));
     }
 
     function shuffleQuestionOptions(qList) {
       return qList.map(q => {
-        const rawOpts = Array.isArray(q.options) ? q.options : ["", "", "", ""];
+        const rawOpts = Array.isArray(q.options) ? q.options.map(o => String(o || "").trim()) : ["", "", "", ""];
         const ansIdx = typeof q.answer === "number" ? q.answer : 0;
-        const balancedOpts = balanceAllFourOptions(rawOpts, ansIdx, q.q || "");
-        const correctText = balancedOpts[ansIdx];
+        const correctText = rawOpts[ansIdx];
 
-        const indices = [0, 1, 2, 3].slice(0, balancedOpts.length).sort(() => Math.random() - 0.5);
-        const shuffled = indices.map(i => balancedOpts[i]);
+        const indices = [0, 1, 2, 3].slice(0, rawOpts.length).sort(() => Math.random() - 0.5);
+        const shuffled = indices.map(i => rawOpts[i]);
         const newAnsIdx = indices.indexOf(ansIdx);
 
         return {
@@ -1881,9 +1812,6 @@
         };
       });
     }
-
-    let askedCrossChapterQuestions = new Set(JSON.parse(localStorage.getItem('bq_asked_q_hashes') || "[]"));
-
     function markQuestionAsked(qText) {
       askedCrossChapterQuestions.add(qText);
       try {
