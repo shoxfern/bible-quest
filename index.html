@@ -588,7 +588,7 @@
                 <h4 class="font-black text-emerald-950 text-sm">🔗 綁定 Google 試算表 GAS 網頁應用程式網址</h4>
                 <p class="text-xs font-bold text-emerald-700">已直接內建您最新的 GAS 部署網址，學員註冊、通關、改名或剔除皆自動同步至試算表。</p>
                 <input id="admin-gas-url-input" type="url"
-                       value="https://script.google.com/macros/s/AKfycbxhKBbOJCVQVhdxOtyHeNn8xsp1RM_R8NEqw5qYBX289FMGtT6H-Iv7HuRGJrzyrqQ/exec"
+                       value="https://script.google.com/macros/s/AKfycbyoWIyr-hZFvex_qVzAI_pu7Fa6XyALsVsgGobRFd8BJF79LONKlgwVp_-XL7H_q14/exec"
                        placeholder="https://script.google.com/macros/s/.../exec"
                        class="w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white font-mono text-xs outline-none" />
                 <div class="flex flex-wrap gap-2">
@@ -679,7 +679,7 @@
       <div id="lesson-bottom-inner" class="mt-4 p-3 rounded-2xl"></div>
     </div>
   </div>
-  <script>
+<script>
     /**************************************************************
      * 1. 音效控制與視覺特效＋10階高難度個人頭銜晉升系統
      **************************************************************/
@@ -1528,7 +1528,7 @@
     }
 
     /**************************************************************
-     * 6. 聖經 66 卷地圖與全章經文載入＋保留 CSV 原文選項洗牌
+     * 6. 聖經 66 卷地圖、經文快速逾時備援載入與精準題庫出題
      **************************************************************/
     function renderLearningPath() {
       const book = BIBLE_BOOKS.find(b => b.id === currentBookId) || BIBLE_BOOKS[0];
@@ -1617,7 +1617,6 @@
         .trim();
     }
 
-// 支援 3.5 秒自動逾時切換的網路請求，避免外部聖經 API 卡住畫面
     async function fetchWithTimeout(url, timeoutMs = 3500) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -1633,7 +1632,6 @@
 
     async function fetchChapterVerbatimVerses(bookId, chapterNum, forceReload = false) {
       const key = `${bookId}_${chapterNum}`;
-      // 1. 優先使用內建與本機快取經文（0秒瞬間顯示）
       if (!forceReload && DEFAULT_BUILTIN_VERSES[key] && DEFAULT_BUILTIN_VERSES[key].length >= 1) {
         return DEFAULT_BUILTIN_VERSES[key];
       }
@@ -1642,8 +1640,6 @@
       }
 
       const book = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
-
-      // 2. 依序嘗試 3 個和合本經文雲端來源（超過 3.5 秒自動換下一個，絕不卡死）
       const endpoints = [
         { url: `https://bolls.life/get-chapter/CUV/${book.num}/${chapterNum}/`, type: 'bolls' },
         { url: `https://bolls.life/get-chapter/CUNP/${book.num}/${chapterNum}/`, type: 'bolls' },
@@ -1718,25 +1714,21 @@
         const chk = document.getElementById('read-confirm-checkbox');
         if (chk) { chk.checked = false; chk.disabled = true; }
 
-        // 先啟動 8 秒閱讀計時器，確保絕對不會卡在 8 秒不動
         if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
         activeLesson.timerInterval = setInterval(() => {
           activeLesson.secondsElapsed++;
           updateReadingLockUI();
         }, 1000);
 
-        // 取得經文並立即渲染顯示到畫面上
         const verses = await fetchChapterVerbatimVerses(bookId, chapterNum, false);
         activeLesson.verses = Array.isArray(verses) && verses.length > 0 ? verses : DEFAULT_BUILTIN_VERSES["創世記_1"];
 
-        // 安全載入本章測驗題目（加上 try-catch 防止題庫異常導致經文不顯示）
         try {
           const quizData = getChapterQuizData(bookId, chapterNum, activeLesson.verses);
           activeLesson.questions = (quizData && Array.isArray(quizData.questions) && quizData.questions.length > 0)
             ? quizData.questions
             : shuffleQuestionOptions(BUILTIN_DEFAULT_QBANK["創世記_1"].questions);
         } catch (err) {
-          console.error("題庫讀取保護觸發：", err);
           activeLesson.questions = shuffleQuestionOptions(BUILTIN_DEFAULT_QBANK["創世記_1"].questions);
         }
 
@@ -1744,6 +1736,7 @@
       }
       playSound('click');
     }
+
     function closeLessonOverlay() {
       if (activeLesson.timerInterval) clearInterval(activeLesson.timerInterval);
       document.getElementById('lesson-overlay').classList.add('hidden');
@@ -1804,7 +1797,6 @@
       playSound('click');
     }
 
-    // 完整保留 CSV 原文選項，不做任何自動補字或截斷，僅清理首尾空白並隨機洗牌
     function normalizeSingleOptionText(optText) {
       if (!optText) return "";
       return String(optText).trim();
@@ -1816,35 +1808,28 @@
 
     function shuffleQuestionOptions(qList) {
       return qList.map(q => {
-        const rawOpts = Array.isArray(q.options) ? q.options.map(o => String(o || "").trim()) : ["", "", "", ""];
-        const ansIdx = typeof q.answer === "number" ? q.answer : 0;
+        const rawOpts = Array.isArray(q.options) ? q.options.map(o => String(o || "").trim()).filter(Boolean) : [];
+        while (rawOpts.length < 4) {
+          rawOpts.push("以上皆非");
+        }
+        const ansIdx = (typeof q.answer === "number" && q.answer >= 0 && q.answer < rawOpts.length) ? q.answer : 0;
         const correctText = rawOpts[ansIdx];
 
         const indices = [0, 1, 2, 3].slice(0, rawOpts.length).sort(() => Math.random() - 0.5);
         const shuffled = indices.map(i => rawOpts[i]);
         const newAnsIdx = indices.indexOf(ansIdx);
 
+        const cleanType = (q.type === "簡單" || q.type === "困難" || q.type === "故事") ? q.type : "簡單";
+        const cleanXp = (Number(q.xp) === 25 || cleanType === "困難") ? 25 : 15;
+
         return {
           ...q,
+          type: cleanType,
+          xp: cleanXp,
           options: shuffled,
           answer: newAnsIdx >= 0 ? newAnsIdx : Math.max(0, shuffled.indexOf(correctText))
         };
       });
-    }
-
-    let askedCrossChapterQuestions = new Set(JSON.parse(localStorage.getItem('bq_asked_q_hashes') || "[]"));
-
-    function markQuestionAsked(qText) {
-      askedCrossChapterQuestions.add(qText);
-      try {
-        localStorage.setItem('bq_asked_q_hashes', JSON.stringify(Array.from(askedCrossChapterQuestions).slice(-200)));
-      } catch (e) {}
-    }
-
-    function isGenealogyOrListChapter(verses = []) {
-      const joined = verses.join(" ");
-      const genCount = (joined.match(/生|後代|族譜|家譜|支派|宗族|兒子是/g) || []).length;
-      return genCount >= 8;
     }
 
     function extractStoryQuestionsFromVerses(bookId, chapterNum, verses = []) {
@@ -1863,8 +1848,7 @@
             num: item.num,
             full: item.text,
             stem: clauses.slice(0, mid).join("，"),
-            tail: clauses.slice(mid).join("，"),
-            isNarrative: /「|」|神|耶和華|耶穌|因為|於是|吩咐|回答|看哪/.test(item.text)
+            tail: clauses.slice(mid).join("，")
           });
         }
       });
@@ -1876,11 +1860,8 @@
         "耶和華必為你們爭戰，只管靜默"
       ];
 
-      const narrativePairs = parsedPairs.filter(p => p.isNarrative);
-      const targetPool = narrativePairs.length >= 7 ? narrativePairs : parsedPairs;
-
-      for (let i = 0; i < targetPool.length && extracted.length < 7; i++) {
-        const cur = targetPool[i];
+      for (let i = 0; i < parsedPairs.length && extracted.length < 7; i++) {
+        const cur = parsedPairs[i];
         let sameChapterTails = parsedPairs
           .filter(p => p.num !== cur.num && p.tail !== cur.tail && p.tail.length >= 4)
           .map(p => p.tail);
@@ -1894,7 +1875,7 @@
         extracted.push({
           type: extracted.length < 4 ? "簡單" : "困難",
           xp: extracted.length < 4 ? 15 : 25,
-          q: `在《${bookId}》第 ${chapterNum} 章第 ${cur.num} 節中，當經文記載「${cur.stem}」之後，接著發生了什麼事或說了什麼話？`,
+          q: `在《${bookId}》第 ${chapterNum} 章第 ${cur.num} 節中，當經文記載「${cur.stem}」之後，接著發生了什麼事？`,
           options: [cur.tail, ...sameChapterTails.slice(0, 3)],
           answer: 0,
           exp: `${bookId} ${chapterNum}:${cur.num}「${cur.full}」`
@@ -1903,69 +1884,29 @@
       return extracted;
     }
 
+    // 直接使用雲端題庫的該章 7 道題目，完全移除舊版族譜干擾邏輯
     function getChapterQuizData(bookId, chapterNum, verses = []) {
       const key = `${bookId}_${chapterNum}`;
-      const isGenealogy = isGenealogyOrListChapter(verses);
+      const chData = window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key];
 
-      if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key] && !isGenealogy) {
-        const qArr = window.CURATED_CHAPTER_DATA[key].questions.slice(0, 7);
-        qArr.forEach(q => markQuestionAsked(q.q));
+      if (chData && Array.isArray(chData.questions) && chData.questions.length > 0) {
         return {
-          title: window.CURATED_CHAPTER_DATA[key].title,
-          questions: shuffleQuestionOptions(qArr)
+          title: chData.title || `${bookId} 第 ${chapterNum} 章`,
+          questions: shuffleQuestionOptions(chData.questions.slice(0, 7))
         };
       }
 
-      let finalQuestions = [];
-      if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key]) {
-        finalQuestions.push(...window.CURATED_CHAPTER_DATA[key].questions);
+      const verseQs = extractStoryQuestionsFromVerses(bookId, chapterNum, verses);
+      if (verseQs.length > 0) {
+        return {
+          title: `${bookId} 第 ${chapterNum} 章`,
+          questions: shuffleQuestionOptions(verseQs.slice(0, 7))
+        };
       }
-
-      if (isGenealogy || finalQuestions.length < 7) {
-        const prevPool = [];
-        for (let c = chapterNum - 1; c >= 1; c--) {
-          const prevKey = `${bookId}_${c}`;
-          if (window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[prevKey]) {
-            window.CURATED_CHAPTER_DATA[prevKey].questions.forEach(pq => {
-              if (!askedCrossChapterQuestions.has(pq.q) && !finalQuestions.some(fq => fq.q === pq.q)) {
-                prevPool.push({
-                  ...pq,
-                  q: `【前章故事回顧・${bookId}${c}章】${pq.q}`
-                });
-              }
-            });
-          }
-        }
-        if (isGenealogy && prevPool.length > 0) {
-          finalQuestions = finalQuestions.slice(0, 3);
-          const needed = 7 - finalQuestions.length;
-          finalQuestions.push(...prevPool.sort(() => Math.random() - 0.5).slice(0, needed));
-        } else if (finalQuestions.length < 7 && prevPool.length > 0) {
-          const needed = 7 - finalQuestions.length;
-          finalQuestions.push(...prevPool.sort(() => Math.random() - 0.5).slice(0, needed));
-        }
-      }
-
-      if (finalQuestions.length < 7) {
-        const verseQs = extractStoryQuestionsFromVerses(bookId, chapterNum, verses);
-        for (const vq of verseQs) {
-          if (finalQuestions.length >= 7) break;
-          if (!finalQuestions.some(fq => fq.q === vq.q)) {
-            finalQuestions.push(vq);
-          }
-        }
-      }
-
-      if (finalQuestions.length === 0) {
-        finalQuestions.push(...BUILTIN_DEFAULT_QBANK["創世記_1"].questions.slice(0, 5));
-      }
-
-      finalQuestions = finalQuestions.slice(0, 7);
-      finalQuestions.forEach(q => markQuestionAsked(q.q));
 
       return {
         title: `${bookId} 第 ${chapterNum} 章`,
-        questions: shuffleQuestionOptions(finalQuestions)
+        questions: shuffleQuestionOptions(BUILTIN_DEFAULT_QBANK["創世記_1"].questions.slice(0, 7))
       };
     }
 
@@ -2005,7 +1946,7 @@
         container.innerHTML = `
           <div class="space-y-4">
             <div class="flex justify-between items-center">
-              <span class="text-xs ${badgeCol} px-2.5 py-1 rounded-full font-black">${q.type || '故事'} (+${q.xp || 15} XP)</span>
+              <span class="text-xs ${badgeCol} px-2.5 py-1 rounded-full font-black">${q.type || '簡單'} (+${q.xp || 15} XP)</span>
               <span class="text-xs font-bold text-slate-400">第 ${qIdx + 1} / ${qList.length} 題 (連擊 x${activeLesson.combo})</span>
             </div>
             <h3 class="text-lg font-black text-slate-800">${q.q}</h3>
@@ -2472,7 +2413,7 @@
       if (!wrongQuestions.some(w => w.q === qObj.q)) {
         wrongQuestions.unshift({
           id: "wq_" + Date.now(), bookId: bookId || currentBookId, chapter: chapter || 1,
-          type: qObj.type || "故事", q: qObj.q, options: qObj.options, answer: qObj.answer, exp: qObj.exp || ""
+          type: qObj.type || "簡單", q: qObj.q, options: qObj.options, answer: qObj.answer, exp: qObj.exp || ""
         });
         saveStateAndSync();
       }
@@ -2838,7 +2779,7 @@
           const o2 = String(opts[2] || '').replace(/"/g, '""');
           const o3 = String(opts[3] || '').replace(/"/g, '""');
           const exp = String(q.exp || '').replace(/"/g, '""');
-          csv += `"${k}","${title}","${idx + 1}","${q.type || '故事'}","${q.xp || 15}","${qText}","${o0}","${o1}","${o2}","${o3}","${exp}"\n`;
+          csv += `"${k}","${title}","${idx + 1}","${q.type || '簡單'}","${q.xp || 15}","${qText}","${o0}","${o1}","${o2}","${o3}","${exp}"\n`;
           qCount++;
         });
       });
