@@ -16,6 +16,7 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
+      transition: background-color 0.25s, color 0.25s;
     }
     .quest-btn-green { background-color: #10b981; color: #fff; box-shadow: 0 4px 0 #059669; transition: all 0.1s; }
     .quest-btn-green:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #059669; }
@@ -56,6 +57,63 @@
       100% { opacity: 0; transform: translateY(-42px) scale(1.05); }
     }
     .floating-pop { animation: floatUpFade 1s ease-out forwards; pointer-events: none; }
+
+    /* 🌙 高對比深色護眼模式 (Dark Mode) */
+    body.dark-mode {
+      background-color: #0f172a !important;
+      color: #f1f5f9 !important;
+    }
+    body.dark-mode header,
+    body.dark-mode nav.fixed,
+    body.dark-mode .bg-white,
+    body.dark-mode .bg-white\/95 {
+      background-color: #1e293b !important;
+      color: #f1f5f9 !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode #lesson-overlay,
+    body.dark-mode .bg-slate-50,
+    body.dark-mode .bg-slate-100 {
+      background-color: #0f172a !important;
+      color: #e2e8f0 !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode .text-slate-800,
+    body.dark-mode .text-slate-700 {
+      color: #f8fafc !important;
+    }
+    body.dark-mode .text-slate-600,
+    body.dark-mode .text-slate-500 {
+      color: #cbd5e1 !important;
+    }
+    body.dark-mode .border-slate-200,
+    body.dark-mode .border-slate-100,
+    body.dark-mode .border-slate-300 {
+      border-color: #334155 !important;
+    }
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #475569 !important;
+    }
+    body.dark-mode .quest-btn-gray {
+      background-color: #334155 !important;
+      color: #f1f5f9 !important;
+      box-shadow: 0 4px 0 #1e293b !important;
+    }
+    body.dark-mode .node-locked {
+      background: #334155 !important;
+      color: #64748b !important;
+      box-shadow: 0 6px 0 #1e293b !important;
+      border-color: #475569 !important;
+    }
+    body.dark-mode #scripture-scroll-box {
+      background-color: #1e293b !important;
+      color: #f1f5f9 !important;
+      border-color: #334155 !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 pb-20 md:pb-0">
@@ -273,6 +331,9 @@
           <div class="flex items-center gap-1 bg-amber-50 text-amber-600 px-2 py-1.5 rounded-xl border border-amber-200" title="經驗值">
             <span>⭐</span><span id="stat-xp">0</span>
           </div>
+          <button onclick="toggleDarkMode()" id="theme-toggle-btn" class="px-2 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer" title="切換深色/淺色模式">
+            🌙
+          </button>
           <button onclick="toggleSoundMute()" id="sound-toggle-btn" class="px-2 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer" title="切換音效">
             🔊
           </button>
@@ -365,7 +426,7 @@
               <h3 class="text-2xl font-black mt-2">聖經極速閃電戰</h3>
               <p class="text-xs text-indigo-100 mt-1">連續答對享加分與加秒！最高紀錄：<strong id="blitz-best-label">0</strong> 分</p>
             </div>
-            <button onclick="startBlitzGame()" class="quest-btn-amber px-6 py-3.5 rounded-2xl font-black text-sm shrink-0 cursor-pointer">
+            <button onclick="startBlitzGame()" id="blitz-start-btn" class="quest-btn-amber px-6 py-3.5 rounded-2xl font-black text-sm shrink-0 cursor-pointer">
               🔥 開始挑戰
             </button>
           </div>
@@ -386,49 +447,65 @@
           </div>
         </section>
 
-        <!-- TAB 3: 4人 PK 擂台 -->
+        <!-- TAB 3: 4人 PK 擂台（含 20 秒倒數速度加成、公開房間大廳、自動清理閒置房間） -->
         <section id="tab-pk" class="hidden space-y-4">
           <div class="bg-white rounded-3xl border border-slate-200 p-4 sm:p-5 space-y-4 overflow-hidden">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 class="text-xl font-black text-slate-800">⚔️ 4人即時 PK 擂台</h2>
-                <p class="text-xs font-bold text-slate-400">支援 2～4 人連線同步搶答 7 題</p>
+                <p class="text-xs font-bold text-slate-400">每題限時 20 秒・越快答對分數越高（最高 +30 分）</p>
               </div>
               <span class="bg-emerald-100 text-emerald-700 text-xs font-black px-3 py-1 rounded-full">勝場：<strong id="pk-wins-badge">0</strong></span>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs font-black">
               <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">1️⃣ 選書卷開房</div>
-              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">2️⃣ 分享4碼房號</div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">2️⃣ 大廳一鍵進房</div>
               <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">3️⃣ 2~4人進場</div>
-              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">4️⃣ 同步搶答7題</div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">4️⃣ 20秒極速搶答</div>
             </div>
 
-            <div id="pk-lobby-panel" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-              <div class="p-4 rounded-2xl bg-emerald-50/60 border-2 border-emerald-200 space-y-3 min-w-0">
-                <h3 class="font-black text-emerald-950 text-sm">👑 建立新房間（可指定範圍）</h3>
-                <div>
-                  <label class="text-[11px] font-black text-emerald-800 block mb-1">📚 選擇出題書卷範圍：</label>
-                  <select id="pk-book-scope-select" class="w-full px-3 py-2.5 rounded-xl border-2 border-emerald-300 bg-white font-black text-xs text-slate-800 outline-none focus:border-emerald-600">
-                    <option value="ALL">🌟 全本聖經綜合題庫（隨機出題）</option>
-                  </select>
+            <div id="pk-lobby-panel" class="space-y-4 pt-1">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 rounded-2xl bg-emerald-50/60 border-2 border-emerald-200 space-y-3 min-w-0">
+                  <h3 class="font-black text-emerald-950 text-sm">👑 建立新房間（可指定範圍）</h3>
+                  <div>
+                    <label class="text-[11px] font-black text-emerald-800 block mb-1">📚 選擇出題書卷範圍：</label>
+                    <select id="pk-book-scope-select" class="w-full px-3 py-2.5 rounded-xl border-2 border-emerald-300 bg-white font-black text-xs text-slate-800 outline-none focus:border-emerald-600">
+                      <option value="ALL">🌟 全本聖經綜合題庫（隨機出題）</option>
+                    </select>
+                  </div>
+                  <button onclick="createPkRoom()" id="pk-create-btn" class="w-full quest-btn-green py-3 rounded-xl font-black text-sm cursor-pointer">
+                    ➕ 建立 PK 房間
+                  </button>
                 </div>
-                <button onclick="createPkRoom()" class="w-full quest-btn-green py-3 rounded-xl font-black text-sm cursor-pointer">
-                  ➕ 建立 PK 房間
-                </button>
+
+                <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col justify-between space-y-3 min-w-0 overflow-hidden">
+                  <div>
+                    <h3 class="font-black text-slate-800 text-sm">🔑 輸入房號加入</h3>
+                    <p class="text-[11px] font-bold text-slate-400 mt-0.5">輸入 4 位房號，或直接點擊下方公開房間加入</p>
+                  </div>
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+                    <input id="pk-room-input" type="text" inputmode="numeric" maxlength="4" placeholder="輸入 4 位房號"
+                           class="w-full sm:flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 border-slate-200 font-black text-center text-base tracking-widest bg-white outline-none focus:border-blue-500" />
+                    <button onclick="joinPkRoom()" class="w-full sm:w-auto shrink-0 quest-btn-blue px-6 py-3 sm:py-2.5 rounded-xl font-black text-xs cursor-pointer">
+                      🚀 加入房間
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col justify-between space-y-3 min-w-0 overflow-hidden">
-                <div>
-                  <h3 class="font-black text-slate-800 text-sm">🔑 輸入房號加入</h3>
-                  <p class="text-[11px] font-bold text-slate-400 mt-0.5">輸入房主提供的 4 位數房號</p>
+              <!-- 🚪 公開房間大廳（免輸房號一鍵進房） -->
+              <div class="p-4 rounded-2xl bg-indigo-50/50 border-2 border-indigo-200 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-base">🚪</span>
+                    <h3 class="font-black text-indigo-950 text-sm">公開等待中房間大廳（免輸房號・點一下直接進）</h3>
+                  </div>
+                  <button onclick="cleanIdlePkRooms(true)" class="text-[11px] font-black text-indigo-600 hover:underline cursor-pointer">🧹 清理閒置房</button>
                 </div>
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
-                  <input id="pk-room-input" type="text" inputmode="numeric" maxlength="4" placeholder="輸入 4 位房號"
-                         class="w-full sm:flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 border-slate-200 font-black text-center text-base tracking-widest bg-white outline-none focus:border-blue-500" />
-                  <button onclick="joinPkRoom()" class="w-full sm:w-auto shrink-0 quest-btn-blue px-6 py-3 sm:py-2.5 rounded-xl font-black text-xs cursor-pointer">
-                    🚀 加入房間
-                  </button>
+                <div id="pk-open-rooms-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <p class="text-xs font-bold text-slate-400 py-2 col-span-full text-center">目前沒有等待中的公開房間，快點上方按鈕建立第一間吧！</p>
                 </div>
               </div>
             </div>
@@ -556,14 +633,15 @@
 
             <div id="admin-panel-notes" class="hidden space-y-2.5"></div>
 
-            <!-- 3. 題庫管理與電腦匯出 -->
+            <!-- 3. 題庫管理與電腦匯出（支援按需載入完整題庫） -->
             <div id="admin-panel-qbank" class="hidden space-y-3">
               <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <h4 class="font-black text-indigo-950 text-xs">📚 目前雲端已載入精選故事題庫：<span id="qbank-count-badge" class="text-indigo-600 text-sm">1</span> 章</h4>
-                  <p id="qbank-chapters-preview" class="text-[11px] font-bold text-slate-500 mt-0.5 max-h-16 overflow-y-auto">載入中...</p>
+                  <h4 class="font-black text-indigo-950 text-xs">📚 本機已快取章節數：<span id="qbank-count-badge" class="text-indigo-600 text-sm">1</span> 章（雲端採用 Lazy Load 省流模式）</h4>
+                  <p id="qbank-chapters-preview" class="text-[11px] font-bold text-slate-500 mt-0.5 max-h-16 overflow-y-auto">平時按需載入單章題庫（省下 95% 流量），如需匯出全庫請點右側按鈕。</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
+                  <button onclick="loadFullQuestionBankForAdmin()" class="quest-btn-amber px-3 py-2 rounded-xl font-black text-xs cursor-pointer">🔄 載入雲端全題庫</button>
                   <button onclick="exportQuestionBankJSON()" class="quest-btn-green px-3 py-2 rounded-xl font-black text-xs cursor-pointer">📥 備份題庫 (.json)</button>
                   <button onclick="exportQuestionBankCSV()" class="quest-btn-purple px-3 py-2 rounded-xl font-black text-xs cursor-pointer">📊 匯出題庫 (.csv)</button>
                 </div>
@@ -679,13 +757,28 @@
       <div id="lesson-bottom-inner" class="mt-4 p-3 rounded-2xl"></div>
     </div>
   </div>
-<script>
+  <script>
     /**************************************************************
-     * 1. 音效控制與視覺特效＋10階高難度個人頭銜晉升系統
+     * 1. 深色模式、音效控制與視覺特效＋10階高難度個人頭銜晉升系統
      **************************************************************/
+    let darkModeEnabled = localStorage.getItem('bq_dark_mode') === '1';
     let soundEnabled = localStorage.getItem('bq_sound_muted') !== '1';
     let audioCtx = null;
     let readerFontSize = 16;
+
+    function applyDarkModeUI() {
+      document.body.classList.toggle('dark-mode', darkModeEnabled);
+      const btn = document.getElementById('theme-toggle-btn');
+      if (btn) btn.innerText = darkModeEnabled ? '☀️' : '🌙';
+    }
+
+    function toggleDarkMode() {
+      darkModeEnabled = !darkModeEnabled;
+      localStorage.setItem('bq_dark_mode', darkModeEnabled ? '1' : '0');
+      applyDarkModeUI();
+      playSound('click');
+      showToast(darkModeEnabled ? '🌙 已切換為深色護眼模式' : '☀️ 已切換為淺色模式', 'info');
+    }
 
     function toggleSoundMute() {
       soundEnabled = !soundEnabled;
@@ -937,7 +1030,47 @@
       }
     };
 
-    window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK);
+    // 智慧快取題庫：優先讀取本機已快取的章節，按需從雲端載入單章（省下 95% 以上流量）
+    let localCachedQBank = {};
+    try {
+      localCachedQBank = JSON.parse(localStorage.getItem('bq_qbank_cache_v2') || "{}");
+    } catch (e) { localCachedQBank = {}; }
+
+    window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK, localCachedQBank);
+    let cloudFetchedChaptersSet = new Set(Object.keys(localCachedQBank));
+
+    function saveChapterToLocalCache(key, chObj) {
+      if (!key || !chObj) return;
+      window.CURATED_CHAPTER_DATA[key] = chObj;
+      cloudFetchedChaptersSet.add(key);
+      localCachedQBank[key] = chObj;
+      try {
+        const keys = Object.keys(localCachedQBank);
+        if (keys.length > 80) {
+          delete localCachedQBank[keys[0]];
+        }
+        localStorage.setItem('bq_qbank_cache_v2', JSON.stringify(localCachedQBank));
+      } catch (e) {}
+    }
+
+    async function ensureChapterQuestionsLoaded(bookId, chapterNum) {
+      const key = `${bookId}_${chapterNum}`;
+      if (cloudFetchedChaptersSet.has(key) && window.CURATED_CHAPTER_DATA[key]) {
+        return window.CURATED_CHAPTER_DATA[key];
+      }
+      try {
+        const snap = await db.ref('bible_quest/question_bank/' + key).once('value');
+        if (snap.exists()) {
+          const val = snap.val();
+          if (val && Array.isArray(val.questions) && val.questions.length > 0) {
+            saveChapterToLocalCache(key, val);
+            updateQbankStatusBadge();
+            return val;
+          }
+        }
+      } catch (e) {}
+      return window.CURATED_CHAPTER_DATA[key] || null;
+    }
 
     function getDistinctBooksReadCount() {
       const s = new Set();
@@ -976,7 +1109,7 @@
     function getUnlockedBadgeCount() { let c = countUnlockedBadgesRaw(); return c >= 18 ? c + 1 : c; }
 
     /**************************************************************
-     * 3. 系統狀態與 Firebase 雙向同步＋預設綁定您最新的 GAS 網址
+     * 3. 系統狀態與 Firebase 雙向同步（採用 Lazy Load 省流架構）
      **************************************************************/
     const DEFAULT_GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxhKBbOJCVQVhdxOtyHeNn8xsp1RM_R8NEqw5qYBX289FMGtT6H-Iv7HuRGJrzyrqQ/exec";
     const ADMIN_PASSWORD_SECRET = "jesusmylord";
@@ -1111,7 +1244,24 @@
       const previewEl = document.getElementById('qbank-chapters-preview');
       if (countEl) countEl.innerText = keys.length;
       if (previewEl) {
-        previewEl.innerText = keys.length > 0 ? `包含章節：${keys.slice(0, 60).join('、')}${keys.length > 60 ? ' ...等共 ' + keys.length + ' 章' : ''}` : '目前尚無手寫題庫';
+        previewEl.innerText = `已快取章節：${keys.slice(0, 40).join('、')}${keys.length > 40 ? ' ...等共 ' + keys.length + ' 章（點選關卡時自動按需載入雲端 1,189 章題庫）' : ''}`;
+      }
+    }
+
+    async function loadFullQuestionBankForAdmin() {
+      showToast('🔄 正在從雲端載入全本 1,189 章題庫...', 'info');
+      try {
+        const snap = await db.ref('bible_quest/question_bank').once('value');
+        const cloudBank = snap.val();
+        if (cloudBank && typeof cloudBank === 'object') {
+          window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK, cloudBank);
+          Object.keys(cloudBank).forEach(k => cloudFetchedChaptersSet.add(k));
+          updateQbankStatusBadge();
+          playSound('fanfare');
+          showToast(`✅ 已完整載入雲端 ${Object.keys(window.CURATED_CHAPTER_DATA).length} 章題庫！`, 'success');
+        }
+      } catch (e) {
+        showToast('載入失敗，請檢查網路連線', 'error');
       }
     }
 
@@ -1150,14 +1300,9 @@
         updateTopBarStats();
       });
 
-      db.ref('bible_quest/question_bank').on('value', snap => {
-        const cloudBank = snap.val();
-        if (cloudBank && typeof cloudBank === 'object') {
-          window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK, cloudBank);
-        } else {
-          window.CURATED_CHAPTER_DATA = Object.assign({}, BUILTIN_DEFAULT_QBANK);
-        }
-        updateQbankStatusBadge();
+      // 監聽公開 PK 房間大廳列表
+      db.ref('bible_quest/pk_rooms').on('value', snap => {
+        renderOpenPkRoomsLobby(snap.val() || {});
       });
 
       db.ref('bible_quest/milestones').limitToLast(12).on('value', snap => {
@@ -1479,7 +1624,10 @@
       if (tabId === 'admin') { renderAdminConsole(true); updateQbankStatusBadge(); }
       if (tabId === 'badges') { renderBadgesWall(); renderLeaderboardSection(); renderMyBookNotesList(); }
       if (tabId === 'daily') renderDailyQuests();
-      if (tabId === 'pk') populatePkBookScopeDropdown();
+      if (tabId === 'pk') {
+        populatePkBookScopeDropdown();
+        cleanIdlePkRooms(false);
+      }
     }
 
     function updateTopBarStats() {
@@ -1528,7 +1676,7 @@
     }
 
     /**************************************************************
-     * 6. 聖經 66 卷地圖、經文快速逾時備援載入與精準題庫出題
+     * 6. 聖經 66 卷地圖、經文快速逾時備援載入與單章按需載入出題
      **************************************************************/
     function renderLearningPath() {
       const book = BIBLE_BOOKS.find(b => b.id === currentBookId) || BIBLE_BOOKS[0];
@@ -1677,7 +1825,10 @@
       if (activeLesson.isReviewDrill) return;
       playSound('click');
       document.getElementById('scripture-scroll-box').innerHTML = `<p class="text-center text-emerald-600 py-8 font-black">🔄 正在從雲端重新載入《${activeLesson.bookId}》第 ${activeLesson.chapterNum} 章完整經文...</p>`;
-      const verses = await fetchChapterVerbatimVerses(activeLesson.bookId, activeLesson.chapterNum, true);
+      const [verses] = await Promise.all([
+        fetchChapterVerbatimVerses(activeLesson.bookId, activeLesson.chapterNum, true),
+        ensureChapterQuestionsLoaded(activeLesson.bookId, activeLesson.chapterNum)
+      ]);
       activeLesson.verses = verses;
       try {
         activeLesson.questions = getChapterQuizData(activeLesson.bookId, activeLesson.chapterNum, verses).questions;
@@ -1720,7 +1871,11 @@
           updateReadingLockUI();
         }, 1000);
 
-        const verses = await fetchChapterVerbatimVerses(bookId, chapterNum, false);
+        // 平行按需載入「單章經文」與「單章 7 題題庫」（僅約 3KB，瞬間開啟！）
+        const [verses] = await Promise.all([
+          fetchChapterVerbatimVerses(bookId, chapterNum, false),
+          ensureChapterQuestionsLoaded(bookId, chapterNum)
+        ]);
         activeLesson.verses = Array.isArray(verses) && verses.length > 0 ? verses : DEFAULT_BUILTIN_VERSES["創世記_1"];
 
         try {
@@ -1802,10 +1957,6 @@
       return String(optText).trim();
     }
 
-    function balanceAllFourOptions(rawOpts) {
-      return (rawOpts || []).map(o => normalizeSingleOptionText(o));
-    }
-
     function shuffleQuestionOptions(qList) {
       return qList.map(q => {
         const rawOpts = Array.isArray(q.options) ? q.options.map(o => String(o || "").trim()).filter(Boolean) : [];
@@ -1884,7 +2035,6 @@
       return extracted;
     }
 
-    // 直接使用雲端題庫的該章 7 道題目，完全移除舊版族譜干擾邏輯
     function getChapterQuizData(bookId, chapterNum, verses = []) {
       const key = `${bookId}_${chapterNum}`;
       const chData = window.CURATED_CHAPTER_DATA && window.CURATED_CHAPTER_DATA[key];
@@ -2034,11 +2184,21 @@
     }
 
     /**************************************************************
-     * 7. 4人即時連線 PK 擂台（僅顯示公開暱稱＋保留 CSV 原文選項）
+     * 7. 4人 PK 擂台（按需抽題＋20秒倒數速度加成＋公開房間大廳＋清理閒置房）
      **************************************************************/
     let activePkRoomId = null;
     let activePkRef = null;
     let myPkPlayerKey = "";
+    let pkQuestionTimerInterval = null;
+    let currentPkWatchedQIdx = -1;
+    let localPkQuestionStartMs = 0;
+
+    function stopPkQuestionTimer() {
+      if (pkQuestionTimerInterval) {
+        clearInterval(pkQuestionTimerInterval);
+        pkQuestionTimerInterval = null;
+      }
+    }
 
     function populatePkBookScopeDropdown() {
       const sel = document.getElementById('pk-book-scope-select');
@@ -2050,34 +2210,121 @@
       sel.innerHTML = html;
     }
 
-    function generatePkQuestionsByScope(scopeBookId = 'ALL') {
+    // 按需平行隨機抽取 7 個章節的題目（僅下載約 15KB，省下 99% 流量！）
+    async function generatePkQuestionsByScopeAsync(scopeBookId = 'ALL', count = 7) {
+      const targetChapters = [];
+      for (let i = 0; i < count; i++) {
+        const bookObj = scopeBookId === 'ALL'
+          ? BIBLE_BOOKS[Math.floor(Math.random() * BIBLE_BOOKS.length)]
+          : (BIBLE_BOOKS.find(b => b.id === scopeBookId) || BIBLE_BOOKS[0]);
+        const randCh = Math.floor(Math.random() * bookObj.chapters) + 1;
+        targetChapters.push({ bookId: bookObj.id, ch: randCh });
+      }
+
+      await Promise.all(targetChapters.map(tc => ensureChapterQuestionsLoaded(tc.bookId, tc.ch)));
+
       const pool = [];
-      if (window.CURATED_CHAPTER_DATA) {
+      targetChapters.forEach(tc => {
+        const key = `${tc.bookId}_${tc.ch}`;
+        const chData = window.CURATED_CHAPTER_DATA[key];
+        if (chData && Array.isArray(chData.questions)) {
+          chData.questions.forEach(q => {
+            if (!pool.some(existing => existing.q === q.q)) {
+              pool.push({ q: q.q, options: q.options, answer: q.answer });
+            }
+          });
+        }
+      });
+
+      if (pool.length < count) {
         Object.keys(window.CURATED_CHAPTER_DATA).forEach(k => {
           const bk = k.split('_')[0];
           if (scopeBookId === 'ALL' || bk === scopeBookId) {
-            const chData = window.CURATED_CHAPTER_DATA[k];
-            if (chData && Array.isArray(chData.questions)) {
-              chData.questions.forEach(q => pool.push({ q: q.q, options: q.options, answer: q.answer }));
-            }
+            (window.CURATED_CHAPTER_DATA[k].questions || []).forEach(q => {
+              if (!pool.some(existing => existing.q === q.q)) {
+                pool.push({ q: q.q, options: q.options, answer: q.answer });
+              }
+            });
           }
         });
       }
 
-      if (pool.length < 7) {
-        Object.keys(DEFAULT_BUILTIN_VERSES).forEach(k => {
-          const parts = k.split('_');
-          const vQs = extractStoryQuestionsFromVerses(parts[0], parseInt(parts[1], 10), DEFAULT_BUILTIN_VERSES[k]);
-          vQs.forEach(q => pool.push({ q: q.q, options: q.options, answer: q.answer }));
-        });
-      }
-
-      return shuffleQuestionOptions(pool.sort(() => Math.random() - 0.5).slice(0, 7));
+      return shuffleQuestionOptions(pool.sort(() => Math.random() - 0.5).slice(0, count));
     }
 
-    function createPkRoom() {
+    // 🚪 渲染公開等待中房間大廳（免輸房號一鍵進房）
+    function renderOpenPkRoomsLobby(roomsObj) {
+      const container = document.getElementById('pk-open-rooms-container');
+      if (!container) return;
+
+      const now = Date.now();
+      const waitingRooms = Object.values(roomsObj || {}).filter(r => {
+        if (!r || r.status !== 'waiting' || !r.players) return false;
+        const pCount = Object.keys(r.players).length;
+        const ageMs = r.createdAt ? (now - r.createdAt) : 0;
+        return pCount > 0 && pCount < 4 && ageMs < 3600000;
+      });
+
+      if (waitingRooms.length === 0) {
+        container.innerHTML = `<p class="text-xs font-bold text-slate-400 py-2 col-span-full text-center">目前沒有等待中的公開房間，快點上方按鈕建立第一間吧！</p>`;
+        return;
+      }
+
+      container.innerHTML = waitingRooms.map(r => {
+        const pList = Object.values(r.players || {});
+        const hostPlayer = r.players[r.hostId] || pList[0] || { name: '房主' };
+        const scopeLabel = r.bookScope === 'ALL' ? '🌟 全本聖經綜合' : `📖 專考《${r.bookScope}》`;
+        return `
+          <div onclick="quickJoinPkRoom('${r.roomId}')" class="p-3 rounded-xl bg-white border-2 border-indigo-200 hover:border-indigo-500 flex items-center justify-between gap-2 cursor-pointer shadow-xs transition">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded">#${r.roomId}</span>
+                <span class="font-black text-slate-800 text-xs truncate">👑 ${hostPlayer.name} 的房間</span>
+              </div>
+              <div class="text-[11px] font-bold text-indigo-600 mt-0.5">${scopeLabel} ・ 目前 ${pList.length}/4 人</div>
+            </div>
+            <button class="quest-btn-blue px-3 py-1.5 rounded-xl font-black text-xs shrink-0 cursor-pointer">加入 &rarr;</button>
+          </div>`;
+      }).join('');
+    }
+
+    function quickJoinPkRoom(roomCode) {
+      const inp = document.getElementById('pk-room-input');
+      if (inp) inp.value = roomCode;
+      joinPkRoom();
+    }
+
+    // 🧹 自動清理超過 1 小時未活動的閒置舊房間
+    function cleanIdlePkRooms(showNotice = false) {
+      db.ref('bible_quest/pk_rooms').once('value').then(snap => {
+        const rooms = snap.val() || {};
+        const now = Date.now();
+        let removed = 0;
+        Object.keys(rooms).forEach(code => {
+          const r = rooms[code];
+          const pCount = r && r.players ? Object.keys(r.players).length : 0;
+          const isOld = r && r.createdAt && (now - r.createdAt > 3600000);
+          if (pCount === 0 || isOld || (r && r.status === 'finished' && r.createdAt && now - r.createdAt > 600000)) {
+            db.ref('bible_quest/pk_rooms/' + code).remove();
+            removed++;
+          }
+        });
+        if (showNotice) {
+          showToast(`🧹 已清理 ${removed} 間閒置或已結束的舊房間！`, 'success');
+        }
+      });
+    }
+
+    async function createPkRoom() {
       populatePkBookScopeDropdown();
+      const btn = document.getElementById('pk-create-btn');
+      if (btn) { btn.disabled = true; btn.innerText = '⏳ 正在抽題建立房間...'; }
+
       const scope = document.getElementById('pk-book-scope-select')?.value || 'ALL';
+      const questions = await generatePkQuestionsByScopeAsync(scope, 7);
+
+      if (btn) { btn.disabled = false; btn.innerText = '➕ 建立 PK 房間'; }
+
       const roomCode = String(Math.floor(1000 + Math.random() * 9000));
       myPkPlayerKey = userId || ('guest_' + Date.now());
       const myTitle = getUserTitleObj(userXP, Object.keys(completedChapters).length).title;
@@ -2088,8 +2335,10 @@
         hostId: myPkPlayerKey,
         bookScope: scope,
         status: 'waiting',
+        createdAt: Date.now(),
         qIdx: 0,
-        questions: generatePkQuestionsByScope(scope),
+        qStartTime: Date.now(),
+        questions: questions,
         players: {
           [myPkPlayerKey]: { id: myPkPlayerKey, name: pubNick, title: myTitle, score: 0, answeredQ: -1, lastSelected: -1, rewarded: false }
         }
@@ -2125,6 +2374,8 @@
 
     function subscribePkRoom(roomCode) {
       if (activePkRef) activePkRef.off();
+      stopPkQuestionTimer();
+      currentPkWatchedQIdx = -1;
       activePkRoomId = roomCode;
       activePkRef = db.ref('bible_quest/pk_rooms/' + roomCode);
       document.getElementById('pk-lobby-panel').classList.add('hidden');
@@ -2147,6 +2398,37 @@
       });
     }
 
+    function startPkCountdownWatcher(room, qIdx, isHost) {
+      if (currentPkWatchedQIdx !== qIdx) {
+        currentPkWatchedQIdx = qIdx;
+        localPkQuestionStartMs = Date.now();
+      }
+      stopPkQuestionTimer();
+
+      pkQuestionTimerInterval = setInterval(() => {
+        const elapsedSec = Math.floor((Date.now() - localPkQuestionStartMs) / 1000);
+        const remSec = Math.max(0, 20 - elapsedSec);
+        const pct = Math.round((remSec / 20) * 100);
+
+        const barEl = document.getElementById('pk-countdown-bar');
+        const txtEl = document.getElementById('pk-countdown-text');
+        if (barEl) {
+          barEl.style.width = `${pct}%`;
+          barEl.className = `h-full transition-all duration-300 ${remSec <= 5 ? 'bg-rose-500' : 'bg-amber-400'}`;
+        }
+        if (txtEl) {
+          txtEl.innerText = `⏱️ ${remSec}秒`;
+        }
+
+        if (remSec <= 0) {
+          stopPkQuestionTimer();
+          if (isHost && activePkRef) {
+            activePkRef.update({ qIdx: qIdx + 1, qStartTime: Date.now() });
+          }
+        }
+      }, 250);
+    }
+
     function renderPkRoomStage(room) {
       const stage = document.getElementById('pk-room-stage');
       const myKey = myPkPlayerKey || userId || '';
@@ -2155,6 +2437,7 @@
       const scopeLabel = room.bookScope === 'ALL' ? '🌟 全本聖經綜合題庫' : `📖 專考《${room.bookScope}》`;
 
       if (room.status === 'waiting') {
+        stopPkQuestionTimer();
         let slotsHtml = '';
         for (let i = 0; i < 4; i++) {
           const p = players[i];
@@ -2187,6 +2470,7 @@
         const qIdx = room.qIdx || 0;
         const qList = room.questions || [];
         if (qIdx >= qList.length) {
+          stopPkQuestionTimer();
           activePkRef.update({ status: 'finished' });
           return;
         }
@@ -2196,10 +2480,23 @@
         const hasAnswered = me && me.answeredQ === qIdx;
         const mySelected = me ? me.lastSelected : -1;
 
+        startPkCountdownWatcher(room, qIdx, isHost);
+        const elapsedSec = Math.floor((Date.now() - localPkQuestionStartMs) / 1000);
+        const remSec = Math.max(0, 20 - elapsedSec);
+        const pct = Math.round((remSec / 20) * 100);
+
         stage.innerHTML = `
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 pb-2 text-xs">
-            <span class="font-black text-amber-400">${scopeLabel}</span>
-            <span class="font-bold text-slate-300">第 ${qIdx + 1} / ${qList.length} 題</span>
+          <div class="space-y-2 border-b border-slate-700 pb-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span class="font-black text-amber-400">${scopeLabel}</span>
+              <div class="flex items-center gap-2">
+                <span id="pk-countdown-text" class="bg-rose-600 text-white font-black px-2.5 py-0.5 rounded-lg">⏱️ ${remSec}秒</span>
+                <span class="font-bold text-slate-300">第 ${qIdx + 1} / ${qList.length} 題</span>
+              </div>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div id="pk-countdown-bar" class="h-full bg-amber-400 transition-all duration-300" style="width: ${pct}%"></div>
+            </div>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             ${players.map(p => `
@@ -2231,12 +2528,13 @@
           </div>
           <div class="flex justify-between items-center pt-2">
             <button onclick="leavePkRoom()" class="text-xs text-slate-400 underline cursor-pointer">離開房間</button>
-            ${isHost ? `<button onclick="hostNextPkQuestion(${qIdx + 1})" class="quest-btn-amber px-4 py-2 rounded-xl font-black text-xs cursor-pointer">下一題 &rarr;</button>` : ''}
+            ${isHost ? `<button onclick="hostNextPkQuestion(${qIdx + 1})" class="quest-btn-amber px-4 py-2 rounded-xl font-black text-xs cursor-pointer">跳下一題 &rarr;</button>` : ''}
           </div>`;
         return;
       }
 
       if (room.status === 'finished') {
+        stopPkQuestionTimer();
         const winner = players[0];
         const me = room.players && room.players[myKey];
         if (winner && winner.id === myKey && me && !me.rewarded && lastRewardedPkRoomId !== room.roomId) {
@@ -2270,14 +2568,24 @@
 
     function hostStartPkMatch() {
       if (!activePkRef) return;
-      activePkRef.update({ status: 'playing', qIdx: 0 });
+      activePkRef.update({ status: 'playing', qIdx: 0, qStartTime: Date.now() });
     }
 
+    // 速度加成計分：越快答對分數越高（最高 +30 分，壓線 +16 分）
     function submitPkAnswer(qIdx, selectedIdx, correctIdx) {
       if (!activePkRef) return;
       const myKey = myPkPlayerKey || userId || '';
-      const addScore = selectedIdx === correctIdx ? 25 : 0;
-      if (addScore > 0) playSound('correct'); else playSound('wrong');
+      const elapsedSec = Math.floor((Date.now() - localPkQuestionStartMs) / 1000);
+      const remSec = Math.max(0, 20 - elapsedSec);
+      const speedBonus = Math.max(1, Math.ceil((remSec / 20) * 15));
+      const addScore = selectedIdx === correctIdx ? (15 + speedBonus) : 0;
+
+      if (addScore > 0) {
+        playSound('correct');
+        spawnFloatingFX(`+${addScore} 分 (極速加成!)`, 'text-emerald-400');
+      } else {
+        playSound('wrong');
+      }
 
       const pRef = activePkRef.child('players/' + myKey);
       pRef.once('value').then(snap => {
@@ -2294,8 +2602,8 @@
             const allDone = Object.values(r.players).every(p => p.answeredQ === qIdx);
             if (allDone) {
               setTimeout(() => {
-                activePkRef.update({ qIdx: qIdx + 1 });
-              }, 1200);
+                activePkRef.update({ qIdx: qIdx + 1, qStartTime: Date.now() });
+              }, 1100);
             }
           });
         });
@@ -2304,10 +2612,12 @@
 
     function hostNextPkQuestion(nextIdx) {
       if (!activePkRef) return;
-      activePkRef.update({ qIdx: nextIdx });
+      activePkRef.update({ qIdx: nextIdx, qStartTime: Date.now() });
     }
 
     function leavePkRoom(skipFirebaseRemove = false) {
+      stopPkQuestionTimer();
+      currentPkWatchedQIdx = -1;
       const roomCode = activePkRoomId;
       const myKey = myPkPlayerKey || userId || '';
       if (activePkRef) activePkRef.off();
@@ -2325,9 +2635,9 @@
     }
 
     /**************************************************************
-     * 8. 60秒閃電戰、錯題本、排行榜(只顯示暱稱)、小家、Admin主控台
+     * 8. 60秒閃電戰（支援按需隨機抽題）、錯題本、排行榜、小家、Admin主控台
      **************************************************************/
-    let blitzState = { timer: 60, interval: null, score: 0, combo: 0, currentQ: null };
+    let blitzState = { timer: 60, interval: null, score: 0, combo: 0, currentQ: null, pool: [] };
 
     function stopBlitzTimer() {
       if (blitzState.interval) {
@@ -2359,9 +2669,15 @@
         </div>`).join('');
     }
 
-    function startBlitzGame() {
+    async function startBlitzGame() {
       playSound('click');
       stopBlitzTimer();
+      const btn = document.getElementById('blitz-start-btn');
+      if (btn) { btn.disabled = true; btn.innerText = '⏳ 準備題庫中...'; }
+
+      blitzState.pool = await generatePkQuestionsByScopeAsync('ALL', 10);
+      if (btn) { btn.disabled = false; btn.innerText = '🔥 開始挑戰'; }
+
       blitzState.timer = 60;
       blitzState.score = 0;
       blitzState.combo = 0;
@@ -2383,8 +2699,12 @@
     }
 
     function nextBlitzQuestion() {
-      const qPool = generatePkQuestionsByScope('ALL');
-      const q = qPool[Math.floor(Math.random() * qPool.length)];
+      const allCachedQs = [];
+      Object.keys(window.CURATED_CHAPTER_DATA).forEach(k => {
+        (window.CURATED_CHAPTER_DATA[k].questions || []).forEach(q => allCachedQs.push(q));
+      });
+      const sourcePool = allCachedQs.length >= 10 ? shuffleQuestionOptions(allCachedQs.sort(() => Math.random() - 0.5).slice(0, 8)) : blitzState.pool;
+      const q = sourcePool[Math.floor(Math.random() * sourcePool.length)];
       blitzState.currentQ = q;
       document.getElementById('blitz-score-badge').innerText = `${blitzState.score} 分`;
       document.getElementById('blitz-combo-badge').innerText = `連擊 x${blitzState.combo}`;
@@ -2737,11 +3057,12 @@
           } else {
             window.CURATED_CHAPTER_DATA = Object.assign(window.CURATED_CHAPTER_DATA || {}, parsed);
           }
+          newKeys.forEach(k => saveChapterToLocalCache(k, parsed[k]));
           updateQbankStatusBadge();
           const totalNow = Object.keys(window.CURATED_CHAPTER_DATA).length;
           document.getElementById('admin-qbank-json').value = '';
           playSound('fanfare');
-          alert(`🎉 上傳成功！\n模式：${isOverwrite ? '🧹 清空覆蓋' : '➕ 合併擴充'}\n本次處理：${newKeys.length} 章\n目前雲端總計可用題庫：共 ${totalNow} 章！`);
+          alert(`🎉 上傳成功！\n模式：${isOverwrite ? '🧹 清空覆蓋' : '➕ 合併擴充'}\n本次處理：${newKeys.length} 章\n目前本機已快取題庫：共 ${totalNow} 章！`);
         }).catch(err => {
           alert('❌ 上傳失敗：' + err.message);
         });
@@ -2750,7 +3071,10 @@
       }
     }
 
-    function exportQuestionBankJSON() {
+    async function exportQuestionBankJSON() {
+      if (Object.keys(window.CURATED_CHAPTER_DATA || {}).length < 50) {
+        await loadFullQuestionBankForAdmin();
+      }
       const data = window.CURATED_CHAPTER_DATA || {};
       const count = Object.keys(data).length;
       const jsonStr = JSON.stringify(data, null, 2);
@@ -2762,7 +3086,10 @@
       showToast(`📥 已下載 ${count} 章完整 JSON 題庫！`, 'success');
     }
 
-    function exportQuestionBankCSV() {
+    async function exportQuestionBankCSV() {
+      if (Object.keys(window.CURATED_CHAPTER_DATA || {}).length < 50) {
+        await loadFullQuestionBankForAdmin();
+      }
       const data = window.CURATED_CHAPTER_DATA || {};
       const keys = Object.keys(data);
       let csv = "\uFEFF章節代碼,章節標題,題號,難度,XP,題目內容,正確答案(選項1),誘答選項2,誘答選項3,誘答選項4,經文解析\n";
@@ -2973,6 +3300,7 @@
     }
 
     window.onload = function() {
+      applyDarkModeUI();
       populatePkBookScopeDropdown();
       updateTopBarStats();
       renderLearningPath();
