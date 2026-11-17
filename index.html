@@ -58,6 +58,14 @@
     }
     .floating-pop { animation: floatUpFade 1s ease-out forwards; pointer-events: none; }
 
+    /* 🖍️ 五色螢光筆畫線樣式（淺色＆深色模式自適應） */
+    .hl-yellow { background-color: #fef08a; color: #713f12; border-left: 4px solid #eab308; }
+    .hl-green  { background-color: #bbf7d0; color: #064e3b; border-left: 4px solid #10b981; }
+    .hl-blue   { background-color: #bae6fd; color: #0c4a6e; border-left: 4px solid #0ea5e9; }
+    .hl-pink   { background-color: #fbcfe8; color: #831843; border-left: 4px solid #ec4899; }
+    .hl-purple { background-color: #e9d5ff; color: #4c1d95; border-left: 4px solid #a855f7; }
+    .verse-selected { outline: 2px dashed #6366f1; background-color: rgba(99, 102, 241, 0.08); }
+
     /* 🌙 高對比深色護眼模式 (Dark Mode) */
     body.dark-mode {
       background-color: #0f172a !important;
@@ -109,11 +117,17 @@
       box-shadow: 0 6px 0 #1e293b !important;
       border-color: #475569 !important;
     }
-    body.dark-mode #scripture-scroll-box {
+    body.dark-mode #scripture-scroll-box,
+    body.dark-mode #bible-study-scroll-box {
       background-color: #1e293b !important;
       color: #f1f5f9 !important;
       border-color: #334155 !important;
     }
+    body.dark-mode .hl-yellow { background-color: rgba(234, 179, 8, 0.28) !important; color: #fef08a !important; border-left: 4px solid #facc15; }
+    body.dark-mode .hl-green  { background-color: rgba(16, 185, 129, 0.28) !important; color: #a7f3d0 !important; border-left: 4px solid #34d399; }
+    body.dark-mode .hl-blue   { background-color: rgba(14, 165, 233, 0.28) !important; color: #bae6fd !important; border-left: 4px solid #38bdf8; }
+    body.dark-mode .hl-pink   { background-color: rgba(236, 72, 153, 0.28) !important; color: #fbcfe8 !important; border-left: 4px solid #f472b6; }
+    body.dark-mode .hl-purple { background-color: rgba(168, 85, 247, 0.28) !important; color: #e9d5ff !important; border-left: 4px solid #c084fc; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 pb-20 md:pb-0">
@@ -302,6 +316,26 @@
     </div>
   </div>
 
+  <!-- 1D. 單節經文亮光短箋彈窗 -->
+  <div id="verse-note-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3.5 border-2 border-slate-100">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 id="verse-note-modal-title" class="text-base font-black text-slate-800">✍️ 經節亮光筆記</h3>
+        <button onclick="closeVerseNoteModal()" class="text-slate-400 hover:text-slate-700 text-lg font-black px-2 cursor-pointer">✕</button>
+      </div>
+      <div id="verse-note-preview-box" class="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs font-bold text-slate-700 leading-relaxed"></div>
+      <textarea id="verse-note-textarea" rows="4" placeholder="寫下這節經文給您的感動、講道筆記或代禱提醒..."
+                class="w-full p-3.5 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-xs text-slate-800 bg-slate-50 focus:bg-white"></textarea>
+      <div class="flex justify-between items-center pt-1">
+        <button onclick="deleteCurrentVerseNote()" class="text-xs font-black text-rose-500 hover:underline cursor-pointer">🗑️ 刪除此節筆記</button>
+        <div class="flex gap-2">
+          <button onclick="closeVerseNoteModal()" class="quest-btn-gray px-4 py-2 rounded-xl font-black text-xs cursor-pointer">取消</button>
+          <button onclick="saveCurrentVerseNote()" class="quest-btn-purple px-5 py-2 rounded-xl font-black text-xs cursor-pointer">💾 儲存亮光 (+10 XP)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 2. 遊戲主畫面 -->
   <div id="game-app-shell" class="flex-1 flex flex-col">
     <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-3 py-2">
@@ -349,6 +383,10 @@
         <button onclick="switchTab('map')" id="nav-btn-map" class="nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl font-black text-sm bg-emerald-50 text-emerald-600 border-2 border-emerald-300 transition cursor-pointer">
           <span class="text-lg">🗺️</span><span>闖關地圖</span>
         </button>
+        <button onclick="switchTab('bible')" id="nav-btn-bible" class="nav-tab-btn flex items-center justify-between px-4 py-3 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-100 border-2 border-transparent transition cursor-pointer">
+          <div class="flex items-center gap-3"><span class="text-lg">📖</span><span>聖經研讀</span></div>
+          <span id="sidebar-hl-badge" class="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full">0</span>
+        </button>
         <button onclick="switchTab('daily')" id="nav-btn-daily" class="nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-100 border-2 border-transparent transition cursor-pointer">
           <span class="text-lg">⚡</span><span>閃電戰</span>
         </button>
@@ -394,9 +432,12 @@
                 </div>
                 <h2 id="current-book-title" class="text-2xl font-black mt-1">創世記</h2>
               </div>
-              <div class="flex gap-2 shrink-0">
-                <button onclick="openBookSelectorModal()" class="quest-btn-amber px-4 py-2.5 rounded-2xl font-black text-xs cursor-pointer">
+              <div class="flex flex-wrap gap-2 shrink-0">
+                <button onclick="openBookSelectorModal('map')" class="quest-btn-amber px-4 py-2.5 rounded-2xl font-black text-xs cursor-pointer">
                   📚 選擇書卷
+                </button>
+                <button onclick="openStudyReaderAt(currentBookId, 1)" class="bg-white/20 hover:bg-white/30 text-white px-3.5 py-2.5 rounded-2xl font-black text-xs cursor-pointer">
+                  📖 經文研讀
                 </button>
                 <button onclick="openBookReflectionModal(currentBookId)" class="bg-white/20 hover:bg-white/30 text-white px-3.5 py-2.5 rounded-2xl font-black text-xs cursor-pointer">
                   ✍️ 寫筆記
@@ -415,6 +456,101 @@
 
           <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs overflow-hidden">
             <div id="chapter-path-container" class="flex flex-col items-center space-y-5 py-3"></div>
+          </div>
+        </section>
+
+        <!-- TAB 1B: 隨身聖經研讀＆五色螢光筆金句系統 (新增) -->
+        <section id="tab-bible" class="hidden space-y-4">
+          <div class="bg-gradient-to-r from-indigo-700 via-blue-700 to-emerald-600 text-white p-5 rounded-3xl shadow-md space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span class="bg-white/20 text-[11px] font-black px-2.5 py-0.5 rounded-full">📖 全本 66 卷 1,189 章自由翻閱・五色螢光畫線</span>
+                <h2 id="study-header-title" class="text-2xl font-black mt-1">🌍 創世記 第 1 章</h2>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="switchStudySubView('reader')" id="study-subbtn-reader" class="bg-white text-indigo-800 px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer shadow-xs">
+                  📖 經文閱讀
+                </button>
+                <button onclick="switchStudySubView('highlights')" id="study-subbtn-highlights" class="bg-white/20 hover:bg-white/30 text-white px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer">
+                  🖍️ 我的螢光金句庫 (<span id="study-hl-count-label">0</span>)
+                </button>
+                <button onclick="openBookReflectionModal(studyReaderState.bookId)" class="quest-btn-amber px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer">
+                  ✍️ 書卷筆記
+                </button>
+              </div>
+            </div>
+
+            <!-- 書卷與章節快速選擇器 -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 pt-1">
+              <div class="sm:col-span-5 flex gap-1.5">
+                <button onclick="openBookSelectorModal('bible')" class="quest-btn-amber px-3 py-2 rounded-xl font-black text-xs shrink-0 cursor-pointer">📚 66卷目錄</button>
+                <select id="study-book-select" onchange="onStudyBookChange(this.value)" class="flex-1 min-w-0 px-3 py-2 rounded-xl font-black text-xs text-slate-800 bg-white outline-none"></select>
+              </div>
+              <div class="sm:col-span-4 flex items-center gap-1.5">
+                <button onclick="stepStudyChapter(-1)" class="bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-xl font-black text-xs cursor-pointer shrink-0">◀ 上章</button>
+                <select id="study-chapter-select" onchange="onStudyChapterChange(this.value)" class="flex-1 min-w-0 px-2.5 py-2 rounded-xl font-black text-xs text-slate-800 bg-white outline-none text-center"></select>
+                <button onclick="stepStudyChapter(1)" class="bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-xl font-black text-xs cursor-pointer shrink-0">下章 ▶</button>
+              </div>
+              <div class="sm:col-span-3 flex items-center gap-1">
+                <input id="study-keyword-input" type="text" oninput="renderStudyVersesList()" placeholder="🔍 搜尋本章字詞..."
+                       class="w-full min-w-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-800 bg-white outline-none" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 子視圖 1：經文閱讀與五色螢光筆工具列 -->
+          <div id="study-view-reader" class="space-y-3">
+            <!-- 🖍️ 螢光筆選色與經文複製工具列 -->
+            <div class="sticky top-14 z-20 bg-white/95 backdrop-blur p-3 rounded-2xl border-2 border-indigo-200 shadow-sm flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs font-black text-slate-600 mr-1">🖍️ 點選經節畫線 (<strong id="study-selected-count" class="text-indigo-600">0</strong>節)：</span>
+                <button onclick="applyHighlightColor('yellow')" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-yellow-200 text-yellow-900 border border-yellow-400 hover:scale-105 transition cursor-pointer" title="恩典應許">🟡 恩典黃</button>
+                <button onclick="applyHighlightColor('green')" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-emerald-200 text-emerald-900 border border-emerald-400 hover:scale-105 transition cursor-pointer" title="生命成長">🟢 生命綠</button>
+                <button onclick="applyHighlightColor('blue')" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-sky-200 text-sky-900 border border-sky-400 hover:scale-105 transition cursor-pointer" title="真理教導">🔵 真理藍</button>
+                <button onclick="applyHighlightColor('pink')" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-pink-200 text-pink-900 border border-pink-400 hover:scale-105 transition cursor-pointer" title="慈愛安慰">🩷 慈愛粉</button>
+                <button onclick="applyHighlightColor('purple')" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-purple-200 text-purple-900 border border-purple-400 hover:scale-105 transition cursor-pointer" title="敬拜禱告">🟣 敬拜紫</button>
+                <button onclick="applyHighlightColor('clear')" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-slate-100 text-slate-600 border border-slate-300 hover:bg-rose-50 hover:text-rose-600 cursor-pointer" title="清除畫線">🧼 擦除</button>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button onclick="openVerseNoteForSelected()" class="quest-btn-purple px-3 py-1.5 rounded-xl font-black text-xs cursor-pointer">✍️ 經節亮光</button>
+                <button onclick="copySelectedOrChapterVerses(false)" class="quest-btn-blue px-3 py-1.5 rounded-xl font-black text-xs cursor-pointer">📋 複製選取經文</button>
+                <button onclick="copySelectedOrChapterVerses(true)" class="quest-btn-gray px-2.5 py-1.5 rounded-xl font-black text-xs cursor-pointer" title="複製整章經文">📄 複製全章</button>
+                <button onclick="adjustStudyFontSize(-2)" class="px-2 py-1.5 rounded-lg bg-slate-100 text-xs font-black text-slate-600 cursor-pointer">A-</button>
+                <button onclick="adjustStudyFontSize(2)" class="px-2 py-1.5 rounded-lg bg-slate-100 text-xs font-black text-slate-600 cursor-pointer">A+</button>
+              </div>
+            </div>
+
+            <!-- 經文列表主體 -->
+            <div class="bg-white rounded-3xl border border-slate-200 p-4 md:p-6 shadow-xs">
+              <div id="bible-study-scroll-box" class="space-y-2 leading-relaxed"></div>
+
+              <div class="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <button onclick="stepStudyChapter(-1)" class="quest-btn-gray px-4 py-2.5 rounded-xl font-black text-xs cursor-pointer">◀ 上一章</button>
+                <button onclick="openLessonOverlay(studyReaderState.bookId, studyReaderState.chapterNum, false)" class="quest-btn-green px-5 py-2.5 rounded-xl font-black text-xs cursor-pointer">
+                  🎯 直接挑戰本章 7 題問答
+                </button>
+                <button onclick="stepStudyChapter(1)" class="quest-btn-blue px-4 py-2.5 rounded-xl font-black text-xs cursor-pointer">下一章 ▶</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 子視圖 2：我的螢光金句＆單節亮光筆記庫 -->
+          <div id="study-view-highlights" class="hidden space-y-3">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-1.5 text-xs font-black">
+                <span class="text-slate-500">🎨 顏色篩選：</span>
+                <button onclick="filterMyHighlights('ALL')" id="hl-filter-ALL" class="px-2.5 py-1 rounded-lg bg-slate-800 text-white cursor-pointer">全部</button>
+                <button onclick="filterMyHighlights('yellow')" id="hl-filter-yellow" class="px-2.5 py-1 rounded-lg bg-yellow-100 text-yellow-900 cursor-pointer">🟡 恩典黃</button>
+                <button onclick="filterMyHighlights('green')" id="hl-filter-green" class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 cursor-pointer">🟢 生命綠</button>
+                <button onclick="filterMyHighlights('blue')" id="hl-filter-blue" class="px-2.5 py-1 rounded-lg bg-sky-100 text-sky-900 cursor-pointer">🔵 真理藍</button>
+                <button onclick="filterMyHighlights('pink')" id="hl-filter-pink" class="px-2.5 py-1 rounded-lg bg-pink-100 text-pink-900 cursor-pointer">🩷 慈愛粉</button>
+                <button onclick="filterMyHighlights('purple')" id="hl-filter-purple" class="px-2.5 py-1 rounded-lg bg-purple-100 text-purple-900 cursor-pointer">🟣 敬拜紫</button>
+              </div>
+              <button onclick="exportAllHighlightsText()" class="quest-btn-blue px-3 py-1.5 rounded-xl font-black text-xs cursor-pointer">📋 複製全部金句</button>
+            </div>
+
+            <div id="my-highlights-list" class="space-y-2.5"></div>
           </div>
         </section>
 
@@ -447,7 +583,7 @@
           </div>
         </section>
 
-        <!-- TAB 3: 4人 PK 擂台（含 20 秒倒數速度加成、公開房間大廳、自動清理閒置房間） -->
+        <!-- TAB 3: 4人 PK 擂台 -->
         <section id="tab-pk" class="hidden space-y-4">
           <div class="bg-white rounded-3xl border border-slate-200 p-4 sm:p-5 space-y-4 overflow-hidden">
             <div class="flex flex-wrap items-center justify-between gap-2">
@@ -495,7 +631,6 @@
                 </div>
               </div>
 
-              <!-- 🚪 公開房間大廳（免輸房號一鍵進房） -->
               <div class="p-4 rounded-2xl bg-indigo-50/50 border-2 border-indigo-200 space-y-2.5">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
@@ -534,7 +669,7 @@
         <section id="tab-badges" class="hidden space-y-4">
           <div class="bg-white rounded-3xl border border-indigo-200 p-5 space-y-3">
             <div class="flex items-center justify-between">
-              <h2 class="text-lg font-black text-slate-800">✍️ 我的書卷筆記</h2>
+              <h2 class="text-lg font-black text-slate-800">✍️ 我的書卷收穫筆記</h2>
               <button onclick="openBookReflectionModal(currentBookId)" class="quest-btn-purple px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer">
                 ➕ 寫筆記
               </button>
@@ -633,7 +768,7 @@
 
             <div id="admin-panel-notes" class="hidden space-y-2.5"></div>
 
-            <!-- 3. 題庫管理與電腦匯出（支援按需載入完整題庫） -->
+            <!-- 3. 題庫管理與電腦匯出 -->
             <div id="admin-panel-qbank" class="hidden space-y-3">
               <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -666,7 +801,7 @@
                 <h4 class="font-black text-emerald-950 text-sm">🔗 綁定 Google 試算表 GAS 網頁應用程式網址</h4>
                 <p class="text-xs font-bold text-emerald-700">已直接內建您最新的 GAS 部署網址，學員註冊、通關、改名或剔除皆自動同步至試算表。</p>
                 <input id="admin-gas-url-input" type="url"
-                       value="https://script.google.com/macros/s/AKfycbyoWIyr-hZFvex_qVzAI_pu7Fa6XyALsVsgGobRFd8BJF79LONKlgwVp_-XL7H_q14/exec"
+                       value="https://script.google.com/macros/s/AKfycbxhKBbOJCVQVhdxOtyHeNn8xsp1RM_R8NEqw5qYBX289FMGtT6H-Iv7HuRGJrzyrqQ/exec"
                        placeholder="https://script.google.com/macros/s/.../exec"
                        class="w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white font-mono text-xs outline-none" />
                 <div class="flex flex-wrap gap-2">
@@ -682,6 +817,7 @@
 
     <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-30 flex justify-around items-center py-1.5 px-1 text-[10px] font-black text-slate-400">
       <button onclick="switchTab('map')" id="mob-nav-map" class="flex flex-col items-center py-1 text-emerald-600"><span class="text-base">🗺️</span><span>闖關</span></button>
+      <button onclick="switchTab('bible')" id="mob-nav-bible" class="flex flex-col items-center py-1"><span class="text-base">📖</span><span>聖經</span></button>
       <button onclick="switchTab('daily')" id="mob-nav-daily" class="flex flex-col items-center py-1"><span class="text-base">⚡</span><span>閃電戰</span></button>
       <button onclick="switchTab('pk')" id="mob-nav-pk" class="flex flex-col items-center py-1"><span class="text-base">⚔️</span><span>4人PK</span></button>
       <button onclick="switchTab('review')" id="mob-nav-review" class="flex flex-col items-center py-1"><span class="text-base">📕</span><span>錯題</span></button>
@@ -1030,7 +1166,6 @@
       }
     };
 
-    // 智慧快取題庫：優先讀取本機已快取的章節，按需從雲端載入單章（省下 95% 以上流量）
     let localCachedQBank = {};
     try {
       localCachedQBank = JSON.parse(localStorage.getItem('bq_qbank_cache_v2') || "{}");
@@ -1109,7 +1244,7 @@
     function getUnlockedBadgeCount() { let c = countUnlockedBadgesRaw(); return c >= 18 ? c + 1 : c; }
 
     /**************************************************************
-     * 3. 系統狀態與 Firebase 雙向同步（採用 Lazy Load 省流架構）
+     * 3. 系統狀態與 Firebase 雙向同步（含五色螢光金句與單節亮光筆記）
      **************************************************************/
     const DEFAULT_GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxhKBbOJCVQVhdxOtyHeNn8xsp1RM_R8NEqw5qYBX289FMGtT6H-Iv7HuRGJrzyrqQ/exec";
     const ADMIN_PASSWORD_SECRET = "jesusmylord";
@@ -1117,6 +1252,7 @@
     let currentTab = 'map';
     let currentBookId = '創世記';
     let activeBookRangeOffset = 0;
+    let bookSelectorTargetMode = 'map';
 
     let userId = localStorage.getItem('bq_userid') || "";
     let userAccountRaw = localStorage.getItem('bq_account_raw') || "";
@@ -1135,6 +1271,8 @@
     let completedChapters = JSON.parse(localStorage.getItem('bq_completed') || "{}");
     let wrongQuestions = JSON.parse(localStorage.getItem('bq_wrong_questions') || "[]");
     let bookNotes = JSON.parse(localStorage.getItem('bq_book_notes') || "{}");
+    let verseHighlights = JSON.parse(localStorage.getItem('bq_verse_highlights') || "{}");
+
     let allCloudUsersCache = [];
     let gasWebhookUrl = DEFAULT_GAS_WEBHOOK_URL;
 
@@ -1195,11 +1333,12 @@
       completedChapters = {};
       wrongQuestions = [];
       bookNotes = {};
+      verseHighlights = {};
 
       [
         'bq_logged_account', 'bq_userid', 'bq_account_raw', 'bq_nickname', 'bq_username', 'bq_userrole',
         'bq_xp', 'bq_streak', 'bq_last_login_date', 'bq_pkwins', 'bq_blitz_best',
-        'bq_max_combo', 'bq_mastered_wrong', 'bq_completed', 'bq_wrong_questions', 'bq_book_notes'
+        'bq_max_combo', 'bq_mastered_wrong', 'bq_completed', 'bq_wrong_questions', 'bq_book_notes', 'bq_verse_highlights'
       ].forEach(k => localStorage.removeItem(k));
     }
 
@@ -1219,6 +1358,7 @@
       completedChapters = val.completed_chapters || {};
       wrongQuestions = val.wrong_questions || [];
       bookNotes = val.notes || {};
+      verseHighlights = val.highlights || {};
       autoJumpToCurrentChapterPage(currentBookId);
     }
 
@@ -1300,7 +1440,6 @@
         updateTopBarStats();
       });
 
-      // 監聽公開 PK 房間大廳列表
       db.ref('bible_quest/pk_rooms').on('value', snap => {
         renderOpenPkRoomsLobby(snap.val() || {});
       });
@@ -1336,6 +1475,7 @@
       localStorage.setItem('bq_completed', JSON.stringify(completedChapters));
       localStorage.setItem('bq_wrong_questions', JSON.stringify(wrongQuestions));
       localStorage.setItem('bq_book_notes', JSON.stringify(bookNotes));
+      localStorage.setItem('bq_verse_highlights', JSON.stringify(verseHighlights));
 
       updateTopBarStats();
 
@@ -1361,7 +1501,8 @@
         wrong_questions: wrongQuestions,
         cleared_count: clearedCount,
         badges_count: getUnlockedBadgeCount(),
-        notes: bookNotes
+        notes: bookNotes,
+        highlights: verseHighlights
       };
 
       db.ref('bible_quest/users/' + userId).update(updatePayload).then(() => {
@@ -1600,7 +1741,7 @@
       }
       currentTab = tabId;
       playSound('click');
-      ['map', 'daily', 'pk', 'review', 'badges', 'flock', 'admin'].forEach(t => {
+      ['map', 'bible', 'daily', 'pk', 'review', 'badges', 'flock', 'admin'].forEach(t => {
         const sec = document.getElementById(`tab-${t}`);
         if (sec) sec.classList.toggle('hidden', t !== tabId);
 
@@ -1619,6 +1760,7 @@
       });
 
       if (tabId === 'map') renderLearningPath();
+      if (tabId === 'bible') initAndLoadStudyBibleTab();
       if (tabId === 'review') renderWrongQuestionsVault();
       if (tabId === 'flock') renderMyGroupDashboard();
       if (tabId === 'admin') { renderAdminConsole(true); updateQbankStatusBadge(); }
@@ -1658,6 +1800,12 @@
       const deskWrong = document.getElementById('sidebar-wrong-badge');
       if (deskWrong) deskWrong.innerText = wrongQuestions.length;
 
+      const hlCount = Object.keys(verseHighlights || {}).length;
+      const sideHl = document.getElementById('sidebar-hl-badge');
+      if (sideHl) sideHl.innerText = hlCount;
+      const studyHlLabel = document.getElementById('study-hl-count-label');
+      if (studyHlLabel) studyHlLabel.innerText = hlCount;
+
       const myAccClean = (userAccountRaw || "").trim().toLowerCase();
       const myNickClean = (userNickname || "").trim().toLowerCase();
       const myFlockMembers = allCloudUsersCache.filter(u => {
@@ -1673,6 +1821,456 @@
       document.getElementById('mob-nav-flock').style.display = isMentor ? 'flex' : 'none';
       document.getElementById('nav-btn-admin').style.display = userAccountRaw === 'admin' ? 'flex' : 'none';
       document.getElementById('mob-nav-admin').style.display = userAccountRaw === 'admin' ? 'flex' : 'none';
+    }
+
+    /**************************************************************
+     * 5B. 隨身聖經研讀＆五色螢光筆金句系統 (TAB 1B)
+     **************************************************************/
+    let studyReaderState = {
+      bookId: '創世記',
+      chapterNum: 1,
+      verses: [],
+      selectedVerses: new Set(),
+      fontSize: 17,
+      subView: 'reader',
+      hlFilter: 'ALL',
+      editingVerseNum: null
+    };
+
+    const HIGHLIGHT_META = {
+      yellow: { label: '🟡 恩典黃', cls: 'hl-yellow', tagCls: 'bg-yellow-200 text-yellow-900' },
+      green:  { label: '🟢 生命綠', cls: 'hl-green',  tagCls: 'bg-emerald-200 text-emerald-900' },
+      blue:   { label: '🔵 真理藍', cls: 'hl-blue',   tagCls: 'bg-sky-200 text-sky-900' },
+      pink:   { label: '🩷 慈愛粉', cls: 'hl-pink',   tagCls: 'bg-pink-200 text-pink-900' },
+      purple: { label: '🟣 敬拜紫', cls: 'hl-purple', tagCls: 'bg-purple-200 text-purple-900' }
+    };
+
+    function openStudyReaderAt(bookId, chapterNum = 1) {
+      studyReaderState.bookId = bookId || currentBookId || '創世記';
+      studyReaderState.chapterNum = chapterNum || 1;
+      studyReaderState.subView = 'reader';
+      switchTab('bible');
+    }
+
+    function initAndLoadStudyBibleTab() {
+      const bookSel = document.getElementById('study-book-select');
+      if (bookSel && bookSel.options.length === 0) {
+        bookSel.innerHTML = BIBLE_BOOKS.map(b => `<option value="${b.id}">${b.icon} ${b.id} (${b.cat})</option>`).join('');
+      }
+      if (!studyReaderState.bookId) studyReaderState.bookId = currentBookId || '創世記';
+      if (bookSel) bookSel.value = studyReaderState.bookId;
+      populateStudyChapterDropdown();
+      switchStudySubView(studyReaderState.subView);
+      loadStudyChapterVerses();
+    }
+
+    function populateStudyChapterDropdown() {
+      const book = BIBLE_BOOKS.find(b => b.id === studyReaderState.bookId) || BIBLE_BOOKS[0];
+      const chSel = document.getElementById('study-chapter-select');
+      if (!chSel) return;
+      if (studyReaderState.chapterNum > book.chapters) studyReaderState.chapterNum = 1;
+      let html = '';
+      for (let i = 1; i <= book.chapters; i++) {
+        html += `<option value="${i}">第 ${i} 章</option>`;
+      }
+      chSel.innerHTML = html;
+      chSel.value = studyReaderState.chapterNum;
+    }
+
+    function onStudyBookChange(newBookId) {
+      playSound('click');
+      studyReaderState.bookId = newBookId;
+      studyReaderState.chapterNum = 1;
+      populateStudyChapterDropdown();
+      loadStudyChapterVerses();
+    }
+
+    function onStudyChapterChange(newCh) {
+      playSound('click');
+      studyReaderState.chapterNum = parseInt(newCh, 10) || 1;
+      loadStudyChapterVerses();
+    }
+
+    function stepStudyChapter(delta) {
+      playSound('click');
+      const bookIdx = BIBLE_BOOKS.findIndex(b => b.id === studyReaderState.bookId);
+      const book = BIBLE_BOOKS[bookIdx] || BIBLE_BOOKS[0];
+      let nextCh = studyReaderState.chapterNum + delta;
+
+      if (nextCh < 1) {
+        if (bookIdx > 0) {
+          const prevBook = BIBLE_BOOKS[bookIdx - 1];
+          studyReaderState.bookId = prevBook.id;
+          studyReaderState.chapterNum = prevBook.chapters;
+        } else {
+          nextCh = 1;
+        }
+      } else if (nextCh > book.chapters) {
+        if (bookIdx < BIBLE_BOOKS.length - 1) {
+          const nextBook = BIBLE_BOOKS[bookIdx + 1];
+          studyReaderState.bookId = nextBook.id;
+          studyReaderState.chapterNum = 1;
+        } else {
+          nextCh = book.chapters;
+        }
+      } else {
+        studyReaderState.chapterNum = nextCh;
+      }
+
+      const bookSel = document.getElementById('study-book-select');
+      if (bookSel) bookSel.value = studyReaderState.bookId;
+      populateStudyChapterDropdown();
+      loadStudyChapterVerses();
+    }
+
+    function switchStudySubView(viewName) {
+      studyReaderState.subView = viewName;
+      document.getElementById('study-view-reader').classList.toggle('hidden', viewName !== 'reader');
+      document.getElementById('study-view-highlights').classList.toggle('hidden', viewName !== 'highlights');
+
+      document.getElementById('study-subbtn-reader').className = viewName === 'reader'
+        ? "bg-white text-indigo-800 px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer shadow-xs"
+        : "bg-white/20 hover:bg-white/30 text-white px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer";
+      document.getElementById('study-subbtn-highlights').className = viewName === 'highlights'
+        ? "bg-white text-indigo-800 px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer shadow-xs"
+        : "bg-white/20 hover:bg-white/30 text-white px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer";
+
+      if (viewName === 'highlights') {
+        renderMyHighlightsGallery();
+      }
+    }
+
+    async function loadStudyChapterVerses() {
+      const book = BIBLE_BOOKS.find(b => b.id === studyReaderState.bookId) || BIBLE_BOOKS[0];
+      document.getElementById('study-header-title').innerText = `${book.icon} ${book.id} 第 ${studyReaderState.chapterNum} 章`;
+      studyReaderState.selectedVerses.clear();
+      updateStudySelectionBadge();
+
+      const box = document.getElementById('bible-study-scroll-box');
+      if (box) box.innerHTML = `<p class="text-center text-slate-400 py-8 font-bold">📖 正在載入《${book.id}》第 ${studyReaderState.chapterNum} 章經文...</p>`;
+
+      const verses = await fetchChapterVerbatimVerses(book.id, studyReaderState.chapterNum, false);
+      studyReaderState.verses = Array.isArray(verses) ? verses : [];
+      renderStudyVersesList();
+    }
+
+    function updateStudySelectionBadge() {
+      const el = document.getElementById('study-selected-count');
+      if (el) el.innerText = studyReaderState.selectedVerses.size;
+    }
+
+    function toggleSelectStudyVerse(vNum) {
+      playSound('click');
+      if (studyReaderState.selectedVerses.has(vNum)) {
+        studyReaderState.selectedVerses.delete(vNum);
+      } else {
+        studyReaderState.selectedVerses.add(vNum);
+      }
+      updateStudySelectionBadge();
+      renderStudyVersesList();
+    }
+
+    function adjustStudyFontSize(delta) {
+      studyReaderState.fontSize = Math.min(28, Math.max(14, studyReaderState.fontSize + delta));
+      renderStudyVersesList();
+    }
+
+    function renderStudyVersesList() {
+      const box = document.getElementById('bible-study-scroll-box');
+      if (!box) return;
+      box.style.fontSize = `${studyReaderState.fontSize}px`;
+
+      const keyword = (document.getElementById('study-keyword-input')?.value || '').trim();
+      const bId = studyReaderState.bookId;
+      const cNum = studyReaderState.chapterNum;
+
+      const htmlList = studyReaderState.verses.map((rawLine, idx) => {
+        const vNum = idx + 1;
+        const cleanText = rawLine.replace(/^\d+\.\s*/, '').trim();
+        if (keyword && !cleanText.includes(keyword)) return '';
+
+        const hlKey = `${bId}_${cNum}_${vNum}`;
+        const hlData = verseHighlights[hlKey] || null;
+        const hlCls = (hlData && hlData.color && HIGHLIGHT_META[hlData.color]) ? HIGHLIGHT_META[hlData.color].cls : '';
+        const isSelected = studyReaderState.selectedVerses.has(vNum);
+
+        let displayHtml = cleanText;
+        if (keyword) {
+          displayHtml = cleanText.split(keyword).join(`<mark class="bg-amber-300 text-slate-900 px-1 rounded">${keyword}</mark>`);
+        }
+
+        return `
+          <div onclick="toggleSelectStudyVerse(${vNum})"
+               class="p-2.5 rounded-xl transition cursor-pointer ${hlCls} ${isSelected ? 'verse-selected' : 'hover:bg-slate-50'}">
+            <div class="flex items-start justify-between gap-2">
+              <p class="font-bold flex-1">
+                <span class="text-emerald-600 font-mono font-black mr-2">${vNum}.</span>${displayHtml}
+              </p>
+              <button onclick="event.stopPropagation(); openSingleVerseNoteModal(${vNum})"
+                      class="text-xs px-2 py-0.5 rounded-lg ${hlData && hlData.note ? 'bg-indigo-600 text-white font-black' : 'text-slate-400 hover:bg-slate-200'} shrink-0 cursor-pointer"
+                      title="撰寫此節亮光筆記">
+                ✍️${hlData && hlData.note ? ' 筆記' : ''}
+              </button>
+            </div>
+            ${hlData && hlData.note ? `
+              <div class="mt-1.5 ml-6 p-2 rounded-lg bg-indigo-50/90 border border-indigo-200 text-xs font-bold text-indigo-950">
+                💡 亮光：${hlData.note}
+              </div>` : ''}
+          </div>`;
+      }).filter(Boolean);
+
+      box.innerHTML = htmlList.length > 0
+        ? htmlList.join('')
+        : `<p class="text-center text-slate-400 py-8 text-xs font-bold">本章中找不到包含「${keyword}」的經節</p>`;
+    }
+
+    function applyHighlightColor(colorKey) {
+      if (studyReaderState.selectedVerses.size === 0) {
+        showToast('💡 請先用手指點擊下方至少一節經文，再選擇螢光筆顏色！', 'warning');
+        return;
+      }
+
+      const bId = studyReaderState.bookId;
+      const cNum = studyReaderState.chapterNum;
+      const count = studyReaderState.selectedVerses.size;
+
+      studyReaderState.selectedVerses.forEach(vNum => {
+        const hlKey = `${bId}_${cNum}_${vNum}`;
+        const rawLine = studyReaderState.verses[vNum - 1] || '';
+        const cleanText = rawLine.replace(/^\d+\.\s*/, '').trim();
+
+        if (colorKey === 'clear') {
+          if (verseHighlights[hlKey]) {
+            if (verseHighlights[hlKey].note) {
+              verseHighlights[hlKey].color = '';
+            } else {
+              delete verseHighlights[hlKey];
+            }
+          }
+        } else {
+          const prev = verseHighlights[hlKey] || {};
+          verseHighlights[hlKey] = {
+            bookId: bId,
+            chapter: cNum,
+            verse: vNum,
+            text: cleanText,
+            color: colorKey,
+            note: prev.note || '',
+            updatedAt: getLocalTodayStr()
+          };
+        }
+      });
+
+      studyReaderState.selectedVerses.clear();
+      updateStudySelectionBadge();
+      saveStateAndSync('highlight_verse');
+      renderStudyVersesList();
+      playSound('correct');
+
+      if (colorKey === 'clear') {
+        showToast(`🧼 已清除 ${count} 節經文畫線`, 'info');
+      } else {
+        showToast(`🖍️ 已套用${HIGHLIGHT_META[colorKey].label}（共 ${count} 節）！`, 'success');
+      }
+    }
+
+    function openVerseNoteForSelected() {
+      if (studyReaderState.selectedVerses.size === 0) {
+        showToast('💡 請先點選一節經文，或點擊經節右側的「✍️」按鈕！', 'warning');
+        return;
+      }
+      const firstVNum = Array.from(studyReaderState.selectedVerses).sort((a, b) => a - b)[0];
+      openSingleVerseNoteModal(firstVNum);
+    }
+
+    function openSingleVerseNoteModal(vNum) {
+      playSound('click');
+      studyReaderState.editingVerseNum = vNum;
+      const bId = studyReaderState.bookId;
+      const cNum = studyReaderState.chapterNum;
+      const hlKey = `${bId}_${cNum}_${vNum}`;
+      const rawLine = studyReaderState.verses[vNum - 1] || '';
+      const cleanText = rawLine.replace(/^\d+\.\s*/, '').trim();
+      const existing = verseHighlights[hlKey] || {};
+
+      document.getElementById('verse-note-modal-title').innerText = `✍️《${bId}》${cNum}:${vNum} 經節亮光`;
+      document.getElementById('verse-note-preview-box').innerText = `「${cleanText}」`;
+      document.getElementById('verse-note-textarea').value = existing.note || '';
+      document.getElementById('verse-note-modal').classList.remove('hidden');
+    }
+
+    function closeVerseNoteModal() {
+      document.getElementById('verse-note-modal').classList.add('hidden');
+    }
+
+    function saveCurrentVerseNote() {
+      const vNum = studyReaderState.editingVerseNum;
+      if (!vNum) return;
+      const noteText = document.getElementById('verse-note-textarea').value.trim();
+      if (!noteText) {
+        showToast('請輸入亮光筆記內容', 'warning');
+        return;
+      }
+
+      const bId = studyReaderState.bookId;
+      const cNum = studyReaderState.chapterNum;
+      const hlKey = `${bId}_${cNum}_${vNum}`;
+      const rawLine = studyReaderState.verses[vNum - 1] || '';
+      const cleanText = rawLine.replace(/^\d+\.\s*/, '').trim();
+      const prev = verseHighlights[hlKey] || {};
+      const isFirstTimeNote = !prev.note;
+
+      verseHighlights[hlKey] = {
+        bookId: bId,
+        chapter: cNum,
+        verse: vNum,
+        text: cleanText,
+        color: prev.color || 'yellow',
+        note: noteText,
+        updatedAt: getLocalTodayStr()
+      };
+
+      if (isFirstTimeNote) {
+        userXP += 10;
+        spawnFloatingFX('+10 XP!', 'text-purple-500');
+      }
+
+      studyReaderState.selectedVerses.clear();
+      updateStudySelectionBadge();
+      saveStateAndSync('save_verse_note');
+      closeVerseNoteModal();
+      renderStudyVersesList();
+      if (studyReaderState.subView === 'highlights') renderMyHighlightsGallery();
+      playSound('correct');
+      showToast('💾 已儲存經節亮光筆記！', 'success');
+    }
+
+    function deleteCurrentVerseNote() {
+      const vNum = studyReaderState.editingVerseNum;
+      if (!vNum) return;
+      const bId = studyReaderState.bookId;
+      const cNum = studyReaderState.chapterNum;
+      const hlKey = `${bId}_${cNum}_${vNum}`;
+      if (verseHighlights[hlKey]) {
+        if (verseHighlights[hlKey].color) {
+          verseHighlights[hlKey].note = '';
+        } else {
+          delete verseHighlights[hlKey];
+        }
+      }
+      saveStateAndSync('delete_verse_note');
+      closeVerseNoteModal();
+      renderStudyVersesList();
+      if (studyReaderState.subView === 'highlights') renderMyHighlightsGallery();
+      showToast('🗑️ 已刪除此節亮光筆記', 'info');
+    }
+
+    function copySelectedOrChapterVerses(fullChapter = false) {
+      const bId = studyReaderState.bookId;
+      const cNum = studyReaderState.chapterNum;
+
+      if (!fullChapter && studyReaderState.selectedVerses.size === 0) {
+        showToast('💡 請先點擊要複製的經節，或點選右側「📄 複製全章」！', 'warning');
+        return;
+      }
+
+      const targetIndices = fullChapter
+        ? studyReaderState.verses.map((_, i) => i + 1)
+        : Array.from(studyReaderState.selectedVerses).sort((a, b) => a - b);
+
+      const lines = targetIndices.map(vNum => {
+        const raw = studyReaderState.verses[vNum - 1] || '';
+        const clean = raw.replace(/^\d+\.\s*/, '').trim();
+        return `${vNum}. ${clean}`;
+      });
+
+      const verseRangeStr = fullChapter ? `第 ${cNum} 章全` : `${cNum}:${targetIndices.join(',')}`;
+      const formattedText = `📖《${bId}》${verseRangeStr}\n${lines.join('\n')}`;
+
+      navigator.clipboard.writeText(formattedText).then(() => {
+        playSound('correct');
+        studyReaderState.selectedVerses.clear();
+        updateStudySelectionBadge();
+        renderStudyVersesList();
+        showToast(`📋 已複製 ${targetIndices.length} 節經文！可直接貼至 LINE 分享`, 'success');
+      });
+    }
+
+    function filterMyHighlights(colorFilter) {
+      studyReaderState.hlFilter = colorFilter;
+      ['ALL', 'yellow', 'green', 'blue', 'pink', 'purple'].forEach(k => {
+        const btn = document.getElementById(`hl-filter-${k}`);
+        if (btn) {
+          btn.classList.toggle('ring-2', k === colorFilter);
+          btn.classList.toggle('ring-indigo-600', k === colorFilter);
+        }
+      });
+      renderMyHighlightsGallery();
+    }
+
+    function renderMyHighlightsGallery() {
+      const listEl = document.getElementById('my-highlights-list');
+      if (!listEl) return;
+
+      const items = Object.entries(verseHighlights || {}).map(([key, val]) => ({ key, ...val }));
+      const filtered = items.filter(it => studyReaderState.hlFilter === 'ALL' || it.color === studyReaderState.hlFilter);
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<div class="bg-white p-8 rounded-3xl border border-slate-200 text-center text-xs font-bold text-slate-400">目前尚無符合此顏色的螢光畫線金句，快去「📖 經文閱讀」點選經節畫線吧！</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.reverse().map(item => {
+        const meta = HIGHLIGHT_META[item.color] || { label: '✍️ 經節亮光', cls: 'bg-slate-50', tagCls: 'bg-slate-200 text-slate-700' };
+        const safeText = String(item.text || '').replace(/'/g, "\\'");
+        return `
+          <div class="p-4 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full ${meta.tagCls}">${meta.label}</span>
+                <span class="font-black text-slate-800 text-xs">《${item.bookId}》第 ${item.chapter} 章 ${item.verse} 節</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="copySingleHighlightVerse('${item.bookId}', ${item.chapter}, ${item.verse}, '${safeText}')" class="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg cursor-pointer">📋 複製</button>
+                <button onclick="openStudyReaderAt('${item.bookId}', ${item.chapter})" class="text-[11px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg cursor-pointer">📖 跳至本章</button>
+                <button onclick="removeHighlightItem('${item.key}')" class="text-[11px] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded-lg cursor-pointer">✕</button>
+              </div>
+            </div>
+            <p class="p-3 rounded-xl text-sm font-bold ${meta.cls}">「${item.text}」</p>
+            ${item.note ? `<div class="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs font-bold text-indigo-950">💡 亮光筆記：${item.note}</div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    function copySingleHighlightVerse(bookId, ch, v, text) {
+      const str = `「${text}」—《${bookId}》${ch}:${v}`;
+      navigator.clipboard.writeText(str).then(() => {
+        playSound('correct');
+        showToast('📋 已複製金句！', 'success');
+      });
+    }
+
+    function removeHighlightItem(key) {
+      delete verseHighlights[key];
+      saveStateAndSync('remove_highlight');
+      renderMyHighlightsGallery();
+      showToast('🗑️ 已移除該筆金句畫線', 'info');
+    }
+
+    function exportAllHighlightsText() {
+      const items = Object.values(verseHighlights || {});
+      if (items.length === 0) {
+        showToast('目前尚無金句可複製', 'warning');
+        return;
+      }
+      const lines = items.map(it => {
+        const noteStr = it.note ? `\n   💡 亮光：${it.note}` : '';
+        return `• 「${it.text}」—《${it.bookId}》${it.chapter}:${it.verse}${noteStr}`;
+      });
+      navigator.clipboard.writeText(`🖍️ 我的聖經螢光金句本（共 ${items.length} 節）：\n\n` + lines.join('\n\n')).then(() => {
+        playSound('correct');
+        showToast(`📋 已複製全部 ${items.length} 節金句與筆記！`, 'success');
+      });
     }
 
     /**************************************************************
@@ -1737,7 +2335,7 @@
     function setActiveBookRange(offset) { activeBookRangeOffset = offset; playSound('click'); renderLearningPath(); }
 
     function handleNodeClick(bookId, chapterNum, isLocked) {
-      if (isLocked) { playSound('wrong'); showToast('請先完成前一章！', 'warning'); return; }
+      if (isLocked) { playSound('wrong'); showToast('請先完成前一章！（若想自由翻閱全本聖經，請點選「📖 聖經研讀」分頁）', 'warning'); return; }
       openLessonOverlay(bookId, chapterNum, false);
     }
 
@@ -1871,7 +2469,6 @@
           updateReadingLockUI();
         }, 1000);
 
-        // 平行按需載入「單章經文」與「單章 7 題題庫」（僅約 3KB，瞬間開啟！）
         const [verses] = await Promise.all([
           fetchChapterVerbatimVerses(bookId, chapterNum, false),
           ensureChapterQuestionsLoaded(bookId, chapterNum)
@@ -2073,7 +2670,13 @@
         document.getElementById('read-chapter-heading').innerText = `${book.id} 第 ${activeLesson.chapterNum} 章 (共 ${activeLesson.verses.length} 節)`;
         const box = document.getElementById('scripture-scroll-box');
         box.style.fontSize = `${readerFontSize}px`;
-        box.innerHTML = activeLesson.verses.map((v, idx) => `<p class="font-bold"><span class="text-emerald-600 font-mono mr-2">${idx + 1}.</span>${v.replace(/^\d+\.\s*/, '')}</p>`).join('');
+        box.innerHTML = activeLesson.verses.map((v, idx) => {
+          const vNum = idx + 1;
+          const hlKey = `${book.id}_${activeLesson.chapterNum}_${vNum}`;
+          const hlData = verseHighlights[hlKey];
+          const hlCls = (hlData && hlData.color && HIGHLIGHT_META[hlData.color]) ? HIGHLIGHT_META[hlData.color].cls : '';
+          return `<p class="font-bold p-1.5 rounded-lg ${hlCls}"><span class="text-emerald-600 font-mono mr-2">${vNum}.</span>${v.replace(/^\d+\.\s*/, '')}</p>`;
+        }).join('');
         box.scrollTop = 0;
         setTimeout(() => {
           if (box.scrollHeight <= box.clientHeight + 45) activeLesson.isScrolledBottom = true;
@@ -2179,7 +2782,7 @@
           ${isLastChapter ? `<button onclick="closeLessonOverlay(); openBookReflectionModal('${book.id}');" class="quest-btn-purple px-6 py-3 rounded-2xl font-black text-sm cursor-pointer">✍️ 寫下《${book.id}》完卷收穫筆記 (+50 XP)</button>` : ''}
         </div>`;
       document.getElementById('lesson-bottom-inner').innerHTML = `
-        <button onclick="closeLessonOverlay()" class="w-full quest-btn-green py-3.5 rounded-2xl font-black text-base cursor-pointer">返回地圖</button>`;
+        <button onclick="closeLessonOverlay()" class="w-full quest-btn-green py-3.5 rounded-2xl font-black text-base cursor-pointer">返回畫面</button>`;
       document.getElementById('lesson-progress-bar').style.width = '100%';
     }
 
@@ -2210,7 +2813,6 @@
       sel.innerHTML = html;
     }
 
-    // 按需平行隨機抽取 7 個章節的題目（僅下載約 15KB，省下 99% 流量！）
     async function generatePkQuestionsByScopeAsync(scopeBookId = 'ALL', count = 7) {
       const targetChapters = [];
       for (let i = 0; i < count; i++) {
@@ -2252,7 +2854,6 @@
       return shuffleQuestionOptions(pool.sort(() => Math.random() - 0.5).slice(0, count));
     }
 
-    // 🚪 渲染公開等待中房間大廳（免輸房號一鍵進房）
     function renderOpenPkRoomsLobby(roomsObj) {
       const container = document.getElementById('pk-open-rooms-container');
       if (!container) return;
@@ -2294,7 +2895,6 @@
       joinPkRoom();
     }
 
-    // 🧹 自動清理超過 1 小時未活動的閒置舊房間
     function cleanIdlePkRooms(showNotice = false) {
       db.ref('bible_quest/pk_rooms').once('value').then(snap => {
         const rooms = snap.val() || {};
@@ -2571,7 +3171,6 @@
       activePkRef.update({ status: 'playing', qIdx: 0, qStartTime: Date.now() });
     }
 
-    // 速度加成計分：越快答對分數越高（最高 +30 分，壓線 +16 分）
     function submitPkAnswer(qIdx, selectedIdx, correctIdx) {
       if (!activePkRef) return;
       const myKey = myPkPlayerKey || userId || '';
@@ -2635,7 +3234,7 @@
     }
 
     /**************************************************************
-     * 8. 60秒閃電戰（支援按需隨機抽題）、錯題本、排行榜、小家、Admin主控台
+     * 8. 60秒閃電戰、錯題本、排行榜、小家、Admin主控台
      **************************************************************/
     let blitzState = { timer: 60, interval: null, score: 0, combo: 0, currentQ: null, pool: [] };
 
@@ -2813,7 +3412,8 @@
       }).join('');
     }
 
-    function openBookSelectorModal() {
+    function openBookSelectorModal(targetMode = 'map') {
+      bookSelectorTargetMode = targetMode;
       document.getElementById('books-catalog-body').innerHTML = BIBLE_BOOKS.map(b => `
         <button onclick="selectBookFromCatalog('${b.id}')" class="p-2.5 rounded-2xl border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-left transition flex items-center gap-2 bg-white cursor-pointer">
           <span class="text-xl">${b.icon}</span>
@@ -2827,11 +3427,17 @@
 
     function closeBookSelectorModal() { document.getElementById('book-selector-modal').classList.add('hidden'); }
     function selectBookFromCatalog(id) {
-      currentBookId = id;
-      autoJumpToCurrentChapterPage(id);
       closeBookSelectorModal();
-      renderLearningPath();
-      saveStateAndSync();
+      if (bookSelectorTargetMode === 'bible') {
+        onStudyBookChange(id);
+        const bookSel = document.getElementById('study-book-select');
+        if (bookSel) bookSel.value = id;
+      } else {
+        currentBookId = id;
+        autoJumpToCurrentChapterPage(id);
+        renderLearningPath();
+        saveStateAndSync();
+      }
     }
 
     function renderMyGroupDashboard() {
